@@ -6,7 +6,7 @@ from storage.models import BlobStorage
 class Course(models.Model):
     name = models.CharField(max_length=200)
     info = models.TextField(null=True)
-    picture = picture = models.ForeignKey(
+    picture = models.ForeignKey(
         BlobStorage, on_delete=models.CASCADE, related_name='course_picture', blank=True, null=True)
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()

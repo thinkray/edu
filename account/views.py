@@ -170,7 +170,7 @@ class UserAPI(View):
             name = CharField()
             balance = DecimalField(
                 max_digits=15, decimal_places=2)
-            profile = CharField()
+            profile = CharField(required=False)
 
         try:
             data = json.loads(request.body)
