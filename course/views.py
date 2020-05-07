@@ -228,7 +228,7 @@ class CourseAPI(View):
 
             if cleaned_data['end_date'] != '':
                 course.end_date = cleaned_data['end_date']
-            
+
             if cleaned_data['start_date'] > cleaned_data['end_date']:
                 return JsonResponse({
                     'status': 400,
@@ -237,7 +237,7 @@ class CourseAPI(View):
 
             if cleaned_data['price'] != '':
                 course.price = cleaned_data['price']
-                
+
             if cleaned_data['quota'] != '':
                 course.quota = cleaned_data['quota']
 
@@ -272,17 +272,100 @@ class CourseAPI(View):
         })
 
 
-
 class CourseInstanceListAPI(View):
     def get(self, request):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class CourseInstanceListAPIGetForm(Form):
+            id_start = IntegerField(initial=1, required=False)
+            id_end = IntegerField(initial=10, required=False)
+            choices = (
+                ("course", "course"),
+                ("student", "student"),
+                ("quota", "quota"),
+            )
+            column = MultipleChoiceField(choices=choices)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = CourseInstanceListAPIGetForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            if cleaned_data['id_start'] is None and cleaned_data['id_end'] is not None:
+                cleaned_data['id_start'] = cleaned_data['id_end'] - 10
+            else:
+                cleaned_data['id_start'] = 1
+            if cleaned_data['id_end'] is None:
+                cleaned_data['id_end'] = cleaned_data['id_start'] + 10
+
+            result = list(CourseInstance.objects.filter(id__range=[
+                          cleaned_data['id_start'], cleaned_data['id_end']]).values('id', *cleaned_data['column']))
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': result,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def post(self, request):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class CourseInstanceListAPIPostForm(Form):
+            course = IntegerField()
+            student = IntegerField()
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = CourseInstanceListAPIPostForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            try:
+                cleaned_data['course'] = Course.objects.get(
+                    pk=cleaned_data['course'])
+            except Exception as e:
+                return JsonResponse({
+                    'status': 400,
+                    'message': 'CourseNotFound',
+                }, status=400)
+
+            try:
+                cleaned_data['student'] = User.objects.get(
+                    pk=cleaned_data['student'])
+            except Exception as e:
+                return JsonResponse({
+                    'status': 400,
+                    'message': 'StudentNotFound',
+                }, status=400)
+
+            course_instance = CourseInstance(
+                course=cleaned_data['course'], student=cleaned_data['student'], quota=cleaned_data['course'].quota)
+            course_instance.save()
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success'
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
 
 class CourseInstanceAPI(View):
