@@ -1,7 +1,7 @@
 from django.views import View
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
-from django.forms import Form, ModelForm, CharField, PasswordInput, IntegerField, MultipleChoiceField
+from django.forms import Form, ModelForm, CharField, PasswordInput, IntegerField, MultipleChoiceField, BooleanField, DecimalField
 from django.db import models
 from django.template import loader
 from django.core.validators import ValidationError
@@ -13,12 +13,13 @@ from django.utils.timezone import localtime
 from django.shortcuts import redirect
 from django.urls import reverse
 from .models import UserManager, User
+from storage.models import BlobStorage
 import json
 
 
 class UserListAPI(View):
     def get(self, request):
-        class UserListForm(Form):
+        class UserListAPIGetForm(Form):
             id_start = IntegerField(initial=1, required=False)
             id_end = IntegerField(initial=10, required=False)
             choices = (
@@ -41,7 +42,7 @@ class UserListAPI(View):
                 'message': 'JSONDecodeError'
             }, status=400)
 
-        form = UserListForm(data)
+        form = UserListAPIGetForm(data)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -105,23 +106,198 @@ class UserListAPI(View):
 
 class UserAPI(View):
     def get(self, request, user_id):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class UserAPIGetForm(Form):
+            choices = (
+                ("last_login", "last login"),
+                ("is_superuser", "is superuser"),
+                ("username", "username"),
+                ("name", "name"),
+                ("balance", "balance"),
+                ("profile", "profile"),
+                ("picture_id", "picture id"),
+            )
+            column = MultipleChoiceField(choices=choices)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = UserAPIGetForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            try:
+                result = list(User.objects.get(pk=user_id).values(
+                    'id', *cleaned_data['column']))
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            if result == []:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                    'data': [],
+                }, status=404)
+
+            if 'last_login' in cleaned_data['column']:
+                for each in result:
+                    each['last_login'] = localtime(each['last_login'])
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': result,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def put(self, request, user_id):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class UserAPIPutForm(Form):
+            username = CharField()
+            password = CharField(widget=PasswordInput)
+            is_superuser = BooleanField()
+            name = CharField()
+            balance = DecimalField(
+                max_digits=15, decimal_places=2)
+            profile = CharField()
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = UserAPIPutForm(data)
+        if form.is_valid():
+            try:
+                user = User.objects.get(pk=user_id)
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            cleaned_data = form.clean()
+            user_manager = UserManager()
+
+            if cleaned_data['username'] != '':
+                user.username = cleaned_data['username']
+
+            if cleaned_data['password'] != '':
+                user.set_password(cleaned_data['password'])
+
+            if 'is_superuser' in data and cleaned_data['is_superuser'] != '':
+                user.is_superuser = cleaned_data['is_superuser']
+
+            if cleaned_data['name'] != '':
+                user.name = cleaned_data['name']
+
+            if cleaned_data['balance'] is not None:
+                user.balance = cleaned_data['balance']
+
+            if cleaned_data['profile'] != '':
+                user.profile = cleaned_data['profile']
+
+            user.save()
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def patch(self, request, user_id):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class UserAPIPatchForm(Form):
+            username = CharField(required=False)
+            password = CharField(widget=PasswordInput, required=False)
+            is_superuser = BooleanField(required=False)
+            name = CharField(required=False)
+            balance = DecimalField(
+                max_digits=15, decimal_places=2, required=False)
+            profile = CharField(required=False)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = UserAPIPatchForm(data)
+        if form.is_valid():
+            try:
+                user = User.objects.get(pk=user_id)
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            cleaned_data = form.clean()
+            user_manager = UserManager()
+
+            if cleaned_data['username'] != '':
+                user.username = cleaned_data['username']
+
+            if cleaned_data['password'] != '':
+                user.set_password(cleaned_data['password'])
+
+            if 'is_superuser' in data and cleaned_data['is_superuser'] != '':
+                user.is_superuser = cleaned_data['is_superuser']
+
+            if cleaned_data['name'] != '':
+                user.name = cleaned_data['name']
+
+            if cleaned_data['balance'] is not None:
+                user.balance = cleaned_data['balance']
+
+            if cleaned_data['profile'] != '':
+                user.profile = cleaned_data['profile']
+
+            user.save()
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def delete(self, request, user_id):
+        try:
+            user = User.objects.get(pk=user_id)
+        except Exception as e:
+            return JsonResponse({
+                'status': 404,
+                'message': 'Not Found',
+            }, status=404)
+
+        user.delete()
+
         return JsonResponse({
-            'error': 'NotImplementedError'
+            'status': 200,
+            'message': 'Success',
         })
 
 
