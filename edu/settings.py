@@ -152,4 +152,4 @@ STATICFILES_DIRS = [
 
 # Site settings
 
-SITE_NAME = 'Demo Site'
+SITE_NAME = 'Group 10 Demo Site'
