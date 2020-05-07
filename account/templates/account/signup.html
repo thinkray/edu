@@ -1,323 +1,186 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>{{ site_name }} | Sign up</title>
-
-    <!-- Bootstrap -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/fontawesome/css/all.min.css" />
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/popper.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/static/js/bootstrap.min.js"></script>
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <style>
-        .icon_box {
-            height: 3rem;
-            width: 3rem;
-        }
-
-        .navbar_dropdown_fixer {
-            min-width: auto;
-        }
-
-        .icon_fixer {
-            min-width: 1.25rem;
-            text-align: center;
-        }
-
-        .navbar .navbar-brand {
-            padding-top: 0;
-        }
-
-        .navbar .nav-link {
-            color: #444343 !important;
-        }
-
-        .navbar .button-collapse {
-            padding-top: 1px;
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Navigation -->
-    <header>
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-light white scrolling-navbar bg-light">
-            <div class="container">
-                <!-- Brand -->
-                <a class="navbar-brand waves-effect" href="/">
-                    <img src="/static/img/logo.svg" alt="Logo"></img>
-                </a>
-
-                <!-- Collapse -->
-                <button class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <!-- Links -->
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
-                        <!--<li class="nav-item active">
-                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                    </li>-->
-                        <div class="d-flex justify-content-center h-100">
-                            <div class="form-inline searchbar">
-                                <input class="form-control" type="text" name="" placeholder="Search..." />
-                                <a href="#" class="btn btn-light"><i class="fas fa-search"></i></a>
-                            </div>
-                        </div>
-                    </ul>
-
-                    <!-- Right -->
-                    <ul class="navbar-nav nav-flex-icons">
-                        <li class="nav-item m-2">
-                            <a class="btn btn-outline-primary waves-effect" href="{%url 'user_login_view'%}">Log in</a>
-                        </li>
-                    </ul>
+{% block content %}
+<div class="container">
+    <div class="card bg-light my-2">
+        <article class="card-body mx-auto" style="max-width: 400px;">
+            <h4 class="card-title mt-3 text-center">Sign up</h4>
+            <hr />
+            <div id="signup-form" class="form">
+                <div class="form-group input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="far fa-id-card icon_fixer"></i>
+                        </span>
+                    </div>
+                    <input id="name" name="name" class="form-control" placeholder="Real name" type="text" />
                 </div>
+                <!-- form-group// -->
+                <div class="form-group input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fa fa-user icon_fixer"></i>
+                        </span>
+                    </div>
+                    <input id="username" name="username" class="form-control" placeholder="Username" type="text" />
+                </div>
+                <!-- form-group// -->
+                <div class="form-group input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fa fa-lock icon_fixer"></i>
+                        </span>
+                    </div>
+                    <input id="password" name="password" class="form-control" placeholder="Password" type="password" />
+                </div>
+                <!-- form-group// -->
+                <div class="form-group input-group">
+                    <div class="input-group-prepend">
+                        <span class="input-group-text">
+                            <i class="fas fa-key icon_fixer"></i>
+                        </span>
+                    </div>
+                    <input id="password2" name="password2" class="form-control" placeholder="Repeat password"
+                        type="password" />
+                </div>
+                <!-- form-group// -->
+                {% csrf_token %}
+                <div class="form-group">
+                    <button id="submit" class="btn btn-primary btn-block">
+                        Submit
+                    </button>
+                </div>
+                <!-- form-group// -->
             </div>
-        </nav>
-        <!-- Navbar -->
-
-        <!-- Intro -->
-        <div class="card blue-gradient rounded-0 border-0">
-            <div class="card-body text-white rgba-black-light text-center" style="
-            background-image: url(/static/img/gradient1.jpg);
-          ">
-                <!--Grid row-->
-                <div class="row d-flex justify-content-center">
-                    <!--Grid column-->
-                    <div class="col-md-6">
-                        <p class="h5 mb-2">
-                            Welcome to the One-on-One Tutoring Platform
-                        </p>
-
-                        <p class="mb-0">The most reliable learning resources.</p>
-                    </div>
-                    <!--Grid column-->
-                </div>
-                <!--Grid row-->
-            </div>
-        </div>
-        <!-- Intro -->
-    </header>
-    <!-- Navigation -->
-    <!--Main Navigation-->
-
-    <div class="container">
-        <div class="card bg-light my-2">
-            <article class="card-body mx-auto" style="max-width: 400px;">
-                <h4 class="card-title mt-3 text-center">Sign up</h4>
-                <hr />
-                <div id="signup-form" class="form">
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">
-                                <i class="far fa-id-card icon_fixer"></i>
-                            </span>
-                        </div>
-                        <input id="name" name="name" class="form-control" placeholder="Real name" type="text" />
-                    </div>
-                    <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">
-                                <i class="fa fa-user icon_fixer"></i>
-                            </span>
-                        </div>
-                        <input id="username" name="username" class="form-control" placeholder="Username" type="text" />
-                    </div>
-                    <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">
-                                <i class="fa fa-lock icon_fixer"></i>
-                            </span>
-                        </div>
-                        <input id="password" name="password" class="form-control" placeholder="Password"
-                            type="password" />
-                    </div>
-                    <!-- form-group// -->
-                    <div class="form-group input-group">
-                        <div class="input-group-prepend">
-                            <span class="input-group-text">
-                                <i class="fas fa-key icon_fixer"></i>
-                            </span>
-                        </div>
-                        <input id="password2" name="password2" class="form-control" placeholder="Repeat password"
-                            type="password" />
-                    </div>
-                    <!-- form-group// -->
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <button id="submit" class="btn btn-primary btn-block">
-                            Submit
-                        </button>
-                    </div>
-                    <!-- form-group// -->
-                </div>
-            </article>
-        </div>
-        <!-- card.// -->
+        </article>
     </div>
-    <!--container end.//-->
+    <!-- card.// -->
+</div>
+<!--container end.//-->
+{% endblock content %}
 
-    <article class="bg-info">
-        <div class="card-body text-center">
-            <h3 class="text-white mt-3">Knowledge is power</h3>
-            <p class="h5 text-white">
-                We bring you the best learning experience
-            </p>
-        </div>
-        <br />
-    </article>
-    <footer>
-        <div class="bg-secondary card-body text-center">
-            <p class="text-black text-white">©2020 {{ site_name }}. All Rights Reserved.</p>
-        </div>
-    </footer>
-    <script>
-        window.addEventListener("scroll", function () {
-            let t = $("body, html").scrollTop();
-            if (t > 0) {
-                if (!$("#navbar_placeholder").length) {
-                    $(".navbar")
-                        .parent()
-                        .prepend(
-                            '<div id="navbar_placeholder" style="height:' +
-                            $(".navbar").innerHeight() +
-                            'px"></div>'
-                        );
-                    $(".navbar").addClass("fixed-top");
-                }
-            } else {
-                $(".navbar").removeClass("fixed-top");
-                $("#navbar_placeholder").remove();
+{% block script %}
+<script>
+    $("#password").blur(function () {
+        if ($("#password")[0].value == $("#password2")[0].value) {
+            $("#ajax_result_password2").remove();
+        } else {
+            if (
+                $("#password2")[0].value.length > 0 &&
+                !$("#ajax_result_password2").length
+            ) {
+                $("#password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
             }
-        });
-        function csrfSafeMethod(method) {
-            // these HTTP methods do not require CSRF protection
-            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
         }
-        function getQueryVariable(variable)
-        {
-            var query = window.location.search.substring(1);
-            var vars = query.split("&");
-            for (var i=0;i<vars.length;i++) {
-                    var pair = vars[i].split("=");
-                    if(pair[0] == variable){return pair[1];}
+    });
+    $("#password2").blur(function () {
+        if ($("#password")[0].value == $("#password2")[0].value) {
+            $("#ajax_result_password2").remove();
+        } else {
+            if (!$("#ajax_result_password2").length) {
+                $("#password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
             }
-            return(false);
         }
-        $("#password").blur(function () {
+    });
+    $("#submit").click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
             if ($("#password")[0].value == $("#password2")[0].value) {
-                $("#ajax_result_password2").remove();
-            }
-            else {
-                if (($("#password2")[0].value.length > 0) && (!$("#ajax_result_password2").length)) {
-                    $("#password2").parent().after('<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>');
-                }
-            }
-        });
-        $("#password2").blur(function () {
-            if ($("#password")[0].value == $("#password2")[0].value) {
-                $("#ajax_result_password2").remove();
-            }
-            else {
-                if (!$("#ajax_result_password2").length) {
-                    $("#password2").parent().after('<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>');
-                }
-            }
-        });
-        $("#submit").click(function () {
-            $(function () {
-                let list = {};
-                let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-                if ($("#password")[0].value == $("#password2")[0].value) {
-                    list['name'] = $("#name")[0].value;
-                    list['username'] = $("#username")[0].value;
-                    list['password'] = $("#password")[0].value;
-                    list['redirect_uri'] = getQueryVariable('redirect_uri');
+                list["name"] = $("#name")[0].value;
+                list["username"] = $("#username")[0].value;
+                list["password"] = $("#password")[0].value;
+                list["redirect_uri"] = getQueryVariable("redirect_uri");
 
-                    $.ajax({
-                        type: "POST",
-                        contentType: "application/json;charset=UTF-8",
-                        url: "{%url 'user_list_api'%}",
-                        data: JSON.stringify(list),
-                        beforeSend: function (xhr, settings) {
-                            if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                                xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                            }
-                        },
-                        success: function (result) {
-                            $("[id^=ajax_result]").remove();
-                            $("#signup-form").append('<div id="ajax_result" class="alert alert-success" role="alert">' + result["message"] + '</div>');
-                            $.ajax({
-                                type: "POST",
-                                contentType: "application/json;charset=UTF-8",
-                                url: "{%url 'user_login_api'%}",
-                                data: JSON.stringify(list),
-                                beforeSend: function (xhr, settings) {
-                                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                                    }
-                                },
-                                success: function (result) {
-                                    if (typeof (result["redirect_uri"]) == 'string') {
-                                        document.location = result["redirect_uri"];
-                                    }
-                                    else {
-                                        document.location = "/";
-                                    }
-                                },
-                                error: function (e) {
-                                    $("[id^=ajax_result]").remove();
-                                    $("#signup-form").append('<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>');
-                                }
-                            });
-                        },
-                        error: function (e) {
-                            let result = e.responseJSON;
-                            switch (result["status"]) {
-                                case 400:
-                                    $("[id^=ajax_result]").remove();
-                                    for (var index in result['message']) {
-                                        $("#" + index).parent().after('<div id="ajax_result_' + index + '" class="alert alert-danger" role="alert">' + result['message'][index][0] + '</div>');
-                                    }
-                                    break;
-                                case 403:
-                                    $("[id^=ajax_result]").remove();
-                                    $("#signup-form").append('<div id="ajax_result" class="alert alert-danger" role="alert">' + result["message"] + '</div>');
-                                    break;
-                                default:
-                                    $("[id^=ajax_result]").remove();
-                                    $("#signup-form").append('<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong. Try again.</div>');
-                                    break;
-                            }
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=UTF-8",
+                    url: "{%url 'user_list_api'%}",
+                    data: JSON.stringify(list),
+                    beforeSend: function (xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
                         }
-                    });
-                }
-            });
+                    },
+                    success: function (result) {
+                        $("[id^=ajax_result]").remove();
+                        $("#signup-form").append(
+                            '<div id="ajax_result" class="alert alert-success" role="alert">' +
+                            result["message"] +
+                            "</div>"
+                        );
+                        $.ajax({
+                            type: "POST",
+                            contentType: "application/json;charset=UTF-8",
+                            url: "{%url 'user_login_api'%}",
+                            data: JSON.stringify(list),
+                            beforeSend: function (xhr, settings) {
+                                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                }
+                            },
+                            success: function (result) {
+                                if (typeof result["redirect_uri"] == "string") {
+                                    document.location = result["redirect_uri"];
+                                } else {
+                                    document.location = "/";
+                                }
+                            },
+                            error: function (e) {
+                                $("[id^=ajax_result]").remove();
+                                $("#signup-form").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
+                                );
+                            },
+                        });
+                    },
+                    error: function (e) {
+                        let result = e.responseJSON;
+                        switch (result["status"]) {
+                            case 400:
+                                $("[id^=ajax_result]").remove();
+                                for (var index in result["message"]) {
+                                    $("#" + index)
+                                        .parent()
+                                        .after(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            "</div>"
+                                        );
+                                }
+                                break;
+                            case 403:
+                                $("[id^=ajax_result]").remove();
+                                $("#signup-form").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                    result["message"] +
+                                    "</div>"
+                                );
+                                break;
+                            default:
+                                $("[id^=ajax_result]").remove();
+                                $("#signup-form").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong. Try again.</div>'
+                                );
+                                break;
+                        }
+                    },
+                });
+            }
         });
-    </script>
-</body>
-
-</html>
+    });
+</script>
+{% endblock script %}
 
 <!--username: varchar(255)
 name: text

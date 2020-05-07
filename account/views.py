@@ -9,6 +9,8 @@ from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 from django.utils.encoding import iri_to_uri
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.shortcuts import redirect
+from django.urls import reverse
 from .models import UserManager, User
 import json
 
@@ -83,7 +85,7 @@ class UserLoginAPI(View):
                 'data': {
                     'is_authenticated': True,
                     'username': request.user.username,
-                    },
+                },
             })
         else:
             return JsonResponse({
@@ -91,7 +93,7 @@ class UserLoginAPI(View):
                 'message': 'Success',
                 'data': {
                     'is_authenticated': False,
-                    },
+                },
             })
 
     def post(self, request):
@@ -108,12 +110,13 @@ class UserLoginAPI(View):
                 'status': 400,
                 'message': 'JSONDecodeError'
             }, status=400)
-        
+
         form = UserLoginForm(data)
         if form.is_valid():
             cleaned_data = form.clean()
             if url_has_allowed_host_and_scheme(iri_to_uri(cleaned_data['redirect_uri']), settings.ALLOWED_HOSTS):
-                cleaned_data['redirect_uri'] = iri_to_uri(cleaned_data['redirect_uri'])
+                cleaned_data['redirect_uri'] = iri_to_uri(
+                    cleaned_data['redirect_uri'])
             else:
                 cleaned_data['redirect_uri'] = '/'
 
@@ -157,18 +160,34 @@ class UserLogoutAPI(View):
             'message': 'Success',
         })
 
+
 class UserSignupView(View):
 
     def get(self, request):
+        if request.user.is_authenticated:
+            if url_has_allowed_host_and_scheme(iri_to_uri(request.GET.get('redirect_uri', default='/')), settings.ALLOWED_HOSTS):
+                return redirect(iri_to_uri(request.GET.get('redirect_uri', default='/')))
+            else:
+                return redirect(reverse('home'))
+
         template = loader.get_template('account/signup.html')
         context = {}
         context['site_name'] = settings.SITE_NAME
+        context['hide_signup'] = True
         return HttpResponse(template.render(context, request))
+
 
 class UserLoginView(View):
 
     def get(self, request):
+        if request.user.is_authenticated:
+            if url_has_allowed_host_and_scheme(iri_to_uri(request.GET.get('redirect_uri', default='/')), settings.ALLOWED_HOSTS):
+                return redirect(iri_to_uri(request.GET.get('redirect_uri', default='/')))
+            else:
+                return redirect(reverse('home'))
+
         template = loader.get_template('account/login.html')
         context = {}
         context['site_name'] = settings.SITE_NAME
+        context['hide_login'] = True
         return HttpResponse(template.render(context, request))

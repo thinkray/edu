@@ -25,7 +25,7 @@ SECRET_KEY = '$d18sgf2!a)42=z#9u3ckei38$gg!)345e7jwze35xwc&+*q!!'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['127.0.0.1','127.0.0.1:8000']
+ALLOWED_HOSTS = ['127.0.0.1', '127.0.0.1:8000']
 
 
 # Application definition
@@ -73,7 +73,7 @@ ROOT_URLCONF = 'edu.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [os.path.join(BASE_DIR, 'templates'), ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

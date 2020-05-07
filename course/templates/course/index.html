@@ -1,515 +1,305 @@
-<!DOCTYPE html>
-<html lang="en">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>{{ site_name }} | Home</title>
-
-    <!-- Bootstrap -->
-    <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
-    <link rel="stylesheet" href="/static/fontawesome/css/all.min.css" />
-    <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-    <script src="/static/js/jquery.min.js"></script>
-    <script src="/static/js/popper.min.js"></script>
-    <!-- Include all compiled plugins (below), or include individual files as needed -->
-    <script src="/static/js/bootstrap.min.js"></script>
-    <!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
-    <!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
-    <!--[if lt IE 9]>
-      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
-      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
-    <![endif]-->
-    <style>
-        .icon_box {
-            height: 3rem;
-            width: 3rem;
-        }
-
-        .navbar_dropdown_fixer {
-            min-width: auto;
-        }
-
-        .icon_fixer {
-            min-width: 1.25rem;
-            text-align: center;
-        }
-
-        .navbar .navbar-brand {
-            padding-top: 0;
-        }
-
-        .navbar .nav-link {
-            color: #444343 !important;
-        }
-
-        .navbar .button-collapse {
-            padding-top: 1px;
-        }
-    </style>
-</head>
-
-<body>
-    <!-- Navigation -->
-    <header>
-        <!-- Navbar -->
-        <nav class="navbar navbar-expand-lg navbar-light white scrolling-navbar bg-light">
-            <div class="container">
-                <!-- Brand -->
-                <a class="navbar-brand waves-effect" href="/" target="_blank">
-                    <img src="/static/img/logo.svg" alt="Logo"></img>
+{% block content %}
+<!--Main layout-->
+<main class="mt-5 pt-5">
+    <div class="container">
+        <!--Section: Jumbotron-->
+        <section class="card wow fadeIn" style="background-image: url(/static/img/gradient1.jpg);">
+            <!-- Content -->
+            <div class="card-body text-white text-center py-5 px-5 my-5">
+                <h1 class="mb-4">
+                    <strong>Learning with One-on-One Tutoring Platform</strong>
+                </h1>
+                <p>
+                    <strong>Best teaching resources and experiences</strong>
+                </p>
+                <p class="mb-4">
+                    <strong>The most comprehensive one-on-one teaching tutorial. Started from
+                        2000. Loved by over 500 000 users.
+                    </strong>
+                </p>
+                {% if is_authenticated %}
+                <a href="#" class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
+                    <i class="fas fa-graduation-cap ml-2"></i>
                 </a>
-
-                <!-- Collapse -->
-                <button class="navbar-toggler" type="button" data-toggle="collapse"
-                    data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                    aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-
-                <!-- Links -->
-                <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                    <ul class="navbar-nav mr-auto">
-                        <!--<li class="nav-item active">
-                        <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
-                    </li>-->
-                        <div class="d-flex justify-content-center h-100">
-                            <div class="form-inline searchbar">
-                                <input class="form-control" type="text" name="" placeholder="Search..." />
-                                <a href="#" class="btn btn-light"><i class="fas fa-search"></i></a>
-                            </div>
-                        </div>
-                    </ul>
-
-                    <!-- Right -->
-                    <ul class="navbar-nav nav-flex-icons">
-                        {% if is_authenticated %}
-                        <li class="nav-item m-2">
-                            <a href="#" class="btn btn-light border border-light rounded waves-effect mr-2" target="_blank">
-                                <i class="fas fa-envelope mr-1"></i>Message
-                                <span id="unread_message_count" class="badge badge-warning text-white rounded-0"
-                                    style="display: none;">0</span>
-                            </a>
-                        </li>
-                        <li class="nav-item dropdown m-2">
-                            <a class="btn btn-light dropdown-toggle" id="navbarDropdownMenuLink-333" data-toggle="dropdown"
-                                aria-haspopup="true" aria-expanded="false">
-                                <i class="fas fa-user"></i>
-                                {{ username }}
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right dropdown-default"
-                                aria-labelledby="navbarDropdownMenuLink-333">
-                                <a class="dropdown-item" href="#">Action</a>
-                                <a class="dropdown-item" href="#">Another action</a>
-                                <a class="dropdown-item" href="#">Something else here</a>
-                            </div>
-                        </li>
-                        <li class="nav-item m-2">
-                            <a id="logout" class="btn btn-light waves-effect" href="#">Logout</a>
-                        </li>
-                        {% else %}
-                        <li class="nav-item m-2">
-                            <a class="btn btn-outline-primary waves-effect" href="{%url 'user_login_view'%}?redirect_uri={{ request.path }}">Log in</a>
-                        </li>
-                        <li class="nav-item m-2">
-                            <a class="btn btn-primary text-white waves-effect" href="{%url 'user_signup_view'%}?redirect_uri={{ request.path }}">Sign
-                                up</a>
-                        </li>
-                        {% endif%}
-                    </ul>
-                </div>
+                {% else %}
+                <a href="{%url 'user_signup_view'%}" class="btn btn-warning text-white btn-outline-white btn-lg">Start
+                    Now
+                    <i class="fas fa-graduation-cap ml-2"></i>
+                </a>
+                {% endif %}
             </div>
-        </nav>
-        <!-- Navbar -->
-        {% csrf_token %}
-        <!-- Intro -->
-        <div class="card blue-gradient rounded-0 border-0">
-            <div class="card-body text-white rgba-black-light text-center" style="
-            background-image: url(/static/img/gradient1.jpg);
-          ">
-                <!--Grid row-->
-                <div class="row d-flex justify-content-center">
-                    <!--Grid column-->
-                    <div class="col-md-6">
-                        <p class="h5 mb-2">
-                            Welcome to the One-on-One Tutoring Platform
-                        </p>
+            <!-- Content -->
+        </section>
+        <!--Section: Jumbotron-->
 
-                        <p class="mb-0">The most reliable teaching resources.</p>
+        <hr class="my-5" />
+
+        <!--Section: Cards-->
+        <section class="text-center">
+            <!--Grid row-->
+            <div class="row mb-4 wow fadeIn">
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <!--Card-->
+                    <div class="card">
+                        <!--Card image-->
+                        <div class="view overlay">
+                            <div class="embed-responsive embed-responsive-16by9 rounded-top">
+                                <iframe class="embed-responsive-item" src="https://www.youtube.com/embed/cXTThxoywNQ"
+                                    allowfullscreen></iframe>
+                            </div>
+                        </div>
+
+                        <!--Card content-->
+                        <div class="card-body">
+                            <!--Title-->
+                            <h4 class="card-title">MDB Quick Start</h4>
+                            <!--Text-->
+                            <p class="card-text">
+                                Get started with MDBootstrap, the world's most popular Material
+                                Design framework for building responsive, mobile-first sites.
+                            </p>
+                            <p class="card-text">
+                                <strong>5 minutes, a few clicks and... done. You will be surprised at
+                                    how easy it is.</strong>
+                            </p>
+                        </div>
                     </div>
-                    <!--Grid column-->
+                    <!--/.Card-->
                 </div>
-                <!--Grid row-->
+                <!--Grid column-->
+
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <!--Card-->
+                    <div class="card">
+                        <!--Card image-->
+                        <div class="view overlay">
+                            <img src="https://mdbootstrap.com/wp-content/uploads/2017/11/brandflow-tutorial-fb.jpg"
+                                class="card-img-top" alt="" />
+                            <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
+                                target="_blank">
+                                <div class="mask rgba-white-slight"></div>
+                            </a>
+                        </div>
+
+                        <!--Card content-->
+                        <div class="card-body">
+                            <!--Title-->
+                            <h4 class="card-title">Bootstrap Automation</h4>
+                            <!--Text-->
+                            <p class="card-text">
+                                Learn how to create a smart website which learns your user and
+                                reacts properly to his behavior.
+                            </p>
+                            <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
+                                target="_blank" class="btn btn-primary btn-md">Start tutorial
+                                <i class="fas fa-play ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <!--/.Card-->
+                </div>
+                <!--Grid column-->
+
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <!--Card-->
+                    <div class="card">
+                        <!--Card image-->
+                        <div class="view overlay">
+                            <img src="https://mdbootstrap.com/wp-content/uploads/2018/01/push-fb.jpg"
+                                class="card-img-top" alt="" />
+                            <a href="https://mdbootstrap.com/education/tech-marketing/web-push-introduction/"
+                                target="_blank">
+                                <div class="mask rgba-white-slight"></div>
+                            </a>
+                        </div>
+
+                        <!--Card content-->
+                        <div class="card-body">
+                            <!--Title-->
+                            <h4 class="card-title">Push notifications</h4>
+                            <!--Text-->
+                            <p class="card-text">
+                                Push messaging provides a simple and effective way to re-engage
+                                with your users and in this tutorial you'll learn how to add
+                                push notifications to your web app
+                            </p>
+                            <a href="https://mdbootstrap.com/education/tech-marketing/web-push-introduction/"
+                                target="_blank" class="btn btn-primary btn-md">Start tutorial
+                                <i class="fas fa-play ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <!--/.Card-->
+                </div>
+                <!--Grid column-->
             </div>
-        </div>
-        <!-- Intro -->
-    </header>
-    <!-- Navigation -->
-    <!--Main Navigation-->
+            <!--Grid row-->
 
-    <!--Main layout-->
-    <main class="mt-5 pt-5">
-        <div class="container">
-            <!--Section: Jumbotron-->
-            <section class="card wow fadeIn" style="
-            background-image: url(/static/img/gradient1.jpg);
-          ">
-                <!-- Content -->
-                <div class="card-body text-white text-center py-5 px-5 my-5">
-                    <h1 class="mb-4">
-                        <strong>Learning with One-on-One Tutoring Platform</strong>
-                    </h1>
-                    <p>
-                        <strong>Best teaching resources and experiences</strong>
-                    </p>
-                    <p class="mb-4">
-                        <strong>The most comprehensive one-on-one teaching tutorial. Started
-                            from 2000. Loved by over 500 000 users.
-                        </strong>
-                    </p>
-                    {% if is_authenticated %}
-                    <a href="#"
-                        class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
-                        <i class="fas fa-graduation-cap ml-2"></i>
-                    </a>
-                    {% else %}
-                    <a href="{%url 'user_signup_view'%}"
-                        class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
-                        <i class="fas fa-graduation-cap ml-2"></i>
-                    </a>
-                    {% endif %}
-                </div>
-                <!-- Content -->
-            </section>
-            <!--Section: Jumbotron-->
-
-            <hr class="my-5" />
-
-            <!--Section: Cards-->
-            <section class="text-center">
-                <!--Grid row-->
-                <div class="row mb-4 wow fadeIn">
-                    <!--Grid column-->
-                    <div class="col-lg-4 col-md-12 mb-4">
-                        <!--Card-->
-                        <div class="card">
-                            <!--Card image-->
-                            <div class="view overlay">
-                                <div class="embed-responsive embed-responsive-16by9 rounded-top">
-                                    <iframe class="embed-responsive-item"
-                                        src="https://www.youtube.com/embed/cXTThxoywNQ" allowfullscreen></iframe>
-                                </div>
-                            </div>
-
-                            <!--Card content-->
-                            <div class="card-body">
-                                <!--Title-->
-                                <h4 class="card-title">MDB Quick Start</h4>
-                                <!--Text-->
-                                <p class="card-text">
-                                    Get started with MDBootstrap, the world's most popular
-                                    Material Design framework for building responsive,
-                                    mobile-first sites.
-                                </p>
-                                <p class="card-text">
-                                    <strong>5 minutes, a few clicks and... done. You will be
-                                        surprised at how easy it is.</strong>
-                                </p>
-                            </div>
-                        </div>
-                        <!--/.Card-->
-                    </div>
-                    <!--Grid column-->
-
-                    <!--Grid column-->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <!--Card-->
-                        <div class="card">
-                            <!--Card image-->
-                            <div class="view overlay">
-                                <img src="https://mdbootstrap.com/wp-content/uploads/2017/11/brandflow-tutorial-fb.jpg"
-                                    class="card-img-top" alt="" />
-                                <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
-                                    target="_blank">
-                                    <div class="mask rgba-white-slight"></div>
-                                </a>
-                            </div>
-
-                            <!--Card content-->
-                            <div class="card-body">
-                                <!--Title-->
-                                <h4 class="card-title">Bootstrap Automation</h4>
-                                <!--Text-->
-                                <p class="card-text">
-                                    Learn how to create a smart website which learns your user
-                                    and reacts properly to his behavior.
-                                </p>
-                                <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
-                                    target="_blank" class="btn btn-primary btn-md">Start tutorial
-                                    <i class="fas fa-play ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <!--/.Card-->
-                    </div>
-                    <!--Grid column-->
-
-                    <!--Grid column-->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <!--Card-->
-                        <div class="card">
-                            <!--Card image-->
-                            <div class="view overlay">
-                                <img src="https://mdbootstrap.com/wp-content/uploads/2018/01/push-fb.jpg"
-                                    class="card-img-top" alt="" />
-                                <a href="https://mdbootstrap.com/education/tech-marketing/web-push-introduction/"
-                                    target="_blank">
-                                    <div class="mask rgba-white-slight"></div>
-                                </a>
-                            </div>
-
-                            <!--Card content-->
-                            <div class="card-body">
-                                <!--Title-->
-                                <h4 class="card-title">Push notifications</h4>
-                                <!--Text-->
-                                <p class="card-text">
-                                    Push messaging provides a simple and effective way to
-                                    re-engage with your users and in this tutorial you'll learn
-                                    how to add push notifications to your web app
-                                </p>
-                                <a href="https://mdbootstrap.com/education/tech-marketing/web-push-introduction/"
-                                    target="_blank" class="btn btn-primary btn-md">Start tutorial
-                                    <i class="fas fa-play ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <!--/.Card-->
-                    </div>
-                    <!--Grid column-->
-                </div>
-                <!--Grid row-->
-
-                <!--Grid row-->
-                <div class="row mb-4 wow fadeIn">
-                    <!--Grid column-->
-                    <div class="col-lg-4 col-md-12 mb-4">
-                        <!--Card-->
-                        <div class="card">
-                            <!--Card image-->
-                            <div class="view overlay">
-                                <img src="https://mdbootstrap.com/img/Marketing/mdb-press-pack/mdb-angular.jpg"
-                                    class="card-img-top" alt="" />
-                                <a href="https://mdbootstrap.com/angular/" target="_blank">
-                                    <div class="mask rgba-white-slight"></div>
-                                </a>
-                            </div>
-
-                            <!--Card content-->
-                            <div class="card-body">
-                                <!--Title-->
-                                <h4 class="card-title">MDB with Angular</h4>
-                                <!--Text-->
-                                <p class="card-text">
-                                    Built with Angular 5, Bootstrap 4 and TypeScript. CLI
-                                    version available.
-                                </p>
-                                <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
-                                    target="_blank" class="btn btn-primary btn-md">Start tutorial
-                                    <i class="fas fa-play ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <!--/.Card-->
-                    </div>
-                    <!--Grid column-->
-
-                    <!--Grid column-->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <!--Card-->
-                        <div class="card">
-                            <!--Card image-->
-                            <div class="view overlay">
-                                <img src="https://mdbootstrap.com/img/Marketing/mdb-press-pack/mdb-react.jpg"
-                                    class="card-img-top" alt="" />
-                                <a href="https://mdbootstrap.com/react/" target="_blank">
-                                    <div class="mask rgba-white-slight"></div>
-                                </a>
-                            </div>
-
-                            <!--Card content-->
-                            <div class="card-body">
-                                <!--Title-->
-                                <h4 class="card-title">MDB with React</h4>
-                                <!--Text-->
-                                <p class="card-text">
-                                    Based on the latest Bootstrap 4 and React 16.
-                                </p>
-                                <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
-                                    target="_blank" class="btn btn-primary btn-md">Start tutorial
-                                    <i class="fas fa-play ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <!--/.Card-->
-                    </div>
-                    <!--Grid column-->
-
-                    <!--Grid column-->
-                    <div class="col-lg-4 col-md-6 mb-4">
-                        <!--Card-->
-                        <div class="card">
-                            <!--Card image-->
-                            <div class="view overlay">
-                                <img src="https://mdbootstrap.com/img/Marketing/mdb-press-pack/mdb-vue.jpg"
-                                    class="card-img-top" alt="" />
-                                <a href="https://mdbootstrap.com/vue/" target="_blank">
-                                    <div class="mask rgba-white-slight"></div>
-                                </a>
-                            </div>
-
-                            <!--Card content-->
-                            <div class="card-body">
-                                <!--Title-->
-                                <h4 class="card-title">MDB with Vue</h4>
-                                <!--Text-->
-                                <p class="card-text">
-                                    Based on the latest Bootstrap 4 and Vue 2.5.7.
-                                </p>
-                                <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
-                                    target="_blank" class="btn btn-primary btn-md">Start tutorial
-                                    <i class="fas fa-play ml-2"></i>
-                                </a>
-                            </div>
-                        </div>
-                        <!--/.Card-->
-                    </div>
-                    <!--Grid column-->
-                </div>
-                <!--Grid row-->
-
-                <!--Pagination-->
-                <nav class="d-flex justify-content-center wow fadeIn">
-                    <ul class="pagination pg-blue">
-                        <!--Arrow left-->
-                        <li class="page-item disabled">
-                            <a class="page-link" href="#" aria-label="Previous">
-                                <span aria-hidden="true">&laquo;</span>
-                                <span class="sr-only">Previous</span>
+            <!--Grid row-->
+            <div class="row mb-4 wow fadeIn">
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-12 mb-4">
+                    <!--Card-->
+                    <div class="card">
+                        <!--Card image-->
+                        <div class="view overlay">
+                            <img src="https://mdbootstrap.com/img/Marketing/mdb-press-pack/mdb-angular.jpg"
+                                class="card-img-top" alt="" />
+                            <a href="https://mdbootstrap.com/angular/" target="_blank">
+                                <div class="mask rgba-white-slight"></div>
                             </a>
-                        </li>
+                        </div>
 
-                        <li class="page-item active">
-                            <a class="page-link" href="#">1
-                                <span class="sr-only">(current)</span>
+                        <!--Card content-->
+                        <div class="card-body">
+                            <!--Title-->
+                            <h4 class="card-title">MDB with Angular</h4>
+                            <!--Text-->
+                            <p class="card-text">
+                                Built with Angular 5, Bootstrap 4 and TypeScript. CLI version
+                                available.
+                            </p>
+                            <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
+                                target="_blank" class="btn btn-primary btn-md">Start tutorial
+                                <i class="fas fa-play ml-2"></i>
                             </a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">2</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">3</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">4</a>
-                        </li>
-                        <li class="page-item">
-                            <a class="page-link" href="#">5</a>
-                        </li>
+                        </div>
+                    </div>
+                    <!--/.Card-->
+                </div>
+                <!--Grid column-->
 
-                        <li class="page-item">
-                            <a class="page-link" href="#" aria-label="Next">
-                                <span aria-hidden="true">&raquo;</span>
-                                <span class="sr-only">Next</span>
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <!--Card-->
+                    <div class="card">
+                        <!--Card image-->
+                        <div class="view overlay">
+                            <img src="https://mdbootstrap.com/img/Marketing/mdb-press-pack/mdb-react.jpg"
+                                class="card-img-top" alt="" />
+                            <a href="https://mdbootstrap.com/react/" target="_blank">
+                                <div class="mask rgba-white-slight"></div>
                             </a>
-                        </li>
-                    </ul>
-                </nav>
-                <!--Pagination-->
-            </section>
-            <!--Section: Cards-->
-        </div>
-    </main>
-    <!--Main layout-->
+                        </div>
 
-    <br /><br />
-    <article class="bg-info">
-        <div class="card-body text-center">
-            <h3 class="text-white mt-3">Knowledge is power</h3>
-            <p class="h5 text-white">
-                We bring you the best learning experience
-            </p>
-            <br />
-            {% if is_authenticated %}
-            <a href="#"
-                class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
-                <i class="fas fa-graduation-cap ml-2"></i>
-            </a>
-            {% else %}
-            <a href="{%url 'user_signup_view'%}"
-                class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
-                <i class="fas fa-graduation-cap ml-2"></i>
-            </a>
-            {% endif %}
-        </div>
+                        <!--Card content-->
+                        <div class="card-body">
+                            <!--Title-->
+                            <h4 class="card-title">MDB with React</h4>
+                            <!--Text-->
+                            <p class="card-text">
+                                Based on the latest Bootstrap 4 and React 16.
+                            </p>
+                            <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
+                                target="_blank" class="btn btn-primary btn-md">Start tutorial
+                                <i class="fas fa-play ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <!--/.Card-->
+                </div>
+                <!--Grid column-->
+
+                <!--Grid column-->
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <!--Card-->
+                    <div class="card">
+                        <!--Card image-->
+                        <div class="view overlay">
+                            <img src="https://mdbootstrap.com/img/Marketing/mdb-press-pack/mdb-vue.jpg"
+                                class="card-img-top" alt="" />
+                            <a href="https://mdbootstrap.com/vue/" target="_blank">
+                                <div class="mask rgba-white-slight"></div>
+                            </a>
+                        </div>
+
+                        <!--Card content-->
+                        <div class="card-body">
+                            <!--Title-->
+                            <h4 class="card-title">MDB with Vue</h4>
+                            <!--Text-->
+                            <p class="card-text">
+                                Based on the latest Bootstrap 4 and Vue 2.5.7.
+                            </p>
+                            <a href="https://mdbootstrap.com/education/tech-marketing/automated-app-introduction/"
+                                target="_blank" class="btn btn-primary btn-md">Start tutorial
+                                <i class="fas fa-play ml-2"></i>
+                            </a>
+                        </div>
+                    </div>
+                    <!--/.Card-->
+                </div>
+                <!--Grid column-->
+            </div>
+            <!--Grid row-->
+
+            <!--Pagination-->
+            <nav class="d-flex justify-content-center wow fadeIn">
+                <ul class="pagination pg-blue">
+                    <!--Arrow left-->
+                    <li class="page-item disabled">
+                        <a class="page-link" href="#" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                    </li>
+
+                    <li class="page-item active">
+                        <a class="page-link" href="#">1
+                            <span class="sr-only">(current)</span>
+                        </a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">2</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">3</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">4</a>
+                    </li>
+                    <li class="page-item">
+                        <a class="page-link" href="#">5</a>
+                    </li>
+
+                    <li class="page-item">
+                        <a class="page-link" href="#" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <!--Pagination-->
+        </section>
+        <!--Section: Cards-->
+    </div>
+</main>
+<!--Main layout-->
+
+<br /><br />
+<article class="bg-info">
+    <div class="card-body text-center">
+        <h3 class="text-white mt-3">Knowledge is power</h3>
+        <p class="h5 text-white">
+            We bring you the best learning experience
+        </p>
         <br />
-    </article>
-    <footer>
-        <div class="bg-secondary card-body text-center">
-            <p class="text-black text-white">©2020 {{ site_name }}. All Rights Reserved.</p>
-        </div>
-    </footer>
-    <script>
-        window.addEventListener("scroll", function () {
-            let t = $("body, html").scrollTop();
-            if (t > 0) {
-                if (!$("#navbar_placeholder").length) {
-                    $(".navbar")
-                        .parent()
-                        .prepend(
-                            '<div id="navbar_placeholder" style="height:' +
-                            $(".navbar").innerHeight() +
-                            'px"></div>'
-                        );
-                    $(".navbar").addClass("fixed-top");
-                }
-            } else {
-                $(".navbar").removeClass("fixed-top");
-                $("#navbar_placeholder").remove();
-            }
-        });
-        function csrfSafeMethod(method) {
-            // these HTTP methods do not require CSRF protection
-            return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
-        }
-        $("#logout").click(function () {
-            $(function () {
-                let list = {};
-                let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-                $.ajax({
-                    type: "POST",
-                    contentType: "application/json;charset=UTF-8",
-                    url: "{%url 'user_logout_api'%}",
-                    data: JSON.stringify(list),
-                    beforeSend: function (xhr, settings) {
-                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                        }
-                    },
-                    success: function (result) {
-                        $("nav").after('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">You have logged out. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
-                        window.location.reload();
-                    },
-                    error: function (e) {
-                        $("nav").after('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
-                        window.location.reload();
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-
-</html>
+        {% if is_authenticated %}
+        <a href="#" class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
+            <i class="fas fa-graduation-cap ml-2"></i>
+        </a>
+        {% else %}
+        <a href="{%url 'user_signup_view'%}" class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
+            <i class="fas fa-graduation-cap ml-2"></i>
+        </a>
+        {% endif %}
+    </div>
+    <br />
+</article>
+{% endblock content %}
