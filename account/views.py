@@ -132,7 +132,7 @@ class UserAPI(View):
             cleaned_data = form.clean()
 
             try:
-                result = list(User.objects.get(pk=user_id).values(
+                result = list(User.objects.filter(pk=user_id).values(
                     'id', *cleaned_data['column']))
             except Exception as e:
                 return JsonResponse({
