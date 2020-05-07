@@ -1,7 +1,7 @@
 from django.views import View
 from django.shortcuts import render
 from django.http import JsonResponse, HttpResponse
-from django.forms import Form, ModelForm, CharField, PasswordInput
+from django.forms import Form, ModelForm, CharField, PasswordInput, IntegerField, MultipleChoiceField
 from django.db import models
 from django.template import loader
 from django.core.validators import ValidationError
@@ -9,6 +9,7 @@ from django.contrib.auth import authenticate, login, logout
 from django.conf import settings
 from django.utils.encoding import iri_to_uri
 from django.utils.http import url_has_allowed_host_and_scheme
+from django.utils.timezone import localtime
 from django.shortcuts import redirect
 from django.urls import reverse
 from .models import UserManager, User
@@ -17,9 +18,57 @@ import json
 
 class UserListAPI(View):
     def get(self, request):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class UserListForm(Form):
+            id_start = IntegerField(initial=1, required=False)
+            id_end = IntegerField(initial=10, required=False)
+            choices = (
+                ("last_login", "last login"),
+                ("is_superuser", "is superuser"),
+                ("username", "username"),
+                ("name", "name"),
+                ("balance", "balance"),
+                ("profile", "profile"),
+                ("picture_id", "picture id"),
+            )
+            column = MultipleChoiceField(choices=choices)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = UserListForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            if cleaned_data['id_start'] is None and cleaned_data['id_end'] is not None:
+                cleaned_data['id_start'] = cleaned_data['id_end'] - 10
+            else:
+                cleaned_data['id_start'] = 1
+            if cleaned_data['id_end'] is None:
+                cleaned_data['id_end'] = cleaned_data['id_start'] + 10
+
+            result = list(User.objects.filter(id__range=[
+                          cleaned_data['id_start'], cleaned_data['id_end']]).values('id', *cleaned_data['column']))
+
+            if 'last_login' in cleaned_data['column']:
+                for each in result:
+                    each['last_login'] = localtime(each['last_login'])
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': result,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def post(self, request):
         class UserListAPIPostForm(ModelForm):
@@ -100,7 +149,7 @@ class UserLoginAPI(View):
         class UserLoginForm(Form):
             username = CharField()
             password = CharField(widget=PasswordInput)
-            redirect_uri = CharField(initial='/', required=False)
+            redirect_uri = CharField(required=False)
 
         try:
             data = json.loads(request.body)
