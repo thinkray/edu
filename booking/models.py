@@ -11,5 +11,4 @@ class Booking(models.Model):
         User, on_delete=models.CASCADE, related_name='booking_teacher')
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='booking_student', null=True)
-    is_full = models.BooleanField()
     info = models.TextField(null=True)

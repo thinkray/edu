@@ -394,6 +394,7 @@ class CourseInstanceAPI(View):
                 return JsonResponse({
                     'status': 404,
                     'message': 'Not Found',
+                    'data': [],
                 }, status=404)
 
             if result == []:
@@ -436,6 +437,7 @@ class CourseInstanceAPI(View):
                 return JsonResponse({
                     'status': 404,
                     'message': 'Not Found',
+                    'data': [],
                 }, status=404)
 
             cleaned_data = form.clean()

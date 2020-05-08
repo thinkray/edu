@@ -136,6 +136,7 @@ class UserAPI(View):
                 return JsonResponse({
                     'status': 404,
                     'message': 'Not Found',
+                    'data': [],
                 }, status=404)
 
             if result == []:
