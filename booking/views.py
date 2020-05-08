@@ -1,13 +1,17 @@
-from django.views import View
-from django.utils.timezone import localtime
-from django.forms import Form, IntegerField, MultipleChoiceField, DateTimeField, CharField
-from django.shortcuts import render
-from django.http import JsonResponse
+import json
+
 from django.db.models import Q
+from django.forms import (CharField, DateTimeField, Form, IntegerField,
+                          MultipleChoiceField)
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils.timezone import localtime
+from django.views import View
+
 from account.models import User
 from course.models import Course, CourseInstance
+
 from .models import Booking
-import json
 
 
 class BookingListAPI(View):

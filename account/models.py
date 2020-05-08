@@ -1,11 +1,12 @@
-from django.db import models
-from django.contrib.auth.models import (
-    BaseUserManager, AbstractBaseUser, PermissionsMixin
-)
-from django.utils.translation import gettext_lazy as _
+from django.contrib.auth.models import (AbstractBaseUser, BaseUserManager,
+                                        PermissionsMixin)
 from django.contrib.auth.validators import ASCIIUsernameValidator
 from django.core.validators import RegexValidator
+from django.db import models
+from django.utils.translation import gettext_lazy as _
+
 from storage.models import BlobStorage
+
 
 class UserManager(BaseUserManager):
     def create_user(self, username, password=None, name=None):
@@ -90,4 +91,3 @@ class User(AbstractBaseUser, PermissionsMixin):
     #     "Is the user a member of staff?"
     #     # Simplest possible answer: All admins are staff
     #     return self.is_admin
-    

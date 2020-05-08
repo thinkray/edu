@@ -1,12 +1,15 @@
-from django.views import View
-from django.utils.timezone import localtime, now
-from django.forms import Form, CharField, BooleanField, IntegerField, DateTimeField, MultipleChoiceField
-from django.shortcuts import render
-from django.http import JsonResponse
-from django.utils.timezone import localtime
-from account.models import User
-from .models import Message
 import json
+
+from django.forms import (BooleanField, CharField, DateTimeField, Form,
+                          IntegerField, MultipleChoiceField)
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils.timezone import localtime, now
+from django.views import View
+
+from account.models import User
+
+from .models import Message
 
 
 class MessageListAPI(View):

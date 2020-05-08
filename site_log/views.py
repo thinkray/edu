@@ -1,11 +1,15 @@
-from django.views import View
+import json
+
+from django.forms import CharField, Form, IntegerField, MultipleChoiceField
+from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.timezone import localtime, now
-from django.forms import Form, IntegerField, MultipleChoiceField, CharField
+from django.views import View
+
 from account.models import User
+
 from .models import Log
-from django.http import JsonResponse
-import json
+
 
 class LogListAPI(View):
     def get(self, request):

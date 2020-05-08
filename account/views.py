@@ -1,20 +1,24 @@
-from django.views import View
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
-from django.forms import Form, ModelForm, CharField, PasswordInput, IntegerField, MultipleChoiceField, BooleanField, DecimalField
-from django.db import models
-from django.template import loader
-from django.core.validators import ValidationError
-from django.contrib.auth import authenticate, login, logout
+import json
+
 from django.conf import settings
+from django.contrib.auth import authenticate, login, logout
+from django.core.validators import ValidationError
+from django.db import models
+from django.forms import (BooleanField, CharField, DecimalField, Form,
+                          IntegerField, ModelForm, MultipleChoiceField,
+                          PasswordInput)
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
+from django.template import loader
+from django.urls import reverse
 from django.utils.encoding import iri_to_uri
 from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.timezone import localtime
-from django.shortcuts import redirect
-from django.urls import reverse
-from .models import UserManager, User
+from django.views import View
+
 from storage.models import BlobStorage
-import json
+
+from .models import User, UserManager
 
 
 class UserListAPI(View):

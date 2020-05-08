@@ -1,7 +1,9 @@
-from django.db import models
-from account.models import User
 from django.core.validators import MinValueValidator
+from django.db import models
+
+from account.models import User
 from storage.models import BlobStorage
+
 
 class Course(models.Model):
     name = models.CharField(max_length=200)

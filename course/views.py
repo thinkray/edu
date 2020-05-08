@@ -1,15 +1,20 @@
-from django.views import View
-from django.shortcuts import render
-from django.http import JsonResponse, HttpResponse
-from django.forms import Form, CharField, BooleanField, DecimalField, IntegerField, DateTimeField, MultipleChoiceField
+import json
+
 from django.conf import settings
-from django.template import loader
 from django.core.validators import MinValueValidator
+from django.forms import (
+    BooleanField, CharField, DateTimeField, DecimalField, Form, IntegerField,
+    MultipleChoiceField)
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import render
+from django.template import loader
 from django.utils.timezone import localtime
-from .models import Course, CourseInstance
+from django.views import View
+
 from account.models import User
 from storage.models import BlobStorage
-import json
+
+from .models import Course, CourseInstance
 
 
 class CourseListAPI(View):

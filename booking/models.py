@@ -1,4 +1,5 @@
 from django.db import models
+
 from account.models import User
 from course.models import Course
 

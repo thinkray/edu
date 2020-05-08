@@ -1,13 +1,18 @@
-from django.core.validators import MinValueValidator, MaxValueValidator
-from django.db import transaction
-from django.views import View
-from django.utils.timezone import localtime, now
-from django.forms import Form, IntegerField, MultipleChoiceField, DateTimeField, CharField, DecimalField, BooleanField
-from django.shortcuts import render
-from django.http import JsonResponse
-from account.models import User
-from .models import Bill, RedemptionCode, CouponCode
 import json
+
+from django.core.validators import MaxValueValidator, MinValueValidator
+from django.db import transaction
+from django.forms import (
+    BooleanField, CharField, DateTimeField, DecimalField, Form, IntegerField,
+    MultipleChoiceField)
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.utils.timezone import localtime, now
+from django.views import View
+
+from account.models import User
+
+from .models import Bill, CouponCode, RedemptionCode
 
 
 class BillListAPI(View):
