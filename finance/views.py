@@ -1,7 +1,8 @@
+from django.core.validators import MinValueValidator
 from django.db import transaction
 from django.views import View
 from django.utils.timezone import localtime, now
-from django.forms import Form, IntegerField, MultipleChoiceField, DateTimeField, CharField, DecimalField
+from django.forms import Form, IntegerField, MultipleChoiceField, DateTimeField, CharField, DecimalField, BooleanField
 from django.shortcuts import render
 from django.http import JsonResponse
 from account.models import User
@@ -218,30 +219,195 @@ class RedeemRedemptionCodeAPI(View):
 
 class RedemptionCodeListAPI(View):
     def get(self, request):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class RedemptionCodeListAPIGetForm(Form):
+            offset = IntegerField(initial=1, required=False)
+            limit = IntegerField(initial=10, required=False)
+            choices = (
+                ("code", "code"),
+                ("amount", "amount"),
+                ("is_available", "is_available"),
+            )
+            column = MultipleChoiceField(choices=choices)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = RedemptionCodeListAPIGetForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            if cleaned_data['offset'] is None:
+                cleaned_data['offset'] = 0
+            if cleaned_data['limit'] is None:
+                cleaned_data['limit'] = 10
+
+            result = list(RedemptionCode.objects.all()[
+                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': result,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def post(self, request):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class RedemptionCodeListAPIPostForm(Form):
+            code = CharField()
+            amount = DecimalField(max_digits=17, decimal_places=2, validators=[
+                                  MinValueValidator(0)])
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = RedemptionCodeListAPIPostForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            redemption_code = RedemptionCode(
+                code=cleaned_data['code'], amount=cleaned_data['amount'], is_available=True)
+
+            redemption_code.save()
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success'
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
 
 class RedemptionCodeAPI(View):
     def get(self, request, redemption_code_id):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class RedemptionCodeAPIGetForm(Form):
+            choices = (
+                ("code", "code"),
+                ("amount", "amount"),
+                ("is_available", "is_available"),
+            )
+            column = MultipleChoiceField(choices=choices)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = RedemptionCodeAPIGetForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            try:
+                result = list(RedemptionCode.objects.filter(pk=redemption_code_id).values(
+                    'id', *cleaned_data['column']))
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            if result == []:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                    'data': [],
+                }, status=404)
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': result,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def patch(self, request, redemption_code_id):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class RedemptionCodeAPIPatchForm(Form):
+            code = CharField(required=False)
+            amount = DecimalField(max_digits=17, decimal_places=2, validators=[
+                                  MinValueValidator(0)], required=False)
+            is_available = BooleanField(required=False)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = RedemptionCodeAPIPatchForm(data)
+        if form.is_valid():
+            try:
+                redemption_code = RedemptionCode.objects.get(
+                    pk=redemption_code_id)
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            cleaned_data = form.clean()
+
+            if 'code' in data and cleaned_data['amount'] != '':
+                redemption_code.code = cleaned_data['code']
+
+            if cleaned_data['amount'] is not None:
+                redemption_code.amount = cleaned_data['amount']
+
+            if 'is_available' in data:
+                redemption_code.is_available = cleaned_data['is_available']
+
+            redemption_code.save()
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def delete(self, request, redemption_code_id):
+        try:
+            redemption_code = RedemptionCode.objects.get(pk=redemption_code_id)
+        except Exception as e:
+            return JsonResponse({
+                'status': 404,
+                'message': 'Not Found',
+            }, status=404)
+
+        redemption_code.delete()
+
         return JsonResponse({
-            'error': 'NotImplementedError'
+            'status': 200,
+            'message': 'Success',
         })
 
 
