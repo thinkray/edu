@@ -212,9 +212,73 @@ class BillAPI(View):
 class RedeemRedemptionCodeAPI(View):
 
     def post(self, request):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class RedeemRedemptionCodeAPIPostForm(Form):
+            user = IntegerField()
+            code = CharField()
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = RedeemRedemptionCodeAPIPostForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            try:
+                cleaned_data['user'] = User.objects.get(
+                    pk=cleaned_data['user'])
+            except Exception as e:
+                return JsonResponse({
+                    'status': 400,
+                    'message': 'UserNotFound',
+                }, status=400)
+
+            try:
+                redemption_code = RedemptionCode.objects.get(
+                    code=cleaned_data['code'])
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            if redemption_code.is_available == False:
+                return JsonResponse({
+                    'status': 403,
+                    'message': 'AlreadyRedeemed',
+                }, status=403)
+
+            try:
+                with transaction.atomic():
+                    redemption_code.is_available = False
+                    cleaned_data['user'].balance = cleaned_data['user'].balance + \
+                        redemption_code.amount
+                    bill = Bill(user=cleaned_data['user'], amount=redemption_code.amount, date=now(
+                    ), info='Redeem the redemption code ' + cleaned_data['code'])
+
+                    redemption_code.save()
+                    cleaned_data['user'].save()
+                    bill.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
 
 class RedemptionCodeListAPI(View):

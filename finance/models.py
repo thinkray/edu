@@ -12,7 +12,7 @@ class Bill(models.Model):
 
 
 class RedemptionCode(models.Model):
-    code = models.CharField(max_length=32)
+    code = models.CharField(max_length=32, unique=True)
     amount = models.DecimalField(
         max_digits=17, decimal_places=2, validators=[MinValueValidator(0)])
     is_available = models.BooleanField()
