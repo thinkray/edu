@@ -344,8 +344,9 @@ class RedemptionCodeListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
-            exist_redemption_code = list(RedemptionCode.objects.filter(code=cleaned_data['code']))
-            
+            exist_redemption_code = list(
+                RedemptionCode.objects.filter(code=cleaned_data['code']))
+
             if exist_redemption_code != []:
                 return JsonResponse({
                     'status': 409,
@@ -530,7 +531,7 @@ class CouponCodeListAPI(View):
         class CouponCodeListAPIPostForm(Form):
             code = CharField()
             discount = DecimalField(max_digits=2, decimal_places=2, validators=[
-                                   MinValueValidator(0.001), MaxValueValidator(0.999)])
+                MinValueValidator(0.001), MaxValueValidator(0.999)])
 
         try:
             data = json.loads(request.body)
@@ -545,8 +546,9 @@ class CouponCodeListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
-            exist_coupon_code = list(RedemptionCode.objects.filter(code=cleaned_data['code']))
-            
+            exist_coupon_code = list(
+                RedemptionCode.objects.filter(code=cleaned_data['code']))
+
             if exist_coupon_code != []:
                 return JsonResponse({
                     'status': 409,
@@ -566,6 +568,7 @@ class CouponCodeListAPI(View):
                 'status': 400,
                 'message': form.errors
             }, status=400)
+
 
 class CouponCodeAPI(View):
     def get(self, request, coupon_code_id):
@@ -631,3 +634,42 @@ class CouponCodeAPI(View):
             'status': 200,
             'message': 'Success',
         })
+
+
+class CouponCodeCheckAPI(View):
+    def post(self, request):
+        class CouponCodeCheckAPIPostForm(Form):
+            code = CharField()
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = CouponCodeCheckAPIPostForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            coupon_code = list(CouponCode.objects.filter(
+                code=cleaned_data['code']).values())
+
+            if coupon_code == []:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': coupon_code
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)

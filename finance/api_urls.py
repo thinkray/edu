@@ -13,6 +13,8 @@ urlpatterns = [
          views.RedemptionCodeAPI.as_view(), name='redemption_code_api'),
     path('coupon_code/list', views.CouponCodeListAPI.as_view(),
          name='coupon_code_list_api'),
+    path('coupon_code/check', views.CouponCodeCheckAPI.as_view(),
+         name='coupon_code_check_api'),
     path('coupon_code/<int:coupon_code_id>',
          views.CouponCodeAPI.as_view(), name='coupon_code_api'),
 ]
