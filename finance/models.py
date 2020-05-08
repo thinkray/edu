@@ -19,6 +19,6 @@ class RedemptionCode(models.Model):
 
 
 class CouponCode(models.Model):
-    code = models.CharField(max_length=32)
+    code = models.CharField(max_length=32, unique=True)
     discount = models.DecimalField(max_digits=2, decimal_places=2, validators=[
-                                   MinValueValidator(0.01), MaxValueValidator(0.99)])
+                                   MinValueValidator(0.001), MaxValueValidator(0.999)])

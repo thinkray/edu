@@ -1,4 +1,4 @@
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import transaction
 from django.views import View
 from django.utils.timezone import localtime, now
@@ -344,6 +344,14 @@ class RedemptionCodeListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
+            exist_redemption_code = list(RedemptionCode.objects.filter(code=cleaned_data['code']))
+            
+            if exist_redemption_code != []:
+                return JsonResponse({
+                    'status': 409,
+                    'message': 'CodeAlreadyExisted'
+                }, status=409)
+
             redemption_code = RedemptionCode(
                 code=cleaned_data['code'], amount=cleaned_data['amount'], is_available=True)
 
@@ -477,23 +485,149 @@ class RedemptionCodeAPI(View):
 
 class CouponCodeListAPI(View):
     def get(self, request):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class CouponCodeListAPIGetForm(Form):
+            offset = IntegerField(initial=1, required=False)
+            limit = IntegerField(initial=10, required=False)
+            choices = (
+                ("code", "code"),
+                ("discount", "discount"),
+            )
+            column = MultipleChoiceField(choices=choices)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = CouponCodeListAPIGetForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            if cleaned_data['offset'] is None:
+                cleaned_data['offset'] = 0
+            if cleaned_data['limit'] is None:
+                cleaned_data['limit'] = 10
+
+            result = list(CouponCode.objects.all()[
+                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': result,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def post(self, request):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class CouponCodeListAPIPostForm(Form):
+            code = CharField()
+            discount = DecimalField(max_digits=2, decimal_places=2, validators=[
+                                   MinValueValidator(0.001), MaxValueValidator(0.999)])
 
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = CouponCodeListAPIPostForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            exist_coupon_code = list(RedemptionCode.objects.filter(code=cleaned_data['code']))
+            
+            if exist_coupon_code != []:
+                return JsonResponse({
+                    'status': 409,
+                    'message': 'CodeAlreadyExisted'
+                }, status=409)
+
+            coupon_code = CouponCode(
+                code=cleaned_data['code'], discount=cleaned_data['discount'])
+
+            coupon_code.save()
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success'
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
 class CouponCodeAPI(View):
     def get(self, request, coupon_code_id):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class CouponCodeAPIGetForm(Form):
+            choices = (
+                ("code", "code"),
+                ("discount", "discount"),
+            )
+            column = MultipleChoiceField(choices=choices)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = CouponCodeAPIGetForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            try:
+                result = list(CouponCode.objects.filter(pk=coupon_code_id).values(
+                    'id', *cleaned_data['column']))
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            if result == []:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                    'data': [],
+                }, status=404)
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': result,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def delete(self, request, coupon_code_id):
+        try:
+            coupon_code = CouponCode.objects.get(pk=coupon_code_id)
+        except Exception as e:
+            return JsonResponse({
+                'status': 404,
+                'message': 'Not Found',
+            }, status=404)
+
+        coupon_code.delete()
+
         return JsonResponse({
-            'error': 'NotImplementedError'
+            'status': 200,
+            'message': 'Success',
         })
