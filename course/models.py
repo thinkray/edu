@@ -16,9 +16,6 @@ class Course(models.Model):
     quota = models.IntegerField(validators=[MinValueValidator(0)])
     sold = models.IntegerField(default=0, validators=[MinValueValidator(0)])
 
-    def __str__(self):
-        return self.name
-
 
 class CourseInstance(models.Model):
     course = models.ForeignKey(
@@ -26,6 +23,3 @@ class CourseInstance(models.Model):
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='course_instance_student')
     quota = models.IntegerField(validators=[MinValueValidator(0)])
-
-    def __str__(self):
-        return self.course + ':' + self.student

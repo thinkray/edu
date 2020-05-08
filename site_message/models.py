@@ -12,6 +12,3 @@ class Message(models.Model):
     is_unread = models.BooleanField(default=True)
     is_deleted_by_sender = models.BooleanField(default=False)
     is_deleted_by_recipient = models.BooleanField(default=False)
-
-    def __str__(self):
-        return self.title + ':' + self.sender + ':' + self.recipient
