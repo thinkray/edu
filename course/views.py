@@ -15,14 +15,14 @@ import json
 class CourseListAPI(View):
     def get(self, request):
         class CourseListAPIGetForm(Form):
-            id_start = IntegerField(initial=1, required=False)
-            id_end = IntegerField(initial=10, required=False)
+            offset = IntegerField(initial=1, required=False)
+            limit = IntegerField(initial=10, required=False)
             choices = (
                 ("name", "name"),
                 ("info", "info"),
                 ("picture", "picture"),
-                ("start_date", "start date"),
-                ("end_date", "end date"),
+                ("start_date", "start_date"),
+                ("end_date", "end_date"),
                 ("teacher", "teacher"),
                 ("price", "price"),
                 ("quota", "quota"),
@@ -42,15 +42,12 @@ class CourseListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
-            if cleaned_data['id_start'] is None and cleaned_data['id_end'] is not None:
-                cleaned_data['id_start'] = cleaned_data['id_end'] - 10
-            else:
-                cleaned_data['id_start'] = 1
-            if cleaned_data['id_end'] is None:
-                cleaned_data['id_end'] = cleaned_data['id_start'] + 10
+            if cleaned_data['offset'] is None:
+                cleaned_data['offset'] = 0
+            if cleaned_data['limit'] is None:
+                cleaned_data['limit'] = 10
 
-            result = list(Course.objects.filter(id__range=[
-                          cleaned_data['id_start'], cleaned_data['id_end']]).values('id', *cleaned_data['column']))
+            result = list(Course.objects.all()[cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             if 'start_date' in cleaned_data['column']:
                 for each in result:
@@ -129,8 +126,8 @@ class CourseAPI(View):
                 ("name", "name"),
                 ("info", "info"),
                 ("picture", "picture"),
-                ("start_date", "start date"),
-                ("end_date", "end date"),
+                ("start_date", "start_date"),
+                ("end_date", "end_date"),
                 ("teacher", "teacher"),
                 ("price", "price"),
                 ("quota", "quota"),
@@ -275,8 +272,8 @@ class CourseAPI(View):
 class CourseInstanceListAPI(View):
     def get(self, request):
         class CourseInstanceListAPIGetForm(Form):
-            id_start = IntegerField(initial=1, required=False)
-            id_end = IntegerField(initial=10, required=False)
+            offset = IntegerField(initial=1, required=False)
+            limit = IntegerField(initial=10, required=False)
             choices = (
                 ("course", "course"),
                 ("student", "student"),
@@ -297,15 +294,12 @@ class CourseInstanceListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
-            if cleaned_data['id_start'] is None and cleaned_data['id_end'] is not None:
-                cleaned_data['id_start'] = cleaned_data['id_end'] - 10
-            else:
-                cleaned_data['id_start'] = 1
-            if cleaned_data['id_end'] is None:
-                cleaned_data['id_end'] = cleaned_data['id_start'] + 10
+            if cleaned_data['offset'] is None:
+                cleaned_data['offset'] = 0
+            if cleaned_data['limit'] is None:
+                cleaned_data['limit'] = 10
 
-            result = list(CourseInstance.objects.filter(id__range=[
-                          cleaned_data['id_start'], cleaned_data['id_end']]).values('id', *cleaned_data['column']))
+            result = list(CourseInstance.objects.all()[cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             return JsonResponse({
                 'status': 200,

@@ -20,16 +20,16 @@ import json
 class UserListAPI(View):
     def get(self, request):
         class UserListAPIGetForm(Form):
-            id_start = IntegerField(initial=1, required=False)
-            id_end = IntegerField(initial=10, required=False)
+            offset = IntegerField(initial=1, required=False)
+            limit = IntegerField(initial=10, required=False)
             choices = (
-                ("last_login", "last login"),
-                ("is_superuser", "is superuser"),
+                ("last_login", "last_login"),
+                ("is_superuser", "is_superuser"),
                 ("username", "username"),
                 ("name", "name"),
                 ("balance", "balance"),
                 ("profile", "profile"),
-                ("picture_id", "picture id"),
+                ("picture_id", "picture_id"),
             )
             column = MultipleChoiceField(choices=choices)
 
@@ -46,15 +46,12 @@ class UserListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
-            if cleaned_data['id_start'] is None and cleaned_data['id_end'] is not None:
-                cleaned_data['id_start'] = cleaned_data['id_end'] - 10
-            else:
-                cleaned_data['id_start'] = 1
-            if cleaned_data['id_end'] is None:
-                cleaned_data['id_end'] = cleaned_data['id_start'] + 10
+            if cleaned_data['offset'] is None:
+                cleaned_data['offset'] = 0
+            if cleaned_data['limit'] is None:
+                cleaned_data['limit'] = 10
 
-            result = list(User.objects.filter(id__range=[
-                          cleaned_data['id_start'], cleaned_data['id_end']]).values('id', *cleaned_data['column']))
+            result = list(User.objects.all()[cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             if 'last_login' in cleaned_data['column']:
                 for each in result:
@@ -108,13 +105,13 @@ class UserAPI(View):
     def get(self, request, user_id):
         class UserAPIGetForm(Form):
             choices = (
-                ("last_login", "last login"),
-                ("is_superuser", "is superuser"),
+                ("last_login", "last_login"),
+                ("is_superuser", "is_superuser"),
                 ("username", "username"),
                 ("name", "name"),
                 ("balance", "balance"),
                 ("profile", "profile"),
-                ("picture_id", "picture id"),
+                ("picture_id", "picture_id"),
             )
             column = MultipleChoiceField(choices=choices)
 
