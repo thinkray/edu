@@ -51,7 +51,8 @@ class UserListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            result = list(User.objects.all()[cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            result = list(User.objects.all()[
+                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             if 'last_login' in cleaned_data['column']:
                 for each in result:

@@ -47,7 +47,8 @@ class CourseListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            result = list(Course.objects.all()[cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            result = list(Course.objects.all()[
+                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             if 'start_date' in cleaned_data['column']:
                 for each in result:
@@ -299,7 +300,8 @@ class CourseInstanceListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            result = list(CourseInstance.objects.all()[cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            result = list(CourseInstance.objects.all()[
+                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             return JsonResponse({
                 'status': 200,
@@ -364,18 +366,108 @@ class CourseInstanceListAPI(View):
 
 class CourseInstanceAPI(View):
     def get(self, request, course_instance_id):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        class CourseInstanceAPIGetForm(Form):
+            choices = (
+                ("course", "course"),
+                ("student", "student"),
+                ("quota", "quota"),
+            )
+            column = MultipleChoiceField(choices=choices)
 
-    def put(self, request, course_instance_id):
-        return JsonResponse({
-            'error': 'NotImplementedError'
-        })
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = CourseInstanceAPIGetForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            try:
+                result = list(CourseInstance.objects.filter(pk=course_instance_id).values(
+                    'id', *cleaned_data['column']))
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            if result == []:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                    'data': [],
+                }, status=404)
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'data': result,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
+
+    def patch(self, request, course_instance_id):
+        class CourseInstanceAPIPatchForm(Form):
+            quota = IntegerField(validators=[MinValueValidator(0)])
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = CourseInstanceAPIPatchForm(data)
+        if form.is_valid():
+            try:
+                course_instance = CourseInstance.objects.get(
+                    pk=course_instance_id)
+            except Exception as e:
+                return JsonResponse({
+                    'status': 404,
+                    'message': 'Not Found',
+                }, status=404)
+
+            cleaned_data = form.clean()
+
+            if cleaned_data['quota'] != '':
+                course_instance.quota = cleaned_data['quota']
+
+            course_instance.save()
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
 
     def delete(self, request, course_instance_id):
+        try:
+            course_instance = CourseInstance.objects.get(pk=course_instance_id)
+        except Exception as e:
+            return JsonResponse({
+                'status': 404,
+                'message': 'Not Found',
+            }, status=404)
+
+        course_instance.delete()
+
         return JsonResponse({
-            'error': 'NotImplementedError'
+            'status': 200,
+            'message': 'Success',
         })
 
 
