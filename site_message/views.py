@@ -19,8 +19,8 @@ class MessageListAPI(View):
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
-        
-        class CourseListAPIGetForm(Form):
+
+        class MessageListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
             choices = (
@@ -48,7 +48,7 @@ class MessageListAPI(View):
                 'message': 'JSONDecodeError'
             }, status=400)
 
-        form = CourseListAPIGetForm(data)
+        form = MessageListAPIGetForm(data)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -86,7 +86,7 @@ class MessageListAPI(View):
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
-        
+
         class MessageListAPIPostForm(Form):
             title = CharField(max_length=255)
             recipient = IntegerField()
@@ -131,6 +131,12 @@ class MessageListAPI(View):
 
 class MessageAPI(View):
     def get(self, request, message_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class MessageAPIGetForm(Form):
             choices = (
                 ("title", "title"),
@@ -156,10 +162,15 @@ class MessageAPI(View):
         form = MessageAPIGetForm(data)
         if form.is_valid():
             cleaned_data = form.clean()
+            query_data = cleaned_data['column'].copy()
+            if not 'sender' in cleaned_data['column']:
+                query_data.append('sender')
+            if not 'recipient' in cleaned_data['column']:
+                query_data.append('recipient')
 
             try:
                 result = list(Message.objects.filter(pk=message_id).values(
-                    'id', *cleaned_data['column']))
+                    'id', *query_data))
             except Exception as e:
                 return JsonResponse({
                     'status': 404,
@@ -172,6 +183,20 @@ class MessageAPI(View):
                     'message': 'Not Found',
                     'data': [],
                 }, status=404)
+
+            if result[0]['sender'] != request.user.id and result[0]['recipient'] != request.user.id:
+                return JsonResponse({
+                    'status': 403,
+                    'message': 'Forbidden'
+                }, status=403)
+
+            if not 'sender' in cleaned_data['column']:
+                for each in result:
+                    del each['sender']
+
+            if not 'recipient' in cleaned_data['column']:
+                for each in result:
+                    del each['recipient']
 
             if 'send_date' in cleaned_data['column']:
                 for each in result:
@@ -189,6 +214,38 @@ class MessageAPI(View):
             }, status=400)
 
     def delete(self, request, message_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
+        try:
+            message = Message.objects.get(pk=message_id)
+        except Exception as e:
+            return JsonResponse({
+                'status': 404,
+                'message': 'Not Found',
+            }, status=404)
+
+        if message.sender == request.user:
+            message.is_deleted_by_sender = True
+            message.save()
+
+        elif message.recipient == request.user:
+            message.is_deleted_by_recipient = True
+            message.save()
+
+        else:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
+        if message.is_deleted_by_sender and message.is_deleted_by_recipient:
+            message.delete()
+
         return JsonResponse({
-            'error': 'NotImplementedError'
+            'status': 200,
+            'message': 'Success',
         })
