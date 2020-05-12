@@ -2,16 +2,18 @@ import json
 
 from django.conf import settings
 from django.core.validators import MinValueValidator
+from django.db import transaction
 from django.forms import (
     BooleanField, CharField, DateTimeField, DecimalField, Form, IntegerField,
     MultipleChoiceField)
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, now
 from django.views import View
 
 from account.models import User
+from finance.models import Bill, CouponCode
 from storage.models import BlobStorage
 
 from .models import Course, CourseInstance
@@ -298,6 +300,12 @@ class CourseAPI(View):
 
 class CourseInstanceListAPI(View):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class CourseInstanceListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -326,8 +334,16 @@ class CourseInstanceListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            result = list(CourseInstance.objects.all()[
-                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            if request.user.is_superuser:
+                result = list(CourseInstance.objects.all()[
+                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            else:
+                result = []
+                if request.user.groups.filter(name='teacher').exists():
+                    result = list(CourseInstance.objects.filter(teacher=request.user)[
+                        cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+                result = result + list(CourseInstance.objects.filter(student=request.user)[
+                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             return JsonResponse({
                 'status': 200,
@@ -341,9 +357,15 @@ class CourseInstanceListAPI(View):
             }, status=400)
 
     def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class CourseInstanceListAPIPostForm(Form):
             course = IntegerField()
-            student = IntegerField()
+            coupon_code = CharField(required=False)
 
         try:
             data = json.loads(request.body)
@@ -367,18 +389,43 @@ class CourseInstanceListAPI(View):
                     'message': 'CourseNotFound',
                 }, status=400)
 
+            if cleaned_data['coupon_code'] != '':
+                try:
+                    coupon_code_discount = CouponCode.objects.get(
+                        code=cleaned_data['coupon_code']).discount
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 400,
+                        'message': 'CouponCodeNotFound',
+                    }, status=400)
+            else:
+                coupon_code_discount = 0
+
+            need_to_pay = round(
+                cleaned_data['course'].price * (1-coupon_code_discount), 2)
+            if request.user.balance < need_to_pay:
+                return JsonResponse({
+                    'status': 403,
+                    'message': 'InsufficientBalance',
+                }, status=403)
+
             try:
-                cleaned_data['student'] = User.objects.get(
-                    pk=cleaned_data['student'])
+                with transaction.atomic():
+                    bill = Bill(user=request.user, amount=-need_to_pay, date=now(
+                    ), info='Pay for the course '+cleaned_data['course'].name)
+                    request.user.balance = request.user.balance - need_to_pay
+                    course_instance = CourseInstance(
+                        course=cleaned_data['course'], student=request.user, teacher=cleaned_data['course'].teacher, quota=cleaned_data['course'].quota)
+
+                    bill.save()
+                    request.user.save()
+                    course_instance.save()
             except Exception as e:
                 return JsonResponse({
-                    'status': 400,
-                    'message': 'StudentNotFound',
-                }, status=400)
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
 
-            course_instance = CourseInstance(
-                course=cleaned_data['course'], student=cleaned_data['student'], quota=cleaned_data['course'].quota)
-            course_instance.save()
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
@@ -396,6 +443,7 @@ class CourseInstanceAPI(View):
             choices = (
                 ("course", "course"),
                 ("student", "student"),
+                ("teacher", "teacher"),
                 ("quota", "quota"),
             )
             column = MultipleChoiceField(choices=choices)

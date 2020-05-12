@@ -24,4 +24,6 @@ class CourseInstance(models.Model):
         Course, on_delete=models.CASCADE, related_name='course_instance_course')
     student = models.ForeignKey(
         User, on_delete=models.CASCADE, related_name='course_instance_student')
+    teacher = models.ForeignKey(
+        User, on_delete=models.CASCADE, related_name='course_instance_teacher')
     quota = models.IntegerField(validators=[MinValueValidator(0)])
