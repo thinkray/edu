@@ -41,8 +41,12 @@ class LogListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            result = list(Log.objects.all()[
-                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            if request.user.is_superuser:
+                result = list(Log.objects.all()[
+                              cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            else:
+                result = list(Log.objects.filter(user=request.user)[
+                              cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             if 'date' in cleaned_data['column']:
                 for each in result:
@@ -60,6 +64,13 @@ class LogListAPI(View):
             }, status=400)
 
     def post(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden',
+                'data': [],
+            }, status=403)
+
         class LogListAPIPostForm(Form):
             user = IntegerField()
             operation = CharField()
