@@ -75,12 +75,18 @@ class CourseListAPI(View):
             }, status=400)
 
     def post(self, request):
+        if not request.user.is_superuser and not request.user.groups.filter(name = 'teacher').exists():
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class CourseListAPIPostForm(Form):
             name = CharField(max_length=200)
             info = CharField(required=False)
             start_date = DateTimeField()
             end_date = DateTimeField()
-            teacher = IntegerField()
+            teacher = IntegerField(required=False)
             price = DecimalField(max_digits=10, decimal_places=2)
             quota = IntegerField(validators=[MinValueValidator(0)])
             sold = IntegerField(
@@ -99,14 +105,17 @@ class CourseListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
-            try:
-                cleaned_data['teacher'] = User.objects.get(
-                    pk=cleaned_data['teacher'])
-            except Exception as e:
-                return JsonResponse({
-                    'status': 400,
-                    'message': 'TeacherNotFound',
-                }, status=400)
+            if request.user.is_superuser and 'teacher' in data:
+                try:
+                    cleaned_data['teacher'] = User.objects.get(
+                        pk=cleaned_data['teacher'])
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 400,
+                        'message': 'TeacherNotFound',
+                    }, status=400)
+            else:
+                cleaned_data['teacher'] = request.user
 
             if cleaned_data['sold'] is None:
                 cleaned_data['sold'] = 0
