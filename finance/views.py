@@ -17,6 +17,12 @@ from .models import Bill, CouponCode, RedemptionCode
 
 class BillListAPI(View):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class BillListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -46,8 +52,12 @@ class BillListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            result = list(Bill.objects.all()[
-                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            if request.user.is_superuser:
+                result = list(Bill.objects.all()[
+                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            else:
+                result = list(Bill.objects.filter(user=request.user)[
+                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             if 'date' in cleaned_data['column']:
                 for each in result:
@@ -65,6 +75,12 @@ class BillListAPI(View):
             }, status=400)
 
     def post(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden',
+            }, status=403)
+
         class BillListAPIPostForm(Form):
             user = IntegerField()
             amount = DecimalField(max_digits=17, decimal_places=2)
@@ -120,6 +136,12 @@ class BillListAPI(View):
 
 class BillAPI(View):
     def get(self, request, bill_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class BillAPIGetForm(Form):
             choices = (
                 ("user", "user"),
@@ -160,13 +182,13 @@ class BillAPI(View):
                     'message': 'Not Found',
                     'data': [],
                 }, status=404)
-            
+
             if result[0]['user'] != request.user.id and not request.user.is_superuser:
                 return JsonResponse({
                     'status': 403,
                     'message': 'Forbidden'
                 }, status=403)
-            
+
             if not 'user' in cleaned_data['column']:
                 for each in result:
                     del each['user']
@@ -192,7 +214,7 @@ class BillAPI(View):
                 'status': 403,
                 'message': 'Forbidden',
             }, status=403)
-        
+
         class BillAPIPatchForm(Form):
             info = CharField(required=False)
 
