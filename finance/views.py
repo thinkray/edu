@@ -294,6 +294,12 @@ class RedeemRedemptionCodeAPI(View):
 
 class RedemptionCodeListAPI(View):
     def get(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class RedemptionCodeListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -337,6 +343,12 @@ class RedemptionCodeListAPI(View):
             }, status=400)
 
     def post(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class RedemptionCodeListAPIPostForm(Form):
             code = CharField()
             amount = DecimalField(max_digits=17, decimal_places=2, validators=[
@@ -381,6 +393,12 @@ class RedemptionCodeListAPI(View):
 
 class RedemptionCodeAPI(View):
     def get(self, request, redemption_code_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class RedemptionCodeAPIGetForm(Form):
             choices = (
                 ("code", "code"),
@@ -430,6 +448,12 @@ class RedemptionCodeAPI(View):
             }, status=400)
 
     def patch(self, request, redemption_code_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class RedemptionCodeAPIPatchForm(Form):
             code = CharField(required=False)
             amount = DecimalField(max_digits=17, decimal_places=2, validators=[
@@ -479,6 +503,12 @@ class RedemptionCodeAPI(View):
             }, status=400)
 
     def delete(self, request, redemption_code_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         try:
             redemption_code = RedemptionCode.objects.get(pk=redemption_code_id)
         except Exception as e:
@@ -497,6 +527,12 @@ class RedemptionCodeAPI(View):
 
 class CouponCodeListAPI(View):
     def get(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class CouponCodeListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -539,6 +575,12 @@ class CouponCodeListAPI(View):
             }, status=400)
 
     def post(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class CouponCodeListAPIPostForm(Form):
             code = CharField()
             discount = DecimalField(max_digits=2, decimal_places=2, validators=[
@@ -583,6 +625,12 @@ class CouponCodeListAPI(View):
 
 class CouponCodeAPI(View):
     def get(self, request, coupon_code_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class CouponCodeAPIGetForm(Form):
             choices = (
                 ("code", "code"),
@@ -631,6 +679,12 @@ class CouponCodeAPI(View):
             }, status=400)
 
     def delete(self, request, coupon_code_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         try:
             coupon_code = CouponCode.objects.get(pk=coupon_code_id)
         except Exception as e:
