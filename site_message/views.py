@@ -57,6 +57,7 @@ class MessageListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
+            result = []
             if cleaned_data['box'] == 'inbox':
                 result = list(Message.objects.filter(recipient=request.user, is_deleted_by_recipient=False)[
                     cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))

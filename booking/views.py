@@ -1,8 +1,8 @@
 import json
 
 from django.db.models import Q
-from django.forms import (CharField, DateTimeField, Form, IntegerField,
-                          MultipleChoiceField)
+from django.forms import (CharField, ChoiceField, DateTimeField, Form,
+                          IntegerField, MultipleChoiceField)
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.timezone import localtime
@@ -16,6 +16,12 @@ from .models import Booking
 
 class BookingListAPI(View):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class BookingListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -28,7 +34,12 @@ class BookingListAPI(View):
                 ("info", "info"),
             )
             column = MultipleChoiceField(choices=choices)
-
+            panel_choices = (
+                ("teacher", "teacher"),
+                ("student", "student"),
+                ("all", "all"),
+            )
+            panel = ChoiceField(choices=panel_choices)
         try:
             data = json.loads(request.body)
 
@@ -47,8 +58,34 @@ class BookingListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            result = list(User.objects.all()[
-                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            result = []
+            if cleaned_data['panel'] == 'all':
+                if request.user.is_superuser:
+                    result = list(Booking.objects.all()[
+                        cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+                else:
+                    return JsonResponse({
+                        'status': 403,
+                        'message': 'Forbidden'
+                    }, status=403)
+            elif cleaned_data['panel'] == 'teacher':
+                if request.user.groups.filter(name='teacher').exists() or request.user.is_superuser:
+                    result = list(Booking.objects.filter(teacher=request.user)[
+                        cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+                else:
+                    return JsonResponse({
+                        'status': 403,
+                        'message': 'Forbidden'
+                    }, status=403)
+            elif cleaned_data['panel'] == 'student':
+                study_course_instance = CourseInstance.objects.filter(
+                    student=request.user, quota__gt=0)
+                study_course = []
+                for each in study_course_instance:
+                    study_course.append(each.course)
+
+                result = result + list(Booking.objects.filter(course__in=study_course)[
+                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             if 'date' in cleaned_data['column']:
                 for each in result:
@@ -66,11 +103,17 @@ class BookingListAPI(View):
             }, status=400)
 
     def post(self, request):
+        if not request.user.is_superuser and not request.user.groups.filter(name='teacher').exists():
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class BookingListAPIPostForm(Form):
             course = IntegerField()
             start_date = DateTimeField()
             end_date = DateTimeField()
-            teacher = IntegerField()
+            teacher = IntegerField(required=False)
             info = CharField(required=False)
 
         try:
@@ -86,14 +129,17 @@ class BookingListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
-            try:
-                cleaned_data['teacher'] = User.objects.get(
-                    pk=cleaned_data['teacher'])
-            except Exception as e:
-                return JsonResponse({
-                    'status': 400,
-                    'message': 'TeacherNotFound',
-                }, status=400)
+            if request.user.is_superuser and 'teacher' in data:
+                try:
+                    cleaned_data['teacher'] = User.objects.get(
+                        pk=cleaned_data['teacher'])
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 400,
+                        'message': 'TeacherNotFound',
+                    }, status=400)
+            else:
+                cleaned_data['teacher'] = request.user
 
             try:
                 cleaned_data['course'] = Course.objects.get(
@@ -103,6 +149,12 @@ class BookingListAPI(View):
                     'status': 400,
                     'message': 'CourseNotFound',
                 }, status=400)
+
+            if cleaned_data['course'].teacher != request.user and not request.user.is_superuser:
+                return JsonResponse({
+                    'status': 403,
+                    'message': 'Forbidden'
+                }, status=403)
 
             if (cleaned_data['start_date'] > cleaned_data['end_date']) or (cleaned_data['start_date'] < cleaned_data['course'].start_date) or (cleaned_data['end_date'] > cleaned_data['course'].end_date):
                 return JsonResponse({

@@ -3,9 +3,9 @@ import json
 from django.conf import settings
 from django.core.validators import MinValueValidator
 from django.db import transaction
-from django.forms import (
-    BooleanField, CharField, DateTimeField, DecimalField, Form, IntegerField,
-    MultipleChoiceField)
+from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
+                          DecimalField, Form, IntegerField,
+                          MultipleChoiceField)
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
@@ -312,9 +312,16 @@ class CourseInstanceListAPI(View):
             choices = (
                 ("course", "course"),
                 ("student", "student"),
+                ("teacher", "teacher"),
                 ("quota", "quota"),
             )
             column = MultipleChoiceField(choices=choices)
+            panel_choices = (
+                ("teacher", "teacher"),
+                ("student", "student"),
+                ("all", "all"),
+            )
+            panel = ChoiceField(choices=panel_choices)
 
         try:
             data = json.loads(request.body)
@@ -334,14 +341,26 @@ class CourseInstanceListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            if request.user.is_superuser:
-                result = list(CourseInstance.objects.all()[
-                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
-            else:
-                result = []
-                if request.user.groups.filter(name='teacher').exists():
+            result = []
+            if cleaned_data['panel'] == 'all':
+                if request.user.is_superuser:
+                    result = list(CourseInstance.objects.all()[
+                        cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+                else:
+                    return JsonResponse({
+                        'status': 403,
+                        'message': 'Forbidden'
+                    }, status=403)
+            elif cleaned_data['panel'] == 'teacher':
+                if request.user.groups.filter(name='teacher').exists() or request.user.is_superuser:
                     result = list(CourseInstance.objects.filter(teacher=request.user)[
                         cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+                else:
+                    return JsonResponse({
+                        'status': 403,
+                        'message': 'Forbidden'
+                    }, status=403)
+            elif cleaned_data['panel'] == 'student':
                 result = result + list(CourseInstance.objects.filter(student=request.user)[
                     cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
