@@ -439,6 +439,12 @@ class CourseInstanceListAPI(View):
 
 class CourseInstanceAPI(View):
     def get(self, request, course_instance_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class CourseInstanceAPIGetForm(Form):
             choices = (
                 ("course", "course"),
@@ -460,10 +466,15 @@ class CourseInstanceAPI(View):
         form = CourseInstanceAPIGetForm(data)
         if form.is_valid():
             cleaned_data = form.clean()
+            query_data = cleaned_data['column'].copy()
+            if not 'student' in cleaned_data['column']:
+                query_data.append('student')
+            if not 'teacher' in cleaned_data['column']:
+                query_data.append('teacher')
 
             try:
                 result = list(CourseInstance.objects.filter(pk=course_instance_id).values(
-                    'id', *cleaned_data['column']))
+                    'id', *query_data))
             except Exception as e:
                 return JsonResponse({
                     'status': 404,
@@ -478,6 +489,19 @@ class CourseInstanceAPI(View):
                     'data': [],
                 }, status=404)
 
+            if result[0]['student'] != request.user.id and result[0]['teacher'] != request.user.id and not request.user.is_superuser:
+                return JsonResponse({
+                    'status': 403,
+                    'message': 'Forbidden'
+                }, status=403)
+
+            if not 'student' in cleaned_data['column']:
+                for each in result:
+                    del each['student']
+            if not 'teacher' in cleaned_data['column']:
+                for each in result:
+                    del each['teacher']
+
             return JsonResponse({
                 'status': 200,
                 'message': 'Success',
@@ -490,6 +514,12 @@ class CourseInstanceAPI(View):
             }, status=400)
 
     def patch(self, request, course_instance_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class CourseInstanceAPIPatchForm(Form):
             quota = IntegerField(validators=[MinValueValidator(0)])
 
@@ -531,6 +561,12 @@ class CourseInstanceAPI(View):
             }, status=400)
 
     def delete(self, request, course_instance_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         try:
             course_instance = CourseInstance.objects.get(pk=course_instance_id)
         except Exception as e:
