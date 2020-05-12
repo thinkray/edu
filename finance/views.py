@@ -141,10 +141,13 @@ class BillAPI(View):
         form = BillAPIGetForm(data)
         if form.is_valid():
             cleaned_data = form.clean()
+            query_data = cleaned_data['column'].copy()
+            if not 'user' in cleaned_data['column']:
+                query_data.append('user')
 
             try:
                 result = list(Bill.objects.filter(pk=bill_id).values(
-                    'id', *cleaned_data['column']))
+                    'id', *query_data))
             except Exception as e:
                 return JsonResponse({
                     'status': 404,
@@ -157,6 +160,16 @@ class BillAPI(View):
                     'message': 'Not Found',
                     'data': [],
                 }, status=404)
+            
+            if result[0]['user'] != request.user.id and not request.user.is_superuser:
+                return JsonResponse({
+                    'status': 403,
+                    'message': 'Forbidden'
+                }, status=403)
+            
+            if not 'user' in cleaned_data['column']:
+                for each in result:
+                    del each['user']
 
             if 'date' in cleaned_data['column']:
                 for each in result:
@@ -174,6 +187,12 @@ class BillAPI(View):
             }, status=400)
 
     def patch(self, request, bill_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden',
+            }, status=403)
+        
         class BillAPIPatchForm(Form):
             info = CharField(required=False)
 

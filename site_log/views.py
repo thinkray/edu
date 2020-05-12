@@ -68,7 +68,6 @@ class LogListAPI(View):
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden',
-                'data': [],
             }, status=403)
 
         class LogListAPIPostForm(Form):
