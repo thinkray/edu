@@ -436,7 +436,6 @@ class UserLoginView(View):
 
     def get(self, request):
         if request.user.is_authenticated:
-            test = request.GET.get('redirect_uri', default='/')
             if url_has_allowed_host_and_scheme(iri_to_uri(request.GET.get('redirect_uri', default='/')), settings.ALLOWED_HOSTS):
                 return redirect(iri_to_uri(request.GET.get('redirect_uri', default='/')))
             else:
