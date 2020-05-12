@@ -84,8 +84,26 @@ class BookingListAPI(View):
                 for each in study_course_instance:
                     study_course.append(each.course)
 
-                result = result + list(Booking.objects.filter(course__in=study_course)[
-                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+                query_data = cleaned_data['column'].copy()
+                if not 'student' in cleaned_data['column']:
+                    query_data.append('student')
+
+                result = list(Booking.objects.filter(course__in=study_course)[
+                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *query_data))
+
+                if 'info' in cleaned_data['column']:
+                    for each in result:
+                        if each['student'] is not None and each['student'] != request.user.id:
+                            each['student'] = 0
+                            each['info'] = ''
+                else:
+                    for each in result:
+                        if each['student'] is not None and each['student'] != request.user.id:
+                            each['student'] = 0
+
+                if not 'student' in cleaned_data['column']:
+                    for each in result:
+                        del each['student']
 
             if 'date' in cleaned_data['column']:
                 for each in result:
@@ -187,6 +205,12 @@ class BookingListAPI(View):
 
 class BookingAPI(View):
     def get(self, request, booking_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class BookingAPIGetForm(Form):
             choices = (
                 ("course", "course"),
@@ -246,6 +270,12 @@ class BookingAPI(View):
             }, status=400)
 
     def patch(self, request, booking_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class BookingAPIPatchForm(Form):
             start_date = DateTimeField(required=False)
             end_date = DateTimeField(required=False)
@@ -321,6 +351,12 @@ class BookingAPI(View):
             }, status=400)
 
     def delete(self, request, booking_id):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         try:
             booking = Course.objects.get(pk=booking_id)
         except Exception as e:
