@@ -75,7 +75,7 @@ class CourseListAPI(View):
             }, status=400)
 
     def post(self, request):
-        if not request.user.is_superuser and not request.user.groups.filter(name = 'teacher').exists():
+        if not request.user.is_superuser and not request.user.groups.filter(name='teacher').exists():
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
@@ -227,6 +227,12 @@ class CourseAPI(View):
                     'message': 'Not Found',
                 }, status=404)
 
+            if not request.user.is_superuser and course.teacher != request.user:
+                return JsonResponse({
+                    'status': 403,
+                    'message': 'Forbidden'
+                }, status=403)
+
             cleaned_data = form.clean()
 
             if cleaned_data['name'] != '':
@@ -276,8 +282,14 @@ class CourseAPI(View):
                 'message': 'Not Found',
             }, status=404)
 
-        course.delete()
+        if not request.user.is_superuser and course.teacher != request.user:
+            return JsonResponse({
+                    'status': 403,
+                    'message': 'Forbidden'
+            }, status=403)
 
+        course.delete()
+        
         return JsonResponse({
             'status': 200,
             'message': 'Success',
