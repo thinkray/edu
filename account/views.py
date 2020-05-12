@@ -342,7 +342,7 @@ class UserLoginAPI(View):
         form = UserLoginForm(data)
         if form.is_valid():
             cleaned_data = form.clean()
-            if url_has_allowed_host_and_scheme(iri_to_uri(cleaned_data['redirect_uri']), settings.ALLOWED_HOSTS):
+            if 'redirect_uri' in data and cleaned_data['redirect_uri'] != url_has_allowed_host_and_scheme(iri_to_uri(cleaned_data['redirect_uri']), settings.ALLOWED_HOSTS):
                 cleaned_data['redirect_uri'] = iri_to_uri(
                     cleaned_data['redirect_uri'])
             else:
@@ -409,6 +409,7 @@ class UserLoginView(View):
 
     def get(self, request):
         if request.user.is_authenticated:
+            test = request.GET.get('redirect_uri', default='/')
             if url_has_allowed_host_and_scheme(iri_to_uri(request.GET.get('redirect_uri', default='/')), settings.ALLOWED_HOSTS):
                 return redirect(iri_to_uri(request.GET.get('redirect_uri', default='/')))
             else:

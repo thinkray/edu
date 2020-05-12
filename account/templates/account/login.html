@@ -46,7 +46,8 @@
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
             list["username"] = $("#username")[0].value;
             list["password"] = $("#password")[0].value;
-            list["redirect_uri"] = getQueryVariable("redirect_uri");
+            if(getQueryVariable("redirect_uri"))
+                list["redirect_uri"] = getQueryVariable("redirect_uri");
 
             $.ajax({
                 type: "POST",
