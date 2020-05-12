@@ -1,7 +1,7 @@
 import json
 
-from django.forms import (BooleanField, CharField, DateTimeField, Form,
-                          IntegerField, MultipleChoiceField)
+from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
+                          Form, IntegerField, MultipleChoiceField)
 from django.http import JsonResponse
 from django.shortcuts import render
 from django.utils.timezone import localtime, now
@@ -14,6 +14,12 @@ from .models import Message
 
 class MessageListAPI(View):
     def get(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+        
         class CourseListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -28,7 +34,11 @@ class MessageListAPI(View):
                 ("is_deleted_by_recipient", "is_deleted_by_recipient"),
             )
             column = MultipleChoiceField(choices=choices)
-
+            box_choices = (
+                ("inbox", "inbox"),
+                ("outbox", "outbox"),
+            )
+            box = ChoiceField(choices=box_choices)
         try:
             data = json.loads(request.body)
 
@@ -47,8 +57,13 @@ class MessageListAPI(View):
             if cleaned_data['limit'] is None:
                 cleaned_data['limit'] = 10
 
-            result = list(Message.objects.all()[
-                          cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+            if cleaned_data['box'] == 'inbox':
+                result = list(Message.objects.filter(recipient=request.user, is_deleted_by_recipient=False)[
+                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+
+            elif cleaned_data['box'] == 'outbox':
+                result = list(Message.objects.filter(sender=request.user, is_deleted_by_sender=False)[
+                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
 
             if 'send_date' in cleaned_data['column']:
                 for each in result:
@@ -66,9 +81,14 @@ class MessageListAPI(View):
             }, status=400)
 
     def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+        
         class MessageListAPIPostForm(Form):
             title = CharField(max_length=255)
-            sender = IntegerField()
             recipient = IntegerField()
             content = CharField()
 
@@ -86,15 +106,6 @@ class MessageListAPI(View):
             cleaned_data = form.clean()
 
             try:
-                cleaned_data['sender'] = User.objects.get(
-                    pk=cleaned_data['sender'])
-            except Exception as e:
-                return JsonResponse({
-                    'status': 400,
-                    'message': 'SenderNotFound',
-                }, status=400)
-
-            try:
                 cleaned_data['recipient'] = User.objects.get(
                     pk=cleaned_data['recipient'])
             except Exception as e:
@@ -104,7 +115,7 @@ class MessageListAPI(View):
                 }, status=400)
 
             message = Message(title=cleaned_data['title'], send_date=now(
-            ), sender=cleaned_data['sender'], recipient=cleaned_data['recipient'], content=cleaned_data['content'])
+            ), sender=request.user, recipient=cleaned_data['recipient'], content=cleaned_data['content'])
 
             message.save()
             return JsonResponse({
