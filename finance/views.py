@@ -643,6 +643,12 @@ class CouponCodeAPI(View):
 
 class CouponCodeCheckAPI(View):
     def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                    'status': 403,
+                    'message': 'Forbidden'
+            }, status=403)
+
         class CouponCodeCheckAPIPostForm(Form):
             code = CharField()
 
