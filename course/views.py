@@ -284,12 +284,12 @@ class CourseAPI(View):
 
         if not request.user.is_superuser and course.teacher != request.user:
             return JsonResponse({
-                    'status': 403,
-                    'message': 'Forbidden'
+                'status': 403,
+                'message': 'Forbidden'
             }, status=403)
 
         course.delete()
-        
+
         return JsonResponse({
             'status': 200,
             'message': 'Success',

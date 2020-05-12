@@ -217,6 +217,12 @@ class BillAPI(View):
 class RedeemRedemptionCodeAPI(View):
 
     def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class RedeemRedemptionCodeAPIPostForm(Form):
             user = IntegerField()
             code = CharField()
@@ -645,8 +651,8 @@ class CouponCodeCheckAPI(View):
     def post(self, request):
         if not request.user.is_authenticated:
             return JsonResponse({
-                    'status': 403,
-                    'message': 'Forbidden'
+                'status': 403,
+                'message': 'Forbidden'
             }, status=403)
 
         class CouponCodeCheckAPIPostForm(Form):
