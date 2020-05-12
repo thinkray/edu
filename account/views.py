@@ -138,6 +138,9 @@ class UserAPI(View):
         form = UserAPIGetForm(data)
         if form.is_valid():
             cleaned_data = form.clean()
+            if 'balance' in cleaned_data['column']:
+                if not request.user.is_superuser and request.user.id != user_id:
+                    cleaned_data['column'].remove('balance')
 
             try:
                 result = list(User.objects.filter(pk=user_id).values(
@@ -172,6 +175,12 @@ class UserAPI(View):
             }, status=400)
 
     def put(self, request, user_id):
+        if not request.user.is_superuser and request.user.id != user_id:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class UserAPIPutForm(Form):
             username = CharField()
             password = CharField(widget=PasswordInput)
@@ -233,6 +242,12 @@ class UserAPI(View):
             }, status=400)
 
     def patch(self, request, user_id):
+        if not request.user.is_superuser and request.user.id != user_id:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class UserAPIPatchForm(Form):
             username = CharField(required=False)
             password = CharField(widget=PasswordInput, required=False)
@@ -294,6 +309,12 @@ class UserAPI(View):
             }, status=400)
 
     def delete(self, request, user_id):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         try:
             user = User.objects.get(pk=user_id)
         except Exception as e:
