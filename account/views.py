@@ -23,6 +23,12 @@ from .models import User, UserManager
 
 class UserListAPI(View):
     def get(self, request):
+        if not request.user.is_superuser:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
         class UserListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
