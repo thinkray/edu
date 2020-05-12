@@ -86,7 +86,8 @@ class LogListAPI(View):
                     'message': 'UserNotFound',
                 }, status=400)
 
-            log = Log(user=cleaned_data['user'], date=now(), operation=cleaned_data['operation'])
+            log = Log(user=cleaned_data['user'], date=now(
+            ), operation=cleaned_data['operation'])
 
             log.save()
             return JsonResponse({
@@ -138,6 +139,13 @@ class LogAPI(View):
                     'message': 'Not Found',
                     'data': [],
                 }, status=404)
+
+            if not request.user.is_superuser and result[0]['user'] != request.user.id:
+                return JsonResponse({
+                    'status': 403,
+                    'message': 'Forbidden',
+                    'data': [],
+                }, status=403)
 
             return JsonResponse({
                 'status': 200,
