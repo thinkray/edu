@@ -12,6 +12,7 @@ In this version, we implemented following features:
 2. Registration
 3. Login
 4. Logout
+5. Almost all of the APIs (except image upload) with permission check
 
 In this version, we completed the design of following pages:
 
@@ -42,6 +43,12 @@ GNU General Public License for more details.
 You should have received a copy of the GNU General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+## Requirements
+
+1. Python 3.6+
+2. Django 3.0 See [How to install Django](https://docs.djangoproject.com/en/3.0/topics/install/) for details.
+3. mysqlclient See [notes for the MySQL backend](https://docs.djangoproject.com/en/3.0/ref/databases/#mysql-notes) for details.
+
 ## Install & Run
 
 1. Create a MySQL/MariaDB database and make sure you have a database user with full access of it.
@@ -56,3 +63,20 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
     ```
 
 5. Open your browser and go to the URL (e.g. http://127.0.0.1:8000/) which is in the command line output.
+
+## User & User Group
+
+Any user registered on the website is a student by default.
+
+To add a teacher role to a user, you may use following command in `python manage.py shell`
+
+    ```
+    # For the first time
+    from django.contrib.auth.models import Group
+    group = Group(name="Teacher")
+    group.save()
+
+    group = Group.objects.get(name="teacher")
+    user = User.objects.get(pk=1) # Replace 1 with the user's id
+    user.groups.add(group)
+    ```
