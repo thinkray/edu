@@ -90,7 +90,7 @@ class MessageListAPI(View):
 
         class MessageListAPIPostForm(Form):
             title = CharField(max_length=255)
-            recipient = IntegerField()
+            recipient = CharField()
             content = CharField()
 
         try:
@@ -108,7 +108,7 @@ class MessageListAPI(View):
 
             try:
                 cleaned_data['recipient'] = User.objects.get(
-                    pk=cleaned_data['recipient'])
+                    username=cleaned_data['recipient'])
             except Exception as e:
                 return JsonResponse({
                     'status': 400,
