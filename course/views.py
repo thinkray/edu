@@ -610,8 +610,10 @@ class CourseHomeView(View):
         context['site_name'] = settings.SITE_NAME
         if request.user.is_authenticated:
             context['is_authenticated'] = True
+            context['is_superuser'] = request.user.is_superuser
+            context['is_teacher'] = request.session.get('is_teacher')
             context['username'] = request.user.name
         else:
             context['is_authenticated'] = False
-        test = template.render(context, request)
+            context['is_superuser'] = False
         return HttpResponse(template.render(context, request))

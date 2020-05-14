@@ -380,6 +380,7 @@ class UserLoginAPI(View):
             if user is not None:
                 logout(request)
                 login(request, user)
+                request.session['is_teacher'] = request.user.groups.filter(name='teacher').exists()
                 return JsonResponse({
                     'status': 200,
                     'message': 'Success',
@@ -403,6 +404,7 @@ class UserLogoutAPI(View):
 
         try:
             logout(request)
+            request.session.flush()
 
         except:
             return JsonResponse({
