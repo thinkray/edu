@@ -130,6 +130,58 @@ class MessageListAPI(View):
             }, status=400)
 
 
+class MessageCountAPI(View):
+    def post(self, request):
+        if not request.user.is_authenticated:
+            return JsonResponse({
+                'status': 403,
+                'message': 'Forbidden'
+            }, status=403)
+
+        class MessageCountAPIPostForm(Form):
+            choices = (
+                ("unread", "unread"),
+                ("inbox", "inbox"),
+                ("outbox", "outbox"),
+            )
+            target = ChoiceField(choices=choices)
+
+        try:
+            data = json.loads(request.body)
+
+        except:
+            return JsonResponse({
+                'status': 400,
+                'message': 'JSONDecodeError'
+            }, status=400)
+
+        form = MessageCountAPIPostForm(data)
+        if form.is_valid():
+            cleaned_data = form.clean()
+
+            count = 0
+            if cleaned_data['target'] == 'unread':
+                count = Message.objects.filter(
+                    recipient=request.user, is_unread=True).count()
+
+            elif cleaned_data['target'] == 'inbox':
+                count = Message.objects.filter(recipient=request.user).count()
+
+            elif cleaned_data['target'] == 'outbox':
+                count = Message.objects.filter(sender=request.user).count()
+
+            return JsonResponse({
+                'status': 200,
+                'message': 'Success',
+                'count': count,
+            })
+        else:
+            return JsonResponse({
+                'status': 400,
+                'message': form.errors
+            }, status=400)
+
+
 class MessageAPI(View):
     def get(self, request, message_id):
         if not request.user.is_authenticated:

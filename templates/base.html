@@ -220,7 +220,44 @@
                     }
                 });
             });
-        }); 
+        });
+        {% if is_authenticated %}
+        var message_count_ref = "";
+        function update_unread() {
+            $(function () {
+                let list = {};
+                list["target"] = "unread";
+                let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=UTF-8",
+                    url: "{%url 'message_count_api'%}",
+                    data: JSON.stringify(list),
+                    beforeSend: function (xhr, settings) {
+                        if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                            xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                        }
+                    },
+                    success: function (result) {
+                        if (result.count > 0) {
+                            $("#unread_message_count").text(result.count);
+                            $("#unread_message_count").show();
+                        }
+                        else {
+                            $("#unread_message_count").hide();
+                        }
+                    },
+                    error: function (e) {
+                        $("#unread_message_count").hide();
+                    }
+                });
+            })
+        }
+        update_unread();
+        message_count_ref = setInterval(function () {
+            update_unread();
+        }, 30000);
+        {% endif %}
     </script>
     {% block script %}
     {% endblock script %}

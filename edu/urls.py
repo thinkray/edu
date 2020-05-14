@@ -22,6 +22,7 @@ urlpatterns = [
     path('', CourseHomeView.as_view(), name='home'),
     path('user/', include('account.urls')),
     path('course/', include('course.urls')),
+    path('message/', include('site_message.urls')),
     path('api/v1/account/', include('account.api_urls')),
     path('api/v1/booking/', include('booking.api_urls')),
     path('api/v1/course/', include('course.api_urls')),
