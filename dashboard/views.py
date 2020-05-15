@@ -1,4 +1,5 @@
 from django.conf import settings
+from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
@@ -16,6 +17,9 @@ class AdminCouponCodeListView(View):
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
+
+        if not request.user.is_superuser:
+            raise PermissionDenied()
 
         context = {}
         result = CouponCode.objects.all()
