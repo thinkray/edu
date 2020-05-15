@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+<!--remember to get rid of welcome to the one-on-one band-->
+{% block content %}
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-3 border-lg-right">
+                    <div class="list-group">
+                        <a href="{%url 'message_send_view' %}" class="list-group-item list-group-item-action bg-success text-white">Send a
+                            message</a>
+                        <a href="{%url 'message_view_box' box_name='inbox'%}"
+                            class="list-group-item list-group-item-action {% if box_name == 'inbox'%}active{% endif %}">Inbox</a>
+                        <a href="{%url 'message_view_box' box_name='outbox'%}"
+                            class="list-group-item list-group-item-action {% if box_name == 'outbox'%}active{% endif %}">Outbox</a>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+
+                    <div class="table-responsive">
+                        <table class="table">
+                            <tbody>
+                                {% if box_name == 'inbox'%}
+                                {% for each in page_obj %}
+                                <tr>
+                                    {% if each.is_unread %}
+                                    <td class="action"><i class="fas fa-envelope text-warning"></i></td>
+                                    {% else %}
+                                    <td class="action"><i class="fas fa-envelope-open-text"></i></td>
+                                    {% endif%}
+                                    <td class="name"><a href="#">{{ each.sender.name }}</a></td>
+                                    <td class="subject"><a class="subject_link"
+                                            href="{%url 'message_detail_view' message_id=each.id%}">{{ each.title }}</a>
+                                    </td>
+                                    <td class="time">{{ each.send_date }}</td>
+                                </tr>
+                                {% endfor %}
+                                {% else %}
+                                {% for each in page_obj %}
+                                <tr>
+                                    {% if each.is_unread %}
+                                    <td class="action"><i class="fas fa-envelope text-warning"></i></td>
+                                    {% else %}
+                                    <td class="action"><i class="fas fa-envelope-open-text"></i></td>
+                                    {% endif%}
+                                    <td class="name"><a href="#">{{ each.recipient.name }}</a></td>
+                                    <td class="subject"><a class="subject_link"
+                                            href="{%url 'message_detail_view' message_id=each.id%}">{{ each.title }}</a>
+                                    </td>
+                                    <td class="time">{{ each.send_date }}</td>
+                                </tr>
+                                {% endfor %}
+                                {% endif %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
+                                href="{%url 'message_view_page' box_name=box_name page=1%}">First</a></li>
+
+                        {% for each in page_bar %}
+                        <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
+                                href="{%url 'message_view_page' box_name=box_name page=each %}">{{ each }}</a></li>
+                        {% endfor %}
+
+                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
+                                href="{%url 'message_view_page' box_name=box_name page=page_obj.paginator.num_pages%}">Last</a>
+                        </li>
+                    </ul>
+                    <span>
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}.
+                    </span>
+                </div>
+            </div>
+
+
+        </div>
+    </div>
+</div>
+
+
+
+{% endblock content %}
+
+{% block script %}
+
+{% endblock script %}

@@ -1,0 +1,137 @@
+{% extends 'base.html' %}
+<!--remember to get rid of welcome to the one-on-one band-->
+{% block content %}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-3 border-lg-right">
+                    <div class="list-group">
+                        <a href="{%url 'message_send_view' %}"
+                            class="list-group-item list-group-item-action bg-success text-white">Send a
+                            message</a>
+                        <a href="{%url 'message_view_box' box_name='inbox'%}"
+                            class="list-group-item list-group-item-action">Inbox</a>
+                        <a href="{%url 'message_view_box' box_name='outbox'%}"
+                            class="list-group-item list-group-item-action">Outbox</a>
+                    </div>
+                </div>
+                <div class="padding border-lg-right"></div>
+                <div class="col-md-9">
+                    <div class="panel panel-default">
+                        <div class="panel-body message">
+                            <div id="message-form">
+                                <div class="form-group row">
+                                    <label for="recipient" class="col-sm-2 col-form-label text-bold">To</label>
+                                    <div class="col-sm-10">
+                                        <input id="recipient" type="text" class="form-control" id="to"
+                                            placeholder="Type in the recipient's username">
+                                    </div>
+                                </div>
+                                <div class="form-group row">
+                                    <label for="title" class="col-sm-2 col-form-label text-bold">Title</label>
+                                    <div class="col-sm-10">
+                                        <input id="title" type="text" class="form-control" id="to"
+                                            placeholder="Type in the title">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <textarea class="form-control" id="content" name="body" rows="12"
+                                        placeholder="Click here to write"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <button id="submit" class="btn btn-success">Send</button>
+                                    <button id="reset" class="btn btn-danger">Discard</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!--/.col-->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}
+
+{% block script %}
+<script>
+    $("#submit").click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["recipient"] = $("#recipient")[0].value;
+            list["title"] = $("#title")[0].value;
+            list["content"] = $("#content")[0].value;
+
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'message_list_api'%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=ajax_result]").remove();
+                    $("#message-form").append(
+                        '<div id="ajax_result" class="alert alert-success" role="alert">' +
+                        result["message"] +
+                        '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
+                    );
+                },
+                error: function (e) {
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $("#message-form").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#" + index)
+                                        .after(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            '</div>'
+                                        );
+                                }
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $("#message-form").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $("#message-form").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+    $("#reset").click(function () {
+        $("[id^=ajax_result]").remove();
+        $("#recipient")[0].value = '';
+        $("#title")[0].value = '';
+        $("#content")[0].value = '';
+    });
+</script>
+{% endblock script %}

@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+<!--remember to get rid of welcome to the one-on-one band-->
+{% block content %}
+
+
+<div class="col-lg-12">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-lg-3 border-lg-right">
+                    <div class="list-group">
+                        <a href="{%url 'message_send_view' %}" class="list-group-item list-group-item-action bg-success text-white">Send a
+                            message</a>
+                        <a href="{%url 'message_view_box' box_name='inbox'%}"
+                            class="list-group-item list-group-item-action {% if box_name == 'inbox'%}active{% endif %}">Inbox</a>
+                        <a href="{%url 'message_view_box' box_name='outbox'%}"
+                            class="list-group-item list-group-item-action {% if box_name == 'outbox'%}active{% endif %}">Outbox</a>
+                    </div>
+                </div>
+                <div class="col-lg-9">
+
+                    {% if status == 200 %}
+                    <div class="email-head">
+                        <div class="email-head-subject">
+                            <div class="title d-flex align-items-center justify-content-between">
+                                <div class="d-flex align-items-center font-weight-bold">
+                                    {% if is_unread %}
+                                    <i class="fas fa-envelope text-warning icon_fixer"></i>
+                                    {% else %}
+                                    <i class="fas fa-envelope-open-text icon_fixer"></i>
+                                    {% endif%}
+                                    <span>{{ title }}</span>
+                                </div>
+                                <div class="icons">
+                                    <a href="#" class="btn text-danger rounded-0" data-toggle="modal" title="Delete"
+                                        data-target="#delete" role="button"><i class="fa fa-trash"></i></a>
+
+                                    <div class="modal fade" id="delete">
+                                        <div class="modal-dialog modal-dialog-centered">
+                                            <div class="modal-content">
+                                                <!-- Modal Header -->
+                                                <div class="modal-header">
+                                                    <h4 class="modal-title">Warning</h4>
+                                                    <button type="button" class="close" data-dismiss="modal">
+                                                        &times;
+                                                    </button>
+                                                </div>
+                                                <!-- Modal body -->
+                                                <div class="modal-body">
+                                                    After deleting it, it will not come back again.
+                                                </div>
+                                                <!-- Modal footer -->
+                                                <div class="modal-footer">
+                                                    <button type="button" class="btn btn-primary"
+                                                        data-dismiss="modal">Back
+                                                    </button>
+                                                    <button id="delete_check" type="button" class="btn btn-danger"
+                                                        data-dismiss="modal">Delete
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="email-head-sender d-flex align-items-center justify-content-between flex-wrap">
+                            <div class="d-flex align-items-center">
+                                <!-- <div class="avatar">
+                                    <img src="https://bootdey.com/img/Content/avatar/avatar1.png" alt="Avatar"
+                                        class="rounded-circle user-avatar-md">
+                                </div> -->
+                                <div class="sender d-flex align-items-center">
+                                    From&nbsp;<a href="#">{{ sender.name }}</a>&nbsp;<span>to</span>&nbsp;<a
+                                        href="#">{{ recipient.name }}</a>
+                                </div>
+                            </div>
+                            <div class="date">{{ send_date }}</div>
+                        </div>
+                    </div>
+                    <hr />
+                    <div class="email-body">
+                        {{ content }}
+                    </div>
+                    {% else %}
+                    <div class="alert alert-danger" role="alert">
+                        {{ message }}
+                    </div>
+                    {% endif%}
+                </div>
+
+            </div>
+        </div>
+
+    </div>
+</div>
+</div>
+
+{% endblock content %}
+
+{% block script %}
+{% if status == 200 %}
+<script>
+    $('#delete_check').click(function () { 
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            $.ajax({
+                type: "DELETE",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'message_api' message_id=message_id%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("nav").after('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The message was successfully deleted. We are redirecting the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location = "{%url 'message_view_box' box_name=box_name%}";
+                },
+                error: function (e) {
+                    $("nav").after('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
+                }
+            });
+        });
+    })
+</script>
+{% endif %}
+{% endblock script %}

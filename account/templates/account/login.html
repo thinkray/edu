@@ -64,7 +64,7 @@
                     $("#login-form").append(
                         '<div id="ajax_result" class="alert alert-success" role="alert">' +
                         result["message"] +
-                        "</div>"
+                        '</div>'
                     );
                     if (typeof result["redirect_uri"] == "string") {
                         document.location = result["redirect_uri"];
@@ -85,7 +85,7 @@
                                         index +
                                         '" class="alert alert-danger" role="alert">' +
                                         result["message"][index][0] +
-                                        "</div>"
+                                        '</div>'
                                     );
                             }
                             break;
@@ -94,7 +94,7 @@
                             $("#login-form").append(
                                 '<div id="ajax_result" class="alert alert-danger" role="alert">' +
                                 result["message"] +
-                                "</div>"
+                                '</div>'
                             );
                             break;
                         default:

@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>{{ site_name }} | Home</title>
+    <title>{{ site_name }} | {{ page_name }}</title>
 
     <!-- Bootstrap -->
     <link href="/static/css/bootstrap.min.css" rel="stylesheet" />
@@ -58,7 +58,7 @@
         <nav class="navbar navbar-expand-lg navbar-light white scrolling-navbar bg-light">
             <div class="container">
                 <!-- Brand -->
-                <a class="navbar-brand waves-effect" href="/" target="_blank">
+                <a class="navbar-brand waves-effect" href="/">
                     <img src="/static/img/logo.svg" alt="Logo"></img>
                 </a>
 
@@ -87,8 +87,7 @@
                     <ul class="navbar-nav nav-flex-icons">
                         {% if is_authenticated %}
                         <li class="nav-item m-2">
-                            <a href="#" class="btn btn-light border border-light rounded waves-effect mr-2"
-                                target="_blank">
+                            <a href="{%url 'message_view_box' box_name='inbox'%}" class="btn btn-light border border-light rounded waves-effect mr-2">
                                 <i class="fas fa-envelope mr-1"></i>Message
                                 <span id="unread_message_count" class="badge badge-warning text-white rounded-0"
                                     style="display: none;">0</span>
@@ -113,13 +112,13 @@
                             <a id="logout" class="btn btn-light waves-effect" href="#">Logout</a>
                         </li>
                         {% else %}
-                            {% if hide_login is None%}
+                            {% if not hide_login%}
                             <li class="nav-item m-2">
                                 <a class="btn btn-outline-primary waves-effect"
                                     href="{%url 'user_login_view'%}?redirect_uri={{ request.path }}">Log in</a>
                             </li>
                             {% endif %}
-                            {% if hide_signup is None%}
+                            {% if not hide_signup%}
                             <li class="nav-item m-2">
                                 <a class="btn btn-primary text-white waves-effect"
                                     href="{%url 'user_signup_view'%}?redirect_uri={{ request.path }}">Sign
@@ -133,6 +132,7 @@
         </nav>
         <!-- Navbar -->
         {% csrf_token %}
+        {% if not hide_welcome%}
         <!-- Intro -->
         <div class="card blue-gradient rounded-0 border-0">
             <div class="card-body text-white rgba-black-light text-center" style="
@@ -154,6 +154,7 @@
             </div>
         </div>
         <!-- Intro -->
+        {% endif%}
     </header>
     <!-- Navigation -->
     <!--Main Navigation-->
