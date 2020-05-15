@@ -84,6 +84,9 @@
                         result["message"] +
                         '<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>'
                     );
+                    $("#recipient")[0].value = '';
+                    $("#title")[0].value = '';
+                    $("#content")[0].value = '';
                 },
                 error: function (e) {
                     let result = e.responseJSON;

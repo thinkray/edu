@@ -338,12 +338,12 @@ class MessageView(View):
         result = Message.objects.none()
         if box_name == 'inbox':
             result = Message.objects.filter(
-                recipient=request.user, is_deleted_by_recipient=False)
+                recipient=request.user, is_deleted_by_recipient=False).order_by('-id')
             context['page_name'] = 'Message Inbox'
 
         elif box_name == 'outbox':
             result = Message.objects.filter(
-                sender=request.user, is_deleted_by_sender=False)
+                sender=request.user, is_deleted_by_sender=False).order_by('-id')
             context['page_name'] = 'Message Outbox'
 
         paginator = Paginator(result, 10)  # Show 25 contacts per page.
