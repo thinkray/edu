@@ -346,7 +346,7 @@ class MessageView(View):
                 sender=request.user, is_deleted_by_sender=False).order_by('-id')
             context['page_name'] = 'Message Outbox'
 
-        paginator = Paginator(result, 10)  # Show 25 contacts per page.
+        paginator = Paginator(result, 10)  # Show 10 contacts per page.
         page_obj = paginator.get_page(page)
 
         template = loader.get_template('site_message/index.html')

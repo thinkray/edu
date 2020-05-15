@@ -1,0 +1,222 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<!--remember to get rid of welcome to the one-on-one band-->
+<!--记得去掉welcome-->
+<style>
+    body {
+        min-height: 100vh;
+        background-color: #4dc9ff;
+    }
+</style>
+
+
+<div class="container py-5">
+    <div class="text-center text-white">
+        <h1 class="display-4">Coupon Code List</h1>
+        <p class="lead mb-0"> Administrator page</p>
+    </div>
+    <div class="row py-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card rounded shadow border-0">
+                <div class="card-body p-4 bg-white rounded">
+                    <div class="row">
+                        <div class="form-row mx-auto">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="code" name="code" placeholder="Code">
+                            </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="discount" name="discount"
+                                    placeholder="Discount e.g. 0.1">
+                            </div>
+                            <div class="col-md-1">
+                                <a button id="create" class="btn btn-primary" href="#">Create</a>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                    </div>
+                    <br>
+
+                    <div class="table-responsive">
+                        <table class="table table-striped text-center">
+                            <colgroup>
+                                <col class="col-xs-1" />
+                                <col class="col-xs-2" />
+                                <col class="col-xs-3" />
+                                <col class="col-xs-2" />
+                            </colgroup>
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Coupon Code</th>
+                                    <th>Discount</th>
+                                    <th>Operation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for each in page_obj %}
+                                <tr>
+                                    <td>{{ each.id }}</td>
+                                    <td>{{ each.code }}</td>
+                                    <td>{% widthratio each.discount 1 100 %}%</td>
+
+                                    <td>
+                                        <a href="#" class="btn btn-danger btn-sm rounded-0 delete-item"
+                                            data-toggle="modal" title="Delete" data-target="#delete" role="button"
+                                            data-id="{{ each.id }}"><i class="fa fa-trash"></i></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="modal fade" id="delete">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <!-- Modal Header -->
+                                    <div class="modal-header">
+                                        <h4 class="modal-title">Warning</h4>
+                                        <button type="button" class="close" data-dismiss="modal">
+                                            &times;
+                                        </button>
+                                    </div>
+                                    <!-- Modal body -->
+                                    <div class="modal-body">
+                                        After deleting it, it will not come back again.
+                                    </div>
+                                    <input id="target_item" name="target_item" type="hidden">
+                                    <!-- Modal footer -->
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Back
+                                        </button>
+                                        <button id="delete_check" type="button" class="btn btn-danger"
+                                            data-dismiss="modal">Delete
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
+                                href="{%url 'admin_coupon_code_list_view_page' page=1%}">First</a></li>
+
+                        {% for each in page_bar %}
+                        <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
+                                href="{%url 'admin_coupon_code_list_view_page' page=each %}">{{ each }}</a></li>
+                        {% endfor %}
+
+                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
+                                href="{%url 'admin_coupon_code_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
+                        </li>
+                    </ul>
+                    <span>
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+
+{% block script %}
+<script>
+    $('.delete-item').click(function () {
+        console.log($(this).data('id'));
+        //var url = $(this).attr('data-url');
+        $("#target_item")[0].value = $(this).data('id');
+    });
+    $('#delete_check').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            let api_url = "{%url 'coupon_code_api' coupon_code_id='0'%}";
+            $.ajax({
+                type: "DELETE",
+                contentType: "application/json;charset=UTF-8",
+                url: api_url.substr(0, api_url.length - 1) + $("#target_item")[0].value,
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The coupon code was successfully deleted. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
+                },
+                error: function (e) {
+                    $(".table-responsive").before('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
+                }
+            });
+        });
+    });
+    $('#create').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["code"] = $("#code")[0].value;
+            list["discount"] = $("#discount")[0].value;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'coupon_code_list_api'%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=ajax_result]").remove();
+                    $(".table-responsive").before(
+                        '<div id="ajax_result" class="alert alert-success" role="alert">' +
+                        result["message"] +
+                        '</div>'
+                    );
+                    window.location.reload();
+                },
+                error: function (e) {
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            for (var index in result["message"]) {
+                                $("#" + index)
+                                    .parent()
+                                    .append(
+                                        '<div id="ajax_result_' +
+                                        index +
+                                        '" class="alert alert-danger" role="alert">' +
+                                        result["message"][index][0] +
+                                        '</div>'
+                                    );
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $(".table-responsive").before(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $(".table-responsive").before(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+</script>
+{% endblock script %}

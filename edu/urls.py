@@ -20,6 +20,7 @@ from course.views import CourseHomeView
 urlpatterns = [
     #path('admin/', admin.site.urls),
     path('', CourseHomeView.as_view(), name='home'),
+    path('dashboard/', include('dashboard.urls')),
     path('user/', include('account.urls')),
     path('course/', include('course.urls')),
     path('message/', include('site_message.urls')),

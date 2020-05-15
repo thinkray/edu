@@ -649,10 +649,15 @@ class CouponCodeListAPI(View):
                     'message': 'CodeAlreadyExisted'
                 }, status=409)
 
-            coupon_code = CouponCode(
-                code=cleaned_data['code'], discount=cleaned_data['discount'])
-
-            coupon_code.save()
+            try:
+                coupon_code = CouponCode(
+                    code=cleaned_data['code'], discount=cleaned_data['discount'])
+                coupon_code.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError: ' + str(e),
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
