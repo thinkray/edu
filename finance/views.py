@@ -523,7 +523,7 @@ class RedemptionCodeAPI(View):
 
             cleaned_data = form.clean()
 
-            if 'code' in data and cleaned_data['amount'] != '':
+            if 'code' in data and cleaned_data['code'] != '':
                 redemption_code.code = cleaned_data['code']
 
             if cleaned_data['amount'] is not None:
@@ -641,7 +641,7 @@ class CouponCodeListAPI(View):
             cleaned_data = form.clean()
 
             exist_coupon_code = list(
-                RedemptionCode.objects.filter(code=cleaned_data['code']))
+                CouponCode.objects.filter(code=cleaned_data['code']))
 
             if exist_coupon_code != []:
                 return JsonResponse({
@@ -649,15 +649,10 @@ class CouponCodeListAPI(View):
                     'message': 'CodeAlreadyExisted'
                 }, status=409)
 
-            try:
-                coupon_code = CouponCode(
+            coupon_code = CouponCode(
                     code=cleaned_data['code'], discount=cleaned_data['discount'])
-                coupon_code.save()
-            except Exception as e:
-                return JsonResponse({
-                    'status': 500,
-                    'message': 'DatabaseError: ' + str(e),
-                }, status=500)
+
+            coupon_code.save()
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'

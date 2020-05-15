@@ -13,4 +13,6 @@ urlpatterns = [
     #path('<int:question_id>/vote/', views.vote, name='vote'),
     path('admin/code/coupon/', views.AdminCouponCodeListView.as_view(), name='admin_coupon_code_list_view'),
     path('admin/code/coupon/<int:page>', views.AdminCouponCodeListView.as_view(), name='admin_coupon_code_list_view_page'),
+    path('admin/code/redemption/', views.AdminRedemptionCodeListView.as_view(), name='admin_redemption_code_list_view'),
+    path('admin/code/redemption/<int:page>', views.AdminRedemptionCodeListView.as_view(), name='admin_redemption_code_list_view_page'),
 ]

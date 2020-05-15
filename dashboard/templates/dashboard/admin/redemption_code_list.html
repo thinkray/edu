@@ -12,7 +12,7 @@
 
 <div class="container py-5">
     <div class="text-center text-white">
-        <h1 class="display-4">Coupon Code List</h1>
+        <h1 class="display-4">Redemption Code List</h1>
         <p class="lead mb-0"> Administrator page</p>
     </div>
     <div class="row py-5">
@@ -26,8 +26,8 @@
                                 <input type="text" class="form-control" id="code" name="code" placeholder="Code">
                             </div>
                             <div class="col-md-4">
-                                <input type="text" class="form-control" id="discount" name="discount"
-                                    placeholder="Discount e.g. 0.66">
+                                <input type="text" class="form-control" id="amount" name="amount"
+                                    placeholder="Amount" min="0">
                             </div>
                             <div class="col-md-1">
                                 <a button id="create" class="btn btn-primary" href="#">Create</a>
@@ -42,8 +42,9 @@
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Coupon Code</th>
-                                    <th>Discount</th>
+                                    <th>Redemption Code</th>
+                                    <th>Amount</th>
+                                    <th>Status</th>
                                     <th>Operation</th>
                                 </tr>
                             </thead>
@@ -52,9 +53,14 @@
                                 <tr>
                                     <td>{{ each.id }}</td>
                                     <td>{{ each.code }}</td>
-                                    <td>{% widthratio each.discount 1 100 %}% OFF</td>
+                                    <td>{{ each.amount }}</td>
+                                    <td>{% if each.is_available %}Available{% else %}Redeemed{% endif %}</td>
 
                                     <td>
+                                        <button class="btn btn-success btn-sm rounded-0 edit-item" type="button"
+                                            data-toggle="modal" data-target="#edit_panel" title="Edit" data-id="{{ each.id }}" data-code="{{ each.code }}" data-amount="{{ each.amount }}" data-is-available="{{ each.is_available }}"><i
+                                                class="fa fa-edit"></i></button>
+
                                         <a href="#" class="btn btn-danger btn-sm rounded-0 delete-item"
                                             data-toggle="modal" title="Delete" data-target="#delete" role="button"
                                             data-id="{{ each.id }}"><i class="fa fa-trash"></i></a>
@@ -89,18 +95,54 @@
                                 </div>
                             </div>
                         </div>
+                        <div class="modal fade" id="edit_panel" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="edit_panel_label">Edit</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form>
+                                            <div class="form-group">
+                                                <label for="edit_panel_code" class="col-form-label">ID:</label>
+                                                <input type="text" class="form-control" id="edit_panel_id" disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_panel_code" class="col-form-label">Code:</label>
+                                                <input type="text" class="form-control" id="edit_panel_code">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_panel_amount" class="col-form-label">Amount:</label>
+                                                <input type="text" class="form-control" id="edit_panel_amount">
+                                            </div>
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="edit_panel_is_available">
+                                                <label class="custom-control-label" for="edit_panel_is_available">Available</label>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                                        <button id="edit_panel_save" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <ul class="pagination justify-content-center">
                         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
-                                href="{%url 'admin_coupon_code_list_view_page' page=1%}">First</a></li>
+                                href="{%url 'admin_redemption_code_list_view_page' page=1%}">First</a></li>
 
                         {% for each in page_bar %}
                         <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
-                                href="{%url 'admin_coupon_code_list_view_page' page=each %}">{{ each }}</a></li>
+                                href="{%url 'admin_redemption_code_list_view_page' page=each %}">{{ each }}</a></li>
                         {% endfor %}
 
                         <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
-                                href="{%url 'admin_coupon_code_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
+                                href="{%url 'admin_redemption_code_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
                         </li>
                     </ul>
                     <span>
@@ -122,11 +164,17 @@
     $('.delete-item').click(function () {
         $("#target_item")[0].value = $(this).data('id');
     });
+    $('.edit-item').click(function () {
+        $("#edit_panel_id")[0].value = $(this).data('id');
+        $("#edit_panel_code")[0].value = $(this).data('code');
+        $("#edit_panel_amount")[0].value = $(this).data('amount');
+        $("#edit_panel_is_available").prop('checked',$(this).data('is-available') == 'True');
+    });
     $('#delete_check').click(function () {
         $(function () {
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            let api_url = "{%url 'coupon_code_api' coupon_code_id='0'%}";
+            let api_url = "{%url 'redemption_code_api' redemption_code_id='0'%}";
             $.ajax({
                 type: "DELETE",
                 contentType: "application/json;charset=UTF-8",
@@ -138,7 +186,7 @@
                     }
                 },
                 success: function (result) {
-                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The coupon code was successfully deleted. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The redemptio code was successfully deleted. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                     window.location.reload();
                 },
                 error: function (e) {
@@ -153,11 +201,11 @@
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
             list["code"] = $("#code")[0].value;
-            list["discount"] = $("#discount")[0].value;
+            list["amount"] = $("#amount")[0].value;
             $.ajax({
                 type: "POST",
                 contentType: "application/json;charset=UTF-8",
-                url: "{%url 'coupon_code_list_api'%}",
+                url: "{%url 'redemption_code_list_api'%}",
                 data: JSON.stringify(list),
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -198,6 +246,14 @@
                                 '</div>'
                             );
                             break;
+                        case 409:
+                            $("[id^=ajax_result]").remove();
+                            $(".table-responsive").before(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
                         default:
                             $("[id^=ajax_result]").remove();
                             $(".table-responsive").before(
@@ -205,6 +261,35 @@
                             );
                             break;
                     }
+                },
+            });
+        });
+    });
+    $('#edit_panel_save').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            let api_url = "{%url 'redemption_code_api' redemption_code_id='0'%}";
+            list["code"] = $("#edit_panel_code")[0].value;
+            list["amount"] = $("#edit_panel_amount")[0].value;
+            list["is_available"] = $("#edit_panel_is_available").is(':checked');
+            $.ajax({
+                type: "PATCH",
+                contentType: "application/json;charset=UTF-8",
+                url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The redemption code was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
+                },
+                error: function (e) {
+                    $(".table-responsive").before('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
                 },
             });
         });
