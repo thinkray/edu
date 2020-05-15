@@ -127,8 +127,6 @@
 {% block script %}
 <script>
     $('.delete-item').click(function () {
-        console.log($(this).data('id'));
-        //var url = $(this).attr('data-url');
         $("#target_item")[0].value = $(this).data('id');
     });
     $('#delete_check').click(function () {
