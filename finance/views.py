@@ -650,7 +650,7 @@ class CouponCodeListAPI(View):
                 }, status=409)
 
             coupon_code = CouponCode(
-                    code=cleaned_data['code'], discount=cleaned_data['discount'])
+                code=cleaned_data['code'], discount=cleaned_data['discount'])
 
             coupon_code.save()
             return JsonResponse({

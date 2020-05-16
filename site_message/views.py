@@ -350,7 +350,7 @@ class MessageView(View):
         page_obj = paginator.get_page(page)
 
         template = loader.get_template('site_message/index.html')
-        
+
         context['site_name'] = settings.SITE_NAME
         context['is_authenticated'] = True
         context['is_superuser'] = request.user.is_superuser
@@ -451,7 +451,7 @@ class MessageSendView(View):
         context['username'] = request.user.name
         context['page_name'] = 'Send a Message'
         context['hide_welcome'] = True
-        
+
         template = loader.get_template('site_message/send.html')
 
         return HttpResponse(template.render(context, request))

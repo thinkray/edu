@@ -20,11 +20,11 @@
             <div class="card rounded shadow border-0">
                 <div class="card-body p-4 bg-white rounded">
                     <div class="row float-right m-4">
-                        <a button type="submit" class="btn btn-primary" title="add user" href="#"><i
-                            class="fas fa-user-plus"></i></a>
+                        <button class="btn btn-primary create-item" type="button" data-toggle="modal"
+                            data-target="#create_panel" title="Create a user"><i class="fas fa-user-plus"></i></button>
                     </div>
                     <br>
-                
+
                     <div class="table-responsive">
                         <table class="table table-striped text-center">
                             <thead>
@@ -44,20 +44,22 @@
                                     <td>{{ each.username }}</td>
                                     <td>{{ each.name }}</td>
                                     <td>{% if each.is_superuser %}
-                                            Admin
+                                        Admin
                                         {% else %}
-                                            {% if each.is_teacher %}
-                                                Teacher
-                                            {% else %}
-                                                Student
-                                            {% endif %}
+                                        {% if each.is_teacher %}
+                                        Teacher
+                                        {% else %}
+                                        Student
+                                        {% endif %}
                                         {% endif %}
                                     </td>
                                     <td>{{ each.last_login }}</td>
                                     <td>
                                         <button class="btn btn-success btn-sm rounded-0 edit-item" type="button"
-                                            data-toggle="modal" data-target="#edit_panel" title="Edit" data-id="{{ each.id }}" data-username="{{ each.username }}" data-name="{{ each.name }}" data-is-superuser="{{ each.is_superuser }}" data-is-teacher="{{ each.is_teacher }}"><i
-                                                class="fa fa-edit"></i></button>
+                                            data-toggle="modal" data-target="#edit_panel" title="Edit"
+                                            data-id="{{ each.id }}" data-username="{{ each.username }}"
+                                            data-name="{{ each.name }}" data-is-superuser="{{ each.is_superuser }}"
+                                            data-is-teacher="{{ each.is_teacher }}"><i class="fa fa-edit"></i></button>
 
                                         <a href="#" class="btn btn-danger btn-sm rounded-0 delete-item"
                                             data-toggle="modal" title="Delete" data-target="#delete" role="button"
@@ -109,7 +111,8 @@
                                                 <input type="text" class="form-control" id="edit_panel_id" disabled>
                                             </div>
                                             <div class="form-group">
-                                                <label for="edit_panel_username" class="col-form-label">Username:</label>
+                                                <label for="edit_panel_username"
+                                                    class="col-form-label">Username:</label>
                                                 <input type="text" class="form-control" id="edit_panel_username">
                                             </div>
                                             <div class="form-group">
@@ -125,8 +128,10 @@
                                                 </select>
                                             </div>
                                             <div class="custom-control custom-switch">
-                                                <input type="checkbox" class="custom-control-input" id="edit_panel_change_password">
-                                                <label class="custom-control-label" for="edit_panel_change_password">Change password</label>
+                                                <input type="checkbox" class="custom-control-input"
+                                                    id="edit_panel_change_password">
+                                                <label class="custom-control-label"
+                                                    for="edit_panel_change_password">Change password</label>
                                             </div>
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
@@ -134,7 +139,8 @@
                                                         <i class="fa fa-lock icon_fixer"></i>
                                                     </span>
                                                 </div>
-                                                <input id="edit_panel_password" name="password" class="form-control" placeholder="Password" type="password" disabled/>
+                                                <input id="edit_panel_password" name="password" class="form-control"
+                                                    placeholder="Password" type="password" disabled />
                                             </div>
                                             <div class="form-group input-group">
                                                 <div class="input-group-prepend">
@@ -142,19 +148,84 @@
                                                         <i class="fas fa-key icon_fixer"></i>
                                                     </span>
                                                 </div>
-                                                <input id="edit_panel_password2" name="password2" class="form-control" placeholder="Repeat password"
-                                                    type="password" disabled/>
+                                                <input id="edit_panel_password2" name="password2" class="form-control"
+                                                    placeholder="Repeat password" type="password" disabled />
                                             </div>
                                             <div class="form-group">
                                                 <label for="edit_panel_profile" class="col-form-label">Profile:</label>
-                                                <textarea class="form-control" id="edit_panel_profile" name="body" rows="6"
-                                                    placeholder="Click here to write"></textarea>
+                                                <textarea class="form-control" id="edit_panel_profile" name="body"
+                                                    rows="6" placeholder="Click here to write"></textarea>
                                             </div>
                                         </form>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                                        <button id="edit_panel_save" type="button" class="btn btn-primary" data-dismiss="modal">Save</button>
+                                        <button type="button" class="btn btn-secondary"
+                                            data-dismiss="modal">Close</button>
+                                        <button id="edit_panel_save" type="button" class="btn btn-primary"
+                                            data-dismiss="modal">Save</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal fade" id="create_panel" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="create_panel_label">Create a User</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body" id="create_panel_modal_body">
+                                        <form>
+                                            <div class="form-group">
+                                                <label for="create_panel_username"
+                                                    class="col-form-label">Username:</label>
+                                                <input type="text" class="form-control" id="create_panel_username">
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="create_panel_name" class="col-form-label">Name:</label>
+                                                <input type="text" class="form-control" id="create_panel_name">
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="create_panel_role">Role:</label>
+                                                <select class="custom-select" id="create_panel_role">
+                                                    <option value="admin">Admin</option>
+                                                    <option value="teacher">Teacher</option>
+                                                    <option value="student">Student</option>
+                                                </select>
+                                            </div>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fa fa-lock icon_fixer"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="create_panel_password" name="password" class="form-control"
+                                                    placeholder="Password" type="password" />
+                                            </div>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-key icon_fixer"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="create_panel_password2" name="password2" class="form-control"
+                                                    placeholder="Repeat password" type="password" />
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="create_panel_profile"
+                                                    class="col-form-label">Profile:</label>
+                                                <textarea class="form-control" id="create_panel_profile" name="body"
+                                                    rows="6" placeholder="Click here to write"></textarea>
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary"
+                                            data-dismiss="modal">Close</button>
+                                        <button id="create_panel_save" type="button"
+                                            class="btn btn-primary">Save</button>
                                     </div>
                                 </div>
                             </div>
@@ -212,7 +283,7 @@
             let list = [];
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
             let api_url = "{%url 'user_api' user_id='0'%}";
-            list.push({name: 'column', value: 'profile'});
+            list.push({ name: 'column', value: 'profile' });
             $.ajax({
                 type: "GET",
                 contentType: "application/json;charset=UTF-8",
@@ -231,7 +302,7 @@
             });
         });
     });
-    $('#edit_panel_change_password').change(function() {
+    $('#edit_panel_change_password').change(function () {
         if (this.checked) {
             $('#edit_panel_password').prop('disabled', false);
             $('#edit_panel_password2').prop('disabled', false);
@@ -240,11 +311,69 @@
             $('#edit_panel_password2').prop('disabled', true);
         }
     });
+    $("#edit_panel_password").blur(function () {
+        if ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value) {
+            $("#ajax_result_password2").remove();
+        } else {
+            if (
+                $("#edit_panel_password2")[0].value.length > 0 &&
+                !$("#ajax_result_password2").length
+            ) {
+                $("#edit_panel_password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
+            }
+        }
+    });
+    $("#edit_panel_password2").blur(function () {
+        if ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value) {
+            $("#ajax_result_password2").remove();
+        } else {
+            if (!$("#ajax_result_password2").length) {
+                $("#edit_panel_password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
+            }
+        }
+    });
+    $("#create_panel_password").blur(function () {
+        if ($("#create_panel_password")[0].value == $("#create_panel_password2")[0].value) {
+            $("#ajax_result_password2").remove();
+        } else {
+            if (
+                $("#create_panel_password2")[0].value.length > 0 &&
+                !$("#ajax_result_password2").length
+            ) {
+                $("#create_panel_password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
+            }
+        }
+    });
+    $("#create_panel_password2").blur(function () {
+        if ($("#create_panel_password")[0].value == $("#create_panel_password2")[0].value) {
+            $("#ajax_result_password2").remove();
+        } else {
+            if (!$("#ajax_result_password2").length) {
+                $("#create_panel_password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
+            }
+        }
+    });
     $('#delete_check').click(function () {
         $(function () {
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            let api_url = "{%url 'redemption_code_api' redemption_code_id='0'%}";
+            let api_url = "{%url 'user_api' user_id='0'%}";
             $.ajax({
                 type: "DELETE",
                 contentType: "application/json;charset=UTF-8",
@@ -343,7 +472,7 @@
             list["username"] = $("#edit_panel_username")[0].value;
             list["name"] = $("#edit_panel_name")[0].value;
             list["profile"] = $("#edit_panel_profile")[0].value;
-            list["role"] =$("#edit_panel_role")[0].value
+            list["role"] = $("#edit_panel_role")[0].value
             if (($("#edit_panel_change_password").is(':checked')) && ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value)) {
                 list["password"] = $("#edit_panel_password")[0].value;
             }
@@ -364,6 +493,76 @@
                 error: function (e) {
                     $(".table-responsive").before('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                     window.location.reload();
+                },
+            });
+        });
+    });
+    $('#create_panel_save').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["username"] = $("#create_panel_username")[0].value;
+            list["name"] = $("#create_panel_name")[0].value;
+            list["profile"] = $("#create_panel_profile")[0].value;
+            list["role"] = $("#create_panel_role")[0].value
+            if ($("#create_panel_password")[0].value == $("#create_panel_password2")[0].value) {
+                list["password"] = $("#create_panel_password")[0].value;
+            }
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'user_list_api'%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The user was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $('#create_panel').modal('hide');
+                    window.location.reload();
+                },
+                error: function (e) {
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            for (var index in result["message"]) {
+                                $("#create_panel_" + index)
+                                    .parent()
+                                    .after(
+                                        '<div id="ajax_result_' +
+                                        index +
+                                        '" class="alert alert-danger" role="alert">' +
+                                        result["message"][index][0] +
+                                        "</div>"
+                                    );
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $(".create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                "</div>"
+                            );
+                            break;
+                        case 409:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                "</div>"
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $(".create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong. Try again.</div>'
+                            );
+                            break;
+                    }
                 },
             });
         });

@@ -6,8 +6,7 @@ from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
 from django.db import models
 from django.forms import (BooleanField, CharField, DecimalField, Form,
-                          IntegerField, ModelForm, MultipleChoiceField,
-                          PasswordInput)
+                          IntegerField, MultipleChoiceField, PasswordInput)
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template import loader
@@ -17,6 +16,7 @@ from django.utils.http import url_has_allowed_host_and_scheme
 from django.utils.timezone import localtime
 from django.views import View
 
+from account.models import User
 from storage.models import BlobStorage
 
 from .models import User, UserManager
@@ -72,10 +72,14 @@ class UserListAPI(View):
             }, status=400)
 
     def post(self, request):
-        class UserListAPIPostForm(ModelForm):
-            class Meta:
-                model = User
-                fields = ['username', 'password', 'name']
+        class UserListAPIPostForm(Form):
+            username = CharField()
+            password = CharField(widget=PasswordInput)
+            name = CharField()
+            role = CharField(required=False)
+            balance = DecimalField(
+                max_digits=15, decimal_places=2, required=False)
+            profile = CharField(required=False)
 
         try:
             data = json.loads(request.body)
@@ -90,9 +94,37 @@ class UserListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
+            if User.objects.filter(username=cleaned_data['username']).exists():
+                return JsonResponse({
+                    'status': 409,
+                    'message': 'UserAlreadyExisted'
+                }, status=409)
+
             user_manager = UserManager()
-            user_manager.create_user(
+            user = user_manager.create_user(
                 cleaned_data['username'], cleaned_data['password'], cleaned_data['name'])
+
+            if request.user.is_superuser and (cleaned_data['role'] == 'admin' or cleaned_data['role'] == 'teacher' or cleaned_data['role'] == 'student'):
+                teacher_group = Group.objects.get(name='teacher')
+                if cleaned_data['role'] == 'admin':
+                    user.is_superuser = True
+                    user.groups.add(teacher_group)
+                else:
+                    user.is_superuser = False
+
+                if cleaned_data['role'] == 'teacher':
+                    user.groups.add(teacher_group)
+                else:
+                    user.groups.remove(teacher_group)
+
+            if request.user.is_superuser and cleaned_data['balance'] is not None:
+                user.balance = cleaned_data['balance']
+
+            if cleaned_data['profile'] != '':
+                user.profile = cleaned_data['profile']
+
+            user.save()
+
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
@@ -167,7 +199,7 @@ class UserAPI(View):
         class UserAPIPutForm(Form):
             username = CharField()
             password = CharField(widget=PasswordInput)
-            is_superuser = BooleanField()
+            role = CharField()
             name = CharField()
             balance = DecimalField(
                 max_digits=15, decimal_places=2)
@@ -195,19 +227,30 @@ class UserAPI(View):
             cleaned_data = form.clean()
             user_manager = UserManager()
 
-            if cleaned_data['username'] != '':
-                user.username = cleaned_data['username']
+            if cleaned_data['username'] != '' and user.username != cleaned_data['username']:
+                if not User.objects.filter(username=cleaned_data['username']).exists():
+                    user.username == cleaned_data['username']
 
             if cleaned_data['password'] != '':
                 user.set_password(cleaned_data['password'])
 
-            if 'is_superuser' in data and cleaned_data['is_superuser'] != '':
-                user.is_superuser = cleaned_data['is_superuser']
-
             if cleaned_data['name'] != '':
                 user.name = cleaned_data['name']
 
-            if cleaned_data['balance'] is not None:
+            if request.user.is_superuser and (cleaned_data['role'] == 'admin' or cleaned_data['role'] == 'teacher' or cleaned_data['role'] == 'student'):
+                teacher_group = Group.objects.get(name='teacher')
+                if cleaned_data['role'] == 'admin':
+                    user.is_superuser = True
+                    user.groups.add(teacher_group)
+                else:
+                    user.is_superuser = False
+
+                if cleaned_data['role'] == 'teacher':
+                    user.groups.add(teacher_group)
+                else:
+                    user.groups.remove(teacher_group)
+
+            if request.user.is_superuser and cleaned_data['balance'] is not None:
                 user.balance = cleaned_data['balance']
 
             if cleaned_data['profile'] != '':
@@ -234,7 +277,6 @@ class UserAPI(View):
         class UserAPIPatchForm(Form):
             username = CharField(required=False)
             password = CharField(widget=PasswordInput, required=False)
-            is_superuser = BooleanField(required=False)
             name = CharField(required=False)
             role = CharField(required=False)
             balance = DecimalField(
@@ -263,14 +305,12 @@ class UserAPI(View):
             cleaned_data = form.clean()
             user_manager = UserManager()
 
-            if cleaned_data['username'] != '':
-                user.username = cleaned_data['username']
+            if cleaned_data['username'] != '' and user.username != cleaned_data['username']:
+                if not User.objects.filter(username=cleaned_data['username']).exists():
+                    user.username == cleaned_data['username']
 
             if cleaned_data['password'] != '':
                 user.set_password(cleaned_data['password'])
-
-            if 'is_superuser' in data and cleaned_data['is_superuser'] != '':
-                user.is_superuser = cleaned_data['is_superuser']
 
             if cleaned_data['name'] != '':
                 user.name = cleaned_data['name']
@@ -282,13 +322,13 @@ class UserAPI(View):
                     user.groups.add(teacher_group)
                 else:
                     user.is_superuser = False
-                
+
                 if cleaned_data['role'] == 'teacher':
                     user.groups.add(teacher_group)
                 else:
                     user.groups.remove(teacher_group)
 
-            if cleaned_data['balance'] is not None:
+            if request.user.is_superuser and cleaned_data['balance'] is not None:
                 user.balance = cleaned_data['balance']
 
             if cleaned_data['profile'] != '':
@@ -377,7 +417,8 @@ class UserLoginAPI(View):
             if user is not None:
                 logout(request)
                 login(request, user)
-                request.session['is_teacher'] = request.user.groups.filter(name='teacher').exists()
+                request.session['is_teacher'] = request.user.groups.filter(
+                    name='teacher').exists()
                 return JsonResponse({
                     'status': 200,
                     'message': 'Success',

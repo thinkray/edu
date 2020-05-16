@@ -166,6 +166,14 @@
                                     "</div>"
                                 );
                                 break;
+                            case 409:
+                                $("[id^=ajax_result]").remove();
+                                $("#signup-form").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                    result["message"] +
+                                    "</div>"
+                                );
+                                break;
                             default:
                                 $("[id^=ajax_result]").remove();
                                 $("#signup-form").append(
