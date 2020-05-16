@@ -355,7 +355,8 @@ class MessageView(View):
         context['is_authenticated'] = True
         context['is_superuser'] = request.user.is_superuser
         context['is_teacher'] = request.session.get('is_teacher')
-        context['username'] = request.user.name
+        context['name'] = request.user.name
+        context['username'] = request.user.username
         context['box_name'] = box_name
         context['hide_welcome'] = True
         context['page_obj'] = page_obj
@@ -400,7 +401,8 @@ class MessageDetailView(View):
         context['is_authenticated'] = True
         context['is_superuser'] = request.user.is_superuser
         context['is_teacher'] = request.session.get('is_teacher')
-        context['username'] = request.user.name
+        context['name'] = request.user.name
+        context['username'] = request.user.username
         context['hide_welcome'] = True
 
         if 'status' in result:
@@ -448,7 +450,8 @@ class MessageSendView(View):
         context['is_authenticated'] = True
         context['is_superuser'] = request.user.is_superuser
         context['is_teacher'] = request.session.get('is_teacher')
-        context['username'] = request.user.name
+        context['name'] = request.user.name
+        context['username'] = request.user.username
         context['page_name'] = 'Send a Message'
         context['hide_welcome'] = True
 

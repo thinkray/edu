@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+<!--remember to get rid of welcome to the one-on-one band-->
+{% block content %}
+<br><br>
+<div class="container">
+    {% if is_teacher or is_superuser %}
+    <!--Section: Cards-->
+    <ul class="nav justify-content-end">
+        <li class="nav-item">
+            <button class="btn btn-sm btn-primary rounded-0 edit-item" type="button" data-toggle="modal"
+                data-target="#create_panel" title="Create New Class"><i class="fas fa-chalkboard-teacher"></i>
+                <i class="fas fa-plus"></i></button>
+        </li>
+    </ul>
+    <div class="modal fade" id="create_panel" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="create_panel_label">Create a New Course</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="create_panel_modal_body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="create_panel_name" class="col-form-label">Course Name:</label>
+                                    <input type="text" class="form-control" id="create_panel_name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="create_panel_teacher" class="col-form-label">Teacher:</label>
+                                    <input type="text" class="form-control" id="create_panel_teacher"
+                                        value="{{ username }}" {% if not is_superuser %}disabled{% endif %}>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="create_panel_start_date" class="col-form-label">Start Date:</label>
+                                    <input type="date" class="form-control" id="create_panel_start_date">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="create_panel_end_date" class="col-form-label">End Date:</label>
+                                    <input type="date" class="form-control" id="create_panel_end_date">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="create_panel_price" class="col-form-label">Price:</label>
+                                    <input type="text" class="form-control" id="create_panel_price">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="create_panel_quota" class="col-form-label">Session Quota:</label>
+                                    <input type="text" class="form-control" id="create_panel_quota">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="create_panel_sold" class="col-form-label">Sold:</label>
+                                    <input type="text" class="form-control" id="create_panel_sold" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="create_panel_info" class="col-form-label">Info:</label>
+                                    <textarea type="text" class="form-control" id="create_panel_info"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Back
+                    </button>
+                    <button id="create_panel_save" type="button" class="btn btn-primary">Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br><br>
+    {% endif %}
+    <section class="text-center">
+        <!--Grid row-->
+        <div class="row row-cols-3 mb-4 wow fadeIn">
+            {% for each in page_obj %}
+            <!--Grid column-->
+            <div class="col mb-4">
+                <!--Card-->
+                <div class="card">
+                    <!--Card image-->
+                    <div class="view overlay">
+                        <img src="https://mdbootstrap.com/wp-content/uploads/2018/01/push-fb.jpg" class="card-img-top"
+                            alt="" />
+                        <a href="https://mdbootstrap.com/education/tech-marketing/web-push-introduction/"
+                            target="_blank">
+                            <div class="mask rgba-white-slight"></div>
+                        </a>
+                    </div>
+
+                    <!--Card content-->
+                    <div class="card-body">
+                        <!--Title-->
+                        <h4 class="card-title">{{ each.name }}</h4>
+                        <!--Text-->
+                        <p class="card-text">
+                        <p class="font-weight-bold">{{ each.teacher.name }}</p>
+                        <p class="font-weight-normal">{{ each.info|truncatechars:255 }}</p>
+                        <p class="font-weight-light">From {{ each.start_date }}</p>
+                        <p class="font-weight-light">To {{ each.end_date }}</p>
+                        <p class="font-italic">${{ each.price }} for {{ each.quota }} session{{ each.quota|pluralize }}
+                        </p>
+                        <p class="font-italic">Already sold {{ each.sold }}</p>
+                        </p>
+                        <a href="{{ each.id }}" target="_blank" class="btn btn-primary btn-md">Start tutorial
+                            <i class="fas fa-play ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                <!--/.Card-->
+            </div>
+            <!--Grid column-->
+            {% endfor %}
+        </div>
+        <!--Grid row-->
+
+        <!--Pagination-->
+        <ul class="pagination justify-content-center">
+            <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
+                    href="{%url 'course_list_view_page' page=1%}">First</a>
+            </li>
+
+            {% for each in page_bar %}
+            <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
+                    href="{%url 'course_list_view_page' page=each %}">{{each}}</a>
+            </li>
+            {% endfor %}
+
+            <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
+                    href="{%url 'course_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
+            </li>
+        </ul>
+        <span class="font-weight-light">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
+        <!--Pagination-->
+    </section>
+    <!--Section: Cards-->
+
+</div>
+
+
+{% endblock content %}
+
+{% block script %}
+{% if is_teacher or is_superuser %}
+<script>
+    $('#create_panel_save').click(function () {
+        $(function () {
+            $('#create_panel_save').prop('disabled', true);
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["name"] = $("#create_panel_name")[0].value;
+            list["teacher"] = $("#create_panel_teacher")[0].value;
+            list["start_date"] = $("#create_panel_start_date")[0].value;
+            list["end_date"] = $("#create_panel_end_date")[0].value;
+            list["price"] = $("#create_panel_price")[0].value;
+            list["quota"] = $("#create_panel_quota")[0].value;
+            list["sold"] = $("#create_panel_sold")[0].value;
+            list["info"] = $("#create_panel_info")[0].value;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'course_list_api'%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=ajax_result]").remove();
+                    $("#create_panel_modal_body").append(
+                        '<div id="ajax_result" class="alert alert-success" role="alert">' +
+                        result["message"] +
+                        '</div>'
+                    );
+                    $('#create_panel').modal('hide');
+                    $("#create_panel_name")[0].value = '';
+                    $("#create_panel_teacher")[0].value = '';
+                    $("#create_panel_start_date")[0].value = '';
+                    $("#create_panel_end_date")[0].value = '';
+                    $("#create_panel_price")[0].value = '';
+                    $("#create_panel_quota")[0].value = '';
+                    $("#create_panel_sold")[0].value = '';
+                    $("#create_panel_info")[0].value = '';
+                    $('#create_panel_save').prop('disabled', false);
+                    window.location.reload();
+                },
+                error: function (e) {
+                    $('#create_panel_save').prop('disabled', false);
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $("#create_panel_modal_body").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#create_panel_" + index)
+                                        .parent()
+                                        .append(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            '</div>'
+                                        );
+                                }
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        case 409:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+</script>
+{% endif %}
+{% endblock script %}
