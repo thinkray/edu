@@ -82,7 +82,7 @@ class BillListAPI(View):
             }, status=403)
 
         class BillListAPIPostForm(Form):
-            user = IntegerField()
+            username = CharField()
             amount = DecimalField(max_digits=17, decimal_places=2)
             info = CharField(required=False)
 
@@ -100,8 +100,8 @@ class BillListAPI(View):
             cleaned_data = form.clean()
 
             try:
-                cleaned_data['user'] = User.objects.get(
-                    pk=cleaned_data['user'])
+                cleaned_data['username'] = User.objects.get(
+                    username=cleaned_data['username'])
             except Exception as e:
                 return JsonResponse({
                     'status': 400,
@@ -110,13 +110,13 @@ class BillListAPI(View):
 
             try:
                 with transaction.atomic():
-                    bill = Bill(user=cleaned_data['user'], amount=cleaned_data['amount'], date=now(
+                    bill = Bill(user=cleaned_data['username'], amount=cleaned_data['amount'], date=now(
                     ), info=cleaned_data['info'])
-                    cleaned_data['user'].balance = cleaned_data['user'].balance + \
+                    cleaned_data['username'].balance = cleaned_data['username'].balance + \
                         cleaned_data['amount']
 
                     bill.save()
-                    cleaned_data['user'].save()
+                    cleaned_data['username'].save()
             except Exception as e:
                 return JsonResponse({
                     'status': 500,
