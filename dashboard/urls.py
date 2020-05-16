@@ -11,6 +11,8 @@ urlpatterns = [
     #path('<int:question_id>/results/', views.results, name='results'),
     # ex: /polls/5/vote/
     #path('<int:question_id>/vote/', views.vote, name='vote'),
+    path('bill/', views.UserBillListView.as_view(), name='bill_list_view'),
+    path('bill/<int:page>', views.UserBillListView.as_view(), name='bill_list_view_page'),
     path('admin/user/', views.AdminUserListView.as_view(), name='admin_user_list_view'),
     path('admin/user/<int:page>', views.AdminUserListView.as_view(), name='admin_user_list_view_page'),
     path('admin/bill/', views.AdminBillListView.as_view(), name='admin_bill_list_view'),
