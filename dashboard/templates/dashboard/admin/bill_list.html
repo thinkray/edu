@@ -1,7 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
 <style>
     body {
         min-height: 100vh;
@@ -12,8 +11,8 @@
 
 <div class="container py-5">
     <div class="text-center text-white">
-        <h1 class="display-4">Redemption Code List</h1>
-        <p class="lead mb-0">Administrator page</p>
+        <h1 class="display-4">Bill List</h1>
+        <p class="lead mb-0"> Administrator page</p>
     </div>
     <div class="row py-5">
         <div class="col-lg-10 mx-auto">
@@ -21,29 +20,34 @@
                 <div class="card-body p-4 bg-white rounded">
                     <div class="row">
                         <div class="form-row mx-auto">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" id="code" name="code" placeholder="Code">
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="username" name="username"
+                                    placeholder="Username">
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <input type="text" class="form-control" id="amount" name="amount" placeholder="Amount">
                             </div>
+                            <div class="col-md-4">
+                                <input type="text" class="form-control" id="info" name="info"
+                                    placeholder="Info e.g. salary">
+                            </div>
                             <div class="col-md-1">
-                                <a button id="create" class="btn btn-primary" href="#">Create</a>
+                                <a id="create" class="btn btn-primary" href="#">Create</a>
                             </div>
                             <div class="col-md-2"></div>
                         </div>
                     </div>
                     <br>
-
                     <div class="table-responsive">
                         <table class="table table-striped text-center">
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Redemption Code</th>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Date</th>
                                     <th>Amount</th>
-                                    <th>Status</th>
+                                    <th>Info</th>
                                     <th>Operation</th>
                                 </tr>
                             </thead>
@@ -51,52 +55,23 @@
                                 {% for each in page_obj %}
                                 <tr>
                                     <td>{{ each.id }}</td>
-                                    <td>{{ each.code }}</td>
+                                    <td>{{ each.user.username }}</td>
+                                    <td>{{ each.user.name }}</td>
+                                    <td>{{ each.date }}</td>
                                     <td>{{ each.amount }}</td>
-                                    <td>{% if each.is_available %}Available{% else %}Redeemed{% endif %}</td>
-
+                                    <td>{{ each.info }}</td>
                                     <td>
                                         <button class="btn btn-success btn-sm rounded-0 edit-item" type="button"
                                             data-toggle="modal" data-target="#edit_panel" title="Edit"
-                                            data-id="{{ each.id }}" data-code="{{ each.code }}"
-                                            data-amount="{{ each.amount }}"
-                                            data-is-available="{{ each.is_available }}"><i
-                                                class="fa fa-edit"></i></button>
-
-                                        <a href="#" class="btn btn-danger btn-sm rounded-0 delete-item"
-                                            data-toggle="modal" title="Delete" data-target="#delete" role="button"
-                                            data-id="{{ each.id }}"><i class="fa fa-trash"></i></a>
+                                            data-id="{{ each.id }}" data-name="{{ each.user.name }}" data-username="{{ each.user.username }}"
+                                            data-date="{{ each.date }}" data-amount="{{ each.amount }}"
+                                            data-info="{{ each.info }}">
+                                            <i class="fa fa-edit"></i></button>
                                     </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
-                        <div class="modal fade" id="delete">
-                            <div class="modal-dialog modal-dialog-centered">
-                                <div class="modal-content">
-                                    <!-- Modal Header -->
-                                    <div class="modal-header">
-                                        <h4 class="modal-title">Warning</h4>
-                                        <button type="button" class="close" data-dismiss="modal">
-                                            &times;
-                                        </button>
-                                    </div>
-                                    <!-- Modal body -->
-                                    <div class="modal-body">
-                                        After deleting it, it will not come back again.
-                                    </div>
-                                    <input id="target_item" name="target_item" type="hidden">
-                                    <!-- Modal footer -->
-                                    <div class="modal-footer">
-                                        <button type="button" class="btn btn-primary" data-dismiss="modal">Back
-                                        </button>
-                                        <button id="delete_check" type="button" class="btn btn-danger"
-                                            data-dismiss="modal">Delete
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
                         <div class="modal fade" id="edit_panel" tabindex="-1" role="dialog">
                             <div class="modal-dialog modal-dialog-centered">
                                 <div class="modal-content">
@@ -113,49 +88,59 @@
                                                 <input type="text" class="form-control" id="edit_panel_id" disabled>
                                             </div>
                                             <div class="form-group">
-                                                <label for="edit_panel_code" class="col-form-label">Code:</label>
-                                                <input type="text" class="form-control" id="edit_panel_code">
+                                                <label for="edit_panel_username" class="col-form-label">Username:</label>
+                                                <input type="text" class="form-control" id="edit_panel_username" disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_panel_name" class="col-form-label">Name:</label>
+                                                <input type="text" class="form-control" id="edit_panel_name" disabled>
+                                            </div>
+                                            <!--CHECK DATE 1.EDIT 2. CREATE-->
+                                            <div class="form-group">
+                                                <label for="edit_panel_date" class="col-form-label">Date:</label>
+                                                <input type="text" class="form-control" id="edit_panel_date" disabled>
                                             </div>
                                             <div class="form-group">
                                                 <label for="edit_panel_amount" class="col-form-label">Amount:</label>
-                                                <input type="text" class="form-control" id="edit_panel_amount">
+                                                <input type="text" class="form-control" id="edit_panel_amount" disabled>
                                             </div>
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input"
-                                                    id="edit_panel_is_available">
-                                                <label class="custom-control-label"
-                                                    for="edit_panel_is_available">Available</label>
+                                            <div class="form-group">
+                                                <label for="edit_panel_info" class="col-form-label">Info:</label>
+                                                <input type="text" class="form-control" id="edit_panel_info">
                                             </div>
+
                                         </form>
                                     </div>
                                     <div class="modal-footer">
-                                        <button type="button" class="btn btn-secondary"
-                                            data-dismiss="modal">Close</button>
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                        </button>
                                         <button id="edit_panel_save" type="button" class="btn btn-primary"
-                                            data-dismiss="modal">Save</button>
+                                            data-dismiss="modal">Save
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
+
                     </div>
                     <ul class="pagination justify-content-center">
                         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
-                                href="{%url 'admin_redemption_code_list_view_page' page=1%}">First</a></li>
+                                href="{%url 'admin_bill_list_view_page' page=1%}">First</a>
+                        </li>
 
                         {% for each in page_bar %}
                         <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
-                                href="{%url 'admin_redemption_code_list_view_page' page=each %}">{{ each }}</a></li>
+                                href="{%url 'admin_bill_list_view_page' page=each %}">{{each}}</a>
+                        </li>
                         {% endfor %}
 
                         <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
-                                href="{%url 'admin_redemption_code_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
+                                href="{%url 'admin_bill_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
                         </li>
                     </ul>
                     <span>
                         Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
                     </span>
-
-
                 </div>
             </div>
         </div>
@@ -172,46 +157,24 @@
     });
     $('.edit-item').click(function () {
         $("#edit_panel_id")[0].value = $(this).data('id');
-        $("#edit_panel_code")[0].value = $(this).data('code');
+        $("#edit_panel_username")[0].value = $(this).data('username');
+        $("#edit_panel_name")[0].value = $(this).data('name');
+        $("#edit_panel_date")[0].value = $(this).data('date');
         $("#edit_panel_amount")[0].value = $(this).data('amount');
-        $("#edit_panel_is_available").prop('checked', $(this).data('is-available') == 'True');
+        $("#edit_panel_info")[0].value = $(this).data('info');
     });
-    $('#delete_check').click(function () {
-        $(function () {
-            let list = {};
-            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            let api_url = "{%url 'redemption_code_api' redemption_code_id='0'%}";
-            $.ajax({
-                type: "DELETE",
-                contentType: "application/json;charset=UTF-8",
-                url: api_url.substr(0, api_url.length - 1) + $("#target_item")[0].value,
-                data: JSON.stringify(list),
-                beforeSend: function (xhr, settings) {
-                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                    }
-                },
-                success: function (result) {
-                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The redemptio code was successfully deleted. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
-                    window.location.reload();
-                },
-                error: function (e) {
-                    $(".table-responsive").before('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
-                    window.location.reload();
-                }
-            });
-        });
-    });
+
     $('#create').click(function () {
         $(function () {
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            list["code"] = $("#code")[0].value;
+            list["username"] = $("#username")[0].value;
             list["amount"] = $("#amount")[0].value;
+            list["info"] = $("#info")[0].value;
             $.ajax({
                 type: "POST",
                 contentType: "application/json;charset=UTF-8",
-                url: "{%url 'redemption_code_list_api'%}",
+                url: "{%url 'bill_list_api'%}",
                 data: JSON.stringify(list),
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
@@ -232,27 +195,26 @@
                     switch (result["status"]) {
                         case 400:
                             $("[id^=ajax_result]").remove();
-                            for (var index in result["message"]) {
-                                $("#" + index)
-                                    .parent()
-                                    .append(
-                                        '<div id="ajax_result_' +
-                                        index +
-                                        '" class="alert alert-danger" role="alert">' +
-                                        result["message"][index][0] +
-                                        '</div>'
-                                    );
+                            if (typeof result['message'] == 'string') {
+                                $(".table-responsive").before(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#" + index)
+                                        .parent()
+                                        .append(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            '</div>'
+                                        );
+                                }
                             }
                             break;
                         case 403:
-                            $("[id^=ajax_result]").remove();
-                            $(".table-responsive").before(
-                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
-                                result["message"] +
-                                '</div>'
-                            );
-                            break;
-                        case 409:
                             $("[id^=ajax_result]").remove();
                             $(".table-responsive").before(
                                 '<div id="ajax_result" class="alert alert-danger" role="alert">' +
@@ -275,10 +237,8 @@
         $(function () {
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            let api_url = "{%url 'redemption_code_api' redemption_code_id='0'%}";
-            list["code"] = $("#edit_panel_code")[0].value;
-            list["amount"] = $("#edit_panel_amount")[0].value;
-            list["is_available"] = $("#edit_panel_is_available").is(':checked');
+            let api_url = "{%url 'bill_api' bill_id='0'%}";
+            list["info"] = $("#edit_panel_info")[0].value;
             $.ajax({
                 type: "PATCH",
                 contentType: "application/json;charset=UTF-8",
