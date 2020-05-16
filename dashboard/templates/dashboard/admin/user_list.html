@@ -12,53 +12,51 @@
 
 <div class="container py-5">
     <div class="text-center text-white">
-        <h1 class="display-4">Redemption Code List</h1>
+        <h1 class="display-4">User List</h1>
         <p class="lead mb-0"> Administrator page</p>
     </div>
     <div class="row py-5">
         <div class="col-lg-10 mx-auto">
             <div class="card rounded shadow border-0">
                 <div class="card-body p-4 bg-white rounded">
-                    <div class="row">
-                        <div class="form-row mx-auto">
-                            <div class="col-md-1"></div>
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" id="code" name="code" placeholder="Code">
-                            </div>
-                            <div class="col-md-4">
-                                <input type="text" class="form-control" id="amount" name="amount"
-                                    placeholder="Amount" min="0">
-                            </div>
-                            <div class="col-md-1">
-                                <a button id="create" class="btn btn-primary" href="#">Create</a>
-                            </div>
-                            <div class="col-md-2"></div>
-                        </div>
+                    <div class="row float-right m-4">
+                        <a button type="submit" class="btn btn-primary" title="add user" href="#"><i
+                            class="fas fa-user-plus"></i></a>
                     </div>
                     <br>
-
+                
                     <div class="table-responsive">
                         <table class="table table-striped text-center">
                             <thead>
                                 <tr>
                                     <th>#</th>
-                                    <th>Redemption Code</th>
-                                    <th>Amount</th>
-                                    <th>Status</th>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Role</th>
+                                    <th>Last Login</th>
                                     <th>Operation</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for each in page_obj %}
+                                {% for each in result %}
                                 <tr>
                                     <td>{{ each.id }}</td>
-                                    <td>{{ each.code }}</td>
-                                    <td>{{ each.amount }}</td>
-                                    <td>{% if each.is_available %}Available{% else %}Redeemed{% endif %}</td>
-
+                                    <td>{{ each.username }}</td>
+                                    <td>{{ each.name }}</td>
+                                    <td>{% if each.is_superuser %}
+                                            Admin
+                                        {% else %}
+                                            {% if each.is_teacher %}
+                                                Teacher
+                                            {% else %}
+                                                Student
+                                            {% endif %}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ each.last_login }}</td>
                                     <td>
                                         <button class="btn btn-success btn-sm rounded-0 edit-item" type="button"
-                                            data-toggle="modal" data-target="#edit_panel" title="Edit" data-id="{{ each.id }}" data-code="{{ each.code }}" data-amount="{{ each.amount }}" data-is-available="{{ each.is_available }}"><i
+                                            data-toggle="modal" data-target="#edit_panel" title="Edit" data-id="{{ each.id }}" data-username="{{ each.username }}" data-name="{{ each.name }}" data-is-superuser="{{ each.is_superuser }}" data-is-teacher="{{ each.is_teacher }}"><i
                                                 class="fa fa-edit"></i></button>
 
                                         <a href="#" class="btn btn-danger btn-sm rounded-0 delete-item"
@@ -96,7 +94,7 @@
                             </div>
                         </div>
                         <div class="modal fade" id="edit_panel" tabindex="-1" role="dialog">
-                            <div class="modal-dialog modal-dialog-centered">
+                            <div class="modal-dialog modal-dialog-centered modal-lg">
                                 <div class="modal-content">
                                     <div class="modal-header">
                                         <h5 class="modal-title" id="edit_panel_label">Edit</h5>
@@ -111,16 +109,46 @@
                                                 <input type="text" class="form-control" id="edit_panel_id" disabled>
                                             </div>
                                             <div class="form-group">
-                                                <label for="edit_panel_code" class="col-form-label">Code:</label>
-                                                <input type="text" class="form-control" id="edit_panel_code">
+                                                <label for="edit_panel_username" class="col-form-label">Username:</label>
+                                                <input type="text" class="form-control" id="edit_panel_username">
                                             </div>
                                             <div class="form-group">
-                                                <label for="edit_panel_amount" class="col-form-label">Amount:</label>
-                                                <input type="text" class="form-control" id="edit_panel_amount">
+                                                <label for="edit_panel_name" class="col-form-label">Name:</label>
+                                                <input type="text" class="form-control" id="edit_panel_name">
                                             </div>
-                                            <div class="custom-control custom-checkbox">
-                                                <input type="checkbox" class="custom-control-input" id="edit_panel_is_available">
-                                                <label class="custom-control-label" for="edit_panel_is_available">Available</label>
+                                            <div class="form-group">
+                                                <label class="col-form-label" for="edit_panel_role">Role:</label>
+                                                <select class="custom-select" id="edit_panel_role">
+                                                    <option value="admin">Admin</option>
+                                                    <option value="teacher">Teacher</option>
+                                                    <option value="student">Student</option>
+                                                </select>
+                                            </div>
+                                            <div class="custom-control custom-switch">
+                                                <input type="checkbox" class="custom-control-input" id="edit_panel_change_password">
+                                                <label class="custom-control-label" for="edit_panel_change_password">Change password</label>
+                                            </div>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fa fa-lock icon_fixer"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="edit_panel_password" name="password" class="form-control" placeholder="Password" type="password" disabled/>
+                                            </div>
+                                            <div class="form-group input-group">
+                                                <div class="input-group-prepend">
+                                                    <span class="input-group-text">
+                                                        <i class="fas fa-key icon_fixer"></i>
+                                                    </span>
+                                                </div>
+                                                <input id="edit_panel_password2" name="password2" class="form-control" placeholder="Repeat password"
+                                                    type="password" disabled/>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_panel_profile" class="col-form-label">Profile:</label>
+                                                <textarea class="form-control" id="edit_panel_profile" name="body" rows="6"
+                                                    placeholder="Click here to write"></textarea>
                                             </div>
                                         </form>
                                     </div>
@@ -134,15 +162,15 @@
                     </div>
                     <ul class="pagination justify-content-center">
                         <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
-                                href="{%url 'admin_redemption_code_list_view_page' page=1%}">First</a></li>
+                                href="{%url 'admin_user_list_view_page' page=1%}">First</a></li>
 
                         {% for each in page_bar %}
                         <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
-                                href="{%url 'admin_redemption_code_list_view_page' page=each %}">{{ each }}</a></li>
+                                href="{%url 'admin_user_list_view_page' page=each %}">{{ each }}</a></li>
                         {% endfor %}
 
                         <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
-                                href="{%url 'admin_redemption_code_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
+                                href="{%url 'admin_user_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
                         </li>
                     </ul>
                     <span>
@@ -166,9 +194,51 @@
     });
     $('.edit-item').click(function () {
         $("#edit_panel_id")[0].value = $(this).data('id');
-        $("#edit_panel_code")[0].value = $(this).data('code');
-        $("#edit_panel_amount")[0].value = $(this).data('amount');
-        $("#edit_panel_is_available").prop('checked',$(this).data('is-available') == 'True');
+        $("#edit_panel_username")[0].value = $(this).data('username');
+        $("#edit_panel_name")[0].value = $(this).data('name');
+        $("#edit_panel_change_password").prop('checked', false);
+        $('#edit_panel_password').prop('disabled', true);
+        $('#edit_panel_password2').prop('disabled', true);
+        if ($(this).data('is-superuser') == "True") {
+            $("#edit_panel_role")[0].value = 'admin';
+        }
+        else if ($(this).data('is-teacher') == "True") {
+            $("#edit_panel_role")[0].value = 'teacher';
+        }
+        else {
+            $("#edit_panel_role")[0].value = 'student';
+        }
+        $(function () {
+            let list = [];
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            let api_url = "{%url 'user_api' user_id='0'%}";
+            list.push({name: 'column', value: 'profile'});
+            $.ajax({
+                type: "GET",
+                contentType: "application/json;charset=UTF-8",
+                url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
+                data: list,
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("#edit_panel_profile")[0].value = result.data[0].profile;
+                },
+                error: function (e) {
+                },
+            });
+        });
+    });
+    $('#edit_panel_change_password').change(function() {
+        if (this.checked) {
+            $('#edit_panel_password').prop('disabled', false);
+            $('#edit_panel_password2').prop('disabled', false);
+        } else {
+            $('#edit_panel_password').prop('disabled', true);
+            $('#edit_panel_password2').prop('disabled', true);
+        }
     });
     $('#delete_check').click(function () {
         $(function () {
@@ -269,10 +339,14 @@
         $(function () {
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            let api_url = "{%url 'redemption_code_api' redemption_code_id='0'%}";
-            list["code"] = $("#edit_panel_code")[0].value;
-            list["amount"] = $("#edit_panel_amount")[0].value;
-            list["is_available"] = $("#edit_panel_is_available").is(':checked');
+            let api_url = "{%url 'user_api' user_id='0'%}";
+            list["username"] = $("#edit_panel_username")[0].value;
+            list["name"] = $("#edit_panel_name")[0].value;
+            list["profile"] = $("#edit_panel_profile")[0].value;
+            list["role"] =$("#edit_panel_role")[0].value
+            if (($("#edit_panel_change_password").is(':checked')) && ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value)) {
+                list["password"] = $("#edit_panel_password")[0].value;
+            }
             $.ajax({
                 type: "PATCH",
                 contentType: "application/json;charset=UTF-8",
@@ -284,7 +358,7 @@
                     }
                 },
                 success: function (result) {
-                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The redemption code was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The user was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                     window.location.reload();
                 },
                 error: function (e) {

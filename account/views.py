@@ -2,6 +2,7 @@ import json
 
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
 from django.db import models
 from django.forms import (BooleanField, CharField, DecimalField, Form,
@@ -43,16 +44,7 @@ class UserListAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = UserListAPIGetForm(data)
+        form = UserListAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -126,16 +118,7 @@ class UserAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = UserAPIGetForm(data)
+        form = UserAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
             if 'balance' in cleaned_data['column']:
@@ -253,6 +236,7 @@ class UserAPI(View):
             password = CharField(widget=PasswordInput, required=False)
             is_superuser = BooleanField(required=False)
             name = CharField(required=False)
+            role = CharField(required=False)
             balance = DecimalField(
                 max_digits=15, decimal_places=2, required=False)
             profile = CharField(required=False)
@@ -290,6 +274,19 @@ class UserAPI(View):
 
             if cleaned_data['name'] != '':
                 user.name = cleaned_data['name']
+
+            if request.user.is_superuser and (cleaned_data['role'] == 'admin' or cleaned_data['role'] == 'teacher' or cleaned_data['role'] == 'student'):
+                teacher_group = Group.objects.get(name='teacher')
+                if cleaned_data['role'] == 'admin':
+                    user.is_superuser = True
+                    user.groups.add(teacher_group)
+                else:
+                    user.is_superuser = False
+                
+                if cleaned_data['role'] == 'teacher':
+                    user.groups.add(teacher_group)
+                else:
+                    user.groups.remove(teacher_group)
 
             if cleaned_data['balance'] is not None:
                 user.balance = cleaned_data['balance']
