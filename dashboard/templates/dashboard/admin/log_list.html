@@ -1,0 +1,163 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body {
+        min-height: 100vh;
+        background-color: #4dc9ff;
+    }
+</style>
+
+
+<div class="container py-5">
+    <div class="text-center text-white">
+        <h1 class="display-4">Log List</h1>
+        <p class="lead mb-0">Administrator page</p>
+    </div>
+    <div class="row py-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card rounded shadow border-0">
+                <div class="card-body p-4 bg-white rounded">
+                    <div class="row">
+                        <div class="form-row mx-auto">
+                            <div class="col-md-1"></div>
+                            <div class="col-md-3">
+                                <input type="text" class="form-control" id="username" name="username"
+                                    placeholder="Username">
+                            </div>
+                            <div class="col-md-5">
+                                <input type="text" class="form-control" id="operation" name="operation"
+                                    placeholder="Operation e.g. change password">
+                            </div>
+                            <div class="col-md-1">
+                                <a id="create" class="btn btn-primary" href="#">Create</a>
+                            </div>
+                            <div class="col-md-2"></div>
+                        </div>
+                    </div>
+                    <br>
+                    <div class="table-responsive">
+                        <table class="table table-striped text-center">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Date</th>
+                                    <th>Operation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for each in page_obj %}
+                                <tr>
+                                    <td>{{ each.id }}</td>
+                                    <td>{{ each.user.username }}</td>
+                                    <td>{{ each.user.name }}</td>
+                                    <td>{{ each.date }}</td>
+                                    <td>{{ each.operation }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+
+
+                    </div>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
+                                href="{%url 'admin_log_list_view_page' page=1%}">First</a>
+                        </li>
+
+                        {% for each in page_bar %}
+                        <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
+                                href="{%url 'admin_log_list_view_page' page=each %}">{{each}}</a>
+                        </li>
+                        {% endfor %}
+
+                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
+                                href="{%url 'admin_log_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
+                        </li>
+                    </ul>
+                    <span>
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock content %}
+
+{% block script %}
+<script>
+    $('#create').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["username"] = $("#username")[0].value;
+            list["operation"] = $("#operation")[0].value;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'log_list_api'%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=ajax_result]").remove();
+                    $(".table-responsive").before(
+                        '<div id="ajax_result" class="alert alert-success" role="alert">' +
+                        result["message"] +
+                        '</div>'
+                    );
+                    window.location.reload();
+                },
+                error: function (e) {
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $(".table-responsive").before(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#" + index)
+                                        .parent()
+                                        .append(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            '</div>'
+                                        );
+                                }
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $(".table-responsive").before(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $(".table-responsive").before(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+</script>
+{% endblock script %}
