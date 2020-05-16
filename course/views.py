@@ -667,3 +667,37 @@ class CourseListView(View):
         context['page_bar'] = page_bar
 
         return HttpResponse(template.render(context, request))
+
+class CourseDetailView(View):
+
+    def get(self, request, course_id=1):
+
+        context = {}
+        context['status'] = 200
+        try:
+            course = Course.objects.get(pk=course_id)
+            context['course'] = course
+        except Exception as e:
+            context['status'] = 404
+            context['message'] = 'CourseNotFound'
+
+        context['page_name'] = 'Course Detail'
+
+        template = loader.get_template('course/course_detail.html')
+
+        context['site_name'] = settings.SITE_NAME
+
+        if request.user.is_authenticated:
+            context['is_authenticated'] = True
+            context['is_superuser'] = request.user.is_superuser
+            context['is_teacher'] = request.session.get('is_teacher')
+            context['name'] = request.user.name
+            context['username'] = request.user.username
+
+        else:
+            context['is_authenticated'] = False
+            context['is_superuser'] = False
+        
+        context['hide_welcome'] = True
+
+        return HttpResponse(template.render(context, request))

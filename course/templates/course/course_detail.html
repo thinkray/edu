@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if status == 200 %}
+<div class="card blue-gradient rounded-0 border-1" style="  background-image: url(/static/img/gradient1.jpg);background-size:cover;">
+    <div class="card-body text-white rgba-black-light" style="margin-left:10%;">
+        <!--Grid row-->
+        <h1>{{ course.name }}</h1>
+        <p class="mb-0">{{ course.info|truncatechars:255 }}</p>
+        <p class="h5 mb-2">
+        <p class="lead"><i class="fa fa-user icon_fixer"></i>&nbsp; by <a href=""><span class="text-white font-weight-bolder">{{ course.teacher.name}}</span></a>
+        </p>
+        </p>
+        <p><i class="fa fa-calendar icon_fixer"></i>&nbsp; From {{ course.start_date }} to {{ course.end_date }}</p>
+        <!--Grid row-->
+    </div>
+</div>
+<br>
+<div class="container mb-5">
+    <div class="row">
+        <!-- <div class="col-md-12">
+            <ul class="nav nav-tabs sticky-top">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#detail">About</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#home">DESCRIPTION</a>
+                </li>
+            </ul>
+        </div> -->
+        <div class="col-md-12">
+            <div class="tab-content 1" id="detail">
+                <div class=" col-md-9 col-lg-9 ">
+                    <table class="table table-user-information">
+                        <tbody>
+                            <tr>
+                                <td><span class="text-primary font-weight-bolder">Course Name:</span></td>
+                                <td>{{ course.name }}</td>
+                            </tr>
+                            <tr>
+                                <td><span class="text-primary font-weight-bolder">Start date:</span></td>
+                                <td>{{ course.start_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><span class="text-primary font-weight-bolder">End date:</span></td>
+                                <td>{{ course.end_date }}</td>
+                            </tr>
+                            <tr>
+                                <td><span class="text-primary font-weight-bolder">Teacher</span></td>
+                                <td><a href="#">{{ course.teacher.name }}</a></td>
+                            </tr>
+                            <tr>
+                                <td><span class="text-primary font-weight-bolder">Price</span></td>
+                                <td>${{ course.price }}</td>
+                            </tr>
+                            <tr>
+                                <td><span class="text-primary font-weight-bolder">Session Quota</span></td>
+                                <td>{{ course.quota }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <hr id="home">
+            <div class="tab-content 2">
+                <div class=" col-md-9 col-lg-9 ">
+                    <span class="text-primary font-weight-bolder"> Course Description:</span>
+                    <br><br>
+                    {{ course.info }}
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Tab panes -->
+</div>
+{% else %}
+    {% if message %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock content %}
+
+{% block script %}
+
+{% endblock script %}

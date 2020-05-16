@@ -117,7 +117,7 @@
                         <h4 class="card-title">{{ each.name }}</h4>
                         <!--Text-->
                         <p class="card-text">
-                        <p class="font-weight-bold">{{ each.teacher.name }}</p>
+                        <p class="font-weight-bolder">{{ each.teacher.name }}</p>
                         <p class="font-weight-normal">{{ each.info|truncatechars:255 }}</p>
                         <p class="font-weight-light">From {{ each.start_date }}</p>
                         <p class="font-weight-light">To {{ each.end_date }}</p>
@@ -125,7 +125,7 @@
                         </p>
                         <p class="font-italic">Already sold {{ each.sold }}</p>
                         </p>
-                        <a href="{{ each.id }}" target="_blank" class="btn btn-primary btn-md">Start tutorial
+                        <a href="{% url 'course_detail_view_page' course_id=each.id %}" target="_blank" class="btn btn-primary btn-md">Start tutorial
                             <i class="fas fa-play ml-2"></i>
                         </a>
                     </div>
