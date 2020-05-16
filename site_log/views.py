@@ -71,7 +71,7 @@ class LogListAPI(View):
             }, status=403)
 
         class LogListAPIPostForm(Form):
-            user = IntegerField()
+            username = CharField()
             operation = CharField()
 
         try:
@@ -88,15 +88,15 @@ class LogListAPI(View):
             cleaned_data = form.clean()
 
             try:
-                cleaned_data['user'] = User.objects.get(
-                    pk=cleaned_data['user'])
+                cleaned_data['username'] = User.objects.get(
+                    username=cleaned_data['username'])
             except Exception as e:
                 return JsonResponse({
                     'status': 400,
                     'message': 'UserNotFound',
                 }, status=400)
 
-            log = Log(user=cleaned_data['user'], date=now(
+            log = Log(user=cleaned_data['username'], date=now(
             ), operation=cleaned_data['operation'])
 
             log.save()
