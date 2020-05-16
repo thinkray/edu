@@ -1,0 +1,151 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<style>
+    body {
+        min-height: 100vh;
+        background-color: #4dc9ff;
+    }
+</style>
+<div class="container py-5">
+    <div class="text-center text-white">
+        <h1 class="display-4">Balance List</h1>
+        <p class="lead mb-0"> Administrator page</p>
+    </div>
+    <div class="row py-5">
+        <div class="col-lg-10 mx-auto">
+            <div class="card rounded shadow border-0">
+                <div class="card-body p-4 bg-white rounded">
+                    <br>
+                    <div class="table-responsive">
+                        <table class="table table-striped text-center">
+                            <thead>
+                                <tr>
+                                    <th>#</th>
+                                    <th>Username</th>
+                                    <th>Name</th>
+                                    <th>Balance</th>
+                                    <th>Operation</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for each in page_obj %}
+                                <tr>
+                                    <td>{{ each.id }}</td>
+                                    <td>{{ each.username }}</td>
+                                    <td>{{ each.name }}</td>
+                                    <td>{{ each.balance }}</td>
+                                    <td>
+                                        <button class="btn btn-success btn-sm rounded-0 edit-item" type="button"
+                                            data-toggle="modal" data-target="#edit_panel" title="Edit"
+                                            data-id="{{ each.id }}" data-name="{{ each.name }}"
+                                            data-username="{{ each.username }}" data-balance="{{each.balance}}">
+                                            <i class="fa fa-edit"></i></button>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                        <div class="modal fade" id="edit_panel" tabindex="-1" role="dialog">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title" id="edit_panel_label">Edit</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                            <span aria-hidden="true">&times;</span>
+                                        </button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <form>
+                                            <div class="form-group">
+                                                <label for="edit_panel_id" class="col-form-label">ID:</label>
+                                                <input type="text" class="form-control" id="edit_panel_id" disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_panel_username"
+                                                    class="col-form-label">Username:</label>
+                                                <input type="text" class="form-control" id="edit_panel_username"
+                                                    disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_panel_name" class="col-form-label">Name:</label>
+                                                <input type="text" class="form-control" id="edit_panel_name" disabled>
+                                            </div>
+                                            <div class="form-group">
+                                                <label for="edit_panel_balance" class="col-form-label">Balance:</label>
+                                                <input type="text" class="form-control" id="edit_panel_balance">
+                                            </div>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close
+                                        </button>
+                                        <button id="edit_panel_save" type="button" class="btn btn-primary"
+                                            data-dismiss="modal">Save
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
+                                href="{%url 'admin_balance_list_view_page' page=1%}">First</a>
+                        </li>
+                        {% for each in page_bar %}
+                        <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
+                                href="{%url 'admin_balance_list_view_page' page=each %}">{{each}}</a>
+                        </li>
+                        {% endfor %}
+                        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
+                                href="{%url 'admin_balance_list_view_page' page=page_obj.paginator.num_pages%}">Last</a>
+                        </li>
+                    </ul>
+                    <span>
+                        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                    </span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    $('.edit-item').click(function () {
+        $("#edit_panel_id")[0].value = $(this).data('id');
+        $("#edit_panel_username")[0].value = $(this).data('username');
+        $("#edit_panel_name")[0].value = $(this).data('name');
+        $("#edit_panel_balance")[0].value = $(this).data('balance');
+    });
+
+    $('#edit_panel_save').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            let api_url = "{%url 'user_api' user_id='0'%}";
+            list["balance"] = $("#edit_panel_balance")[0].value;
+            $.ajax({
+                type: "PATCH",
+                contentType: "application/json;charset=UTF-8",
+                url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The redemption code was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
+                },
+                error: function (e) {
+                    $(".table-responsive").before('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
+                },
+            });
+        });
+    });
+</script>
+{% endblock script %}
