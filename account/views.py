@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
-from django.db import models
+from django.db import models, transaction
 from django.forms import (BooleanField, CharField, DecimalField, Form,
                           IntegerField, MultipleChoiceField, PasswordInput)
 from django.http import HttpResponse, JsonResponse
@@ -13,10 +13,11 @@ from django.template import loader
 from django.urls import reverse
 from django.utils.encoding import iri_to_uri
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, now
 from django.views import View
 
 from account.models import User
+from finance.models import Bill
 from storage.models import BlobStorage
 
 from .models import User, UserManager
@@ -117,13 +118,25 @@ class UserListAPI(View):
                 else:
                     user.groups.remove(teacher_group)
 
-            if request.user.is_superuser and cleaned_data['balance'] is not None:
-                user.balance = cleaned_data['balance']
-
             if cleaned_data['profile'] != '':
                 user.profile = cleaned_data['profile']
 
             user.save()
+
+            if request.user.is_superuser and cleaned_data['balance'] is not None:
+                try:
+                    with transaction.atomic():
+                        bill = Bill(user=user, amount=cleaned_data['balance'], date=now(
+                        ), info='Adjust the balance by an administrator ' + request.user.username)
+                        user.balance = user.balance + cleaned_data['balance']
+
+                        bill.save()
+                        user.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
 
             return JsonResponse({
                 'status': 200,
@@ -250,13 +263,27 @@ class UserAPI(View):
                 else:
                     user.groups.remove(teacher_group)
 
-            if request.user.is_superuser and cleaned_data['balance'] is not None:
-                user.balance = cleaned_data['balance']
-
             if cleaned_data['profile'] != '':
                 user.profile = cleaned_data['profile']
 
             user.save()
+
+            if request.user.is_superuser and cleaned_data['balance'] is not None:
+                balance_diff = cleaned_data['balance'] - user.balance
+                try:
+                    with transaction.atomic():
+                        bill = Bill(user=user, amount=balance_diff, date=now(
+                        ), info='Adjust the balance by an administrator ' + request.user.username)
+                        user.balance = user.balance + balance_diff
+
+                        bill.save()
+                        user.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
+
             return JsonResponse({
                 'status': 200,
                 'message': 'Success',
@@ -328,13 +355,27 @@ class UserAPI(View):
                 else:
                     user.groups.remove(teacher_group)
 
-            if request.user.is_superuser and cleaned_data['balance'] is not None:
-                user.balance = cleaned_data['balance']
-
             if cleaned_data['profile'] != '':
                 user.profile = cleaned_data['profile']
 
             user.save()
+
+            if request.user.is_superuser and cleaned_data['balance'] is not None:
+                balance_diff = cleaned_data['balance'] - user.balance
+                try:
+                    with transaction.atomic():
+                        bill = Bill(user=user, amount=balance_diff, date=now(
+                        ), info='Adjust the balance by an administrator ' + request.user.username)
+                        user.balance = user.balance + balance_diff
+
+                        bill.save()
+                        user.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
+
             return JsonResponse({
                 'status': 200,
                 'message': 'Success',
