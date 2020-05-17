@@ -4,6 +4,7 @@ from django.conf import settings
 from django.core.paginator import Paginator
 from django.core.validators import MinValueValidator
 from django.db import transaction
+from django.db.models import Q
 from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
                           DecimalField, Form, IntegerField,
                           MultipleChoiceField)
@@ -712,7 +713,7 @@ class CourseEnrollView(View):
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
-        
+
         context = {}
         context['status'] = 200
         try:
@@ -741,5 +742,61 @@ class CourseEnrollView(View):
             context['is_superuser'] = False
 
         context['hide_welcome'] = True
+
+        return HttpResponse(template.render(context, request))
+
+
+class CourseSearchView(View):
+
+    def get(self, request, page=1):
+        context = {}
+        query = ""
+        if request.GET:
+            query = request.GET['q']
+            context['query'] = str(query)
+
+        result = Course.objects.all().filter(Q(name__icontains=query) |
+                                             Q(info__icontains=query))
+
+        context['course_search_num'] = len(result)
+        context['page_name'] = 'Course Search Result'
+
+        template = loader.get_template('course/course_search.html')
+
+        paginator = Paginator(result, 10)
+        page_obj = paginator.get_page(page)
+
+        context['site_name'] = settings.SITE_NAME
+
+        if request.user.is_authenticated:
+            context['is_authenticated'] = True
+            context['is_superuser'] = request.user.is_superuser
+            context['is_teacher'] = request.session.get('is_teacher')
+            context['name'] = request.user.name
+            context['username'] = request.user.username
+        else:
+            context['is_authenticated'] = False
+            context['is_superuser'] = False
+
+        context['page_obj'] = page_obj
+        context['query'] = str(query)
+
+        page_start = page_obj.number
+        page_bar_num = 5
+        for i in range(int(page_bar_num / 2)):
+            if page_start - 1 > 0:
+                page_start = page_start - 1
+        page_end = page_start
+        for i in range(int(page_bar_num / 2) * 2):
+            if page_end + 1 <= page_obj.paginator.num_pages:
+                page_end = page_end + 1
+        if page_end - page_start < int(page_bar_num / 2) * 2:
+            for i in range(int(page_bar_num / 2) * 2):
+                if page_start - 1 >= 1 and page_end - page_start < int(page_bar_num / 2) * 2:
+                    page_start = page_start - 1
+        page_bar = []
+        for i in range(page_start, page_end + 1):
+            page_bar.append(i)
+        context['page_bar'] = page_bar
 
         return HttpResponse(template.render(context, request))

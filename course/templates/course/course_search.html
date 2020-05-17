@@ -1,0 +1,149 @@
+{% extends 'base.html' %}
+<!--remember to get rid of welcome to the one-on-one band-->
+{% block content %}
+<style>
+    .search-result .col-md-2 {
+        border-right: 1px dotted #ccc;
+        min-height: 140px;
+    }
+
+    .search-result ul {
+        padding-left: 0 !important;
+        list-style: none;
+    }
+
+    .search-result ul li {
+        font: 400 normal .85em "Roboto", Arial, Verdana, sans-serif;
+        line-height: 30px;
+    }
+
+    .search-result ul li i {
+        padding-right: 3px;
+    }
+
+    .search-result .col-md-7 {
+        position: relative;
+    }
+
+    .search-result h3 {
+        font: 500 normal 1.375em "Roboto", Arial, Verdana, sans-serif;
+        margin-top: 0 !important;
+        margin-bottom: 10px !important;
+    }
+
+    .search-result h3>a,
+    .search-result i {
+        color: #248dc1 !important;
+    }
+
+    .search-result p {
+        font: normal normal 1.125em "Roboto", Arial, Verdana, sans-serif;
+    }
+
+    .search-result span.plus {
+        position: absolute;
+        right: 0;
+        top: 126px;
+    }
+
+    .search-result span.plus a {
+        background-color: #248dc1;
+        padding: 5px 4px 3px 5px;
+    }
+
+    .search-result span.plus a:hover {
+        background-color: #414141;
+    }
+
+    .search-result span.plus a i {
+        color: #fff !important;
+    }
+</style>
+<br>
+{% if course_search_num %}
+<div class="container">
+    <div class="mb-5 p-2 border-bottom">
+        <h3>Search Results</h3>
+        <h4 class="lead">
+            {% if course_search_num > 1 %}
+            <span class="font-weight-bolder text-danger">{{ course_search_num }}</span> results were found for the
+            search for <span class="font-weight-bolder text-danger">"{{query}}"</span>
+            {% else %}
+            <span class="font-weight-bolder text-danger">{{ course_search_num }}</span> results was found for the
+            search for <span class="font-weight-bolder text-danger">"{{query}}"</span>
+            {% endif %}
+        </h4>
+    </div>
+
+    <section class="col-xs-12 col-sm-12 col-md-12">
+        {% for each in page_obj %}
+        <article class="search-result row border-bottom">
+            <div class="col-xs-12 col-sm-12 col-md-3">
+                <a href="#" title="Details" class="thumbnail"> <img
+                        src="https://mdbootstrap.com/wp-content/uploads/2018/01/push-fb.jpg" class="card-img-top"
+                        alt="" /></a>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-2">
+                <ul class="meta-search">
+                    <li><i class="far fa-calendar-alt"></i> <span>From {{each.start_date | date:"M d, Y"}}</span></li>
+                    <li><i class="far fa-calendar-alt"></i> <span>To {{each.end_date | date:"M d, Y"}}</span></li>
+                    <!-- <li><i class="far fa-clock"></i> <span>midnight</span></li> -->
+                    <li><i class="fas fa-chalkboard-teacher"></i> <span>{{each.teacher.name}}</span></li>
+                    <li><i class="fas fa-coins"></i> <span>${{each.price}}</span></li>
+                    <li><i class="fas fa-leaf"></i> <span>{{each.quota}} session{{each.quota|pluralize}}</span></li>
+                </ul>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-7 excerpet">
+                <h3><a href="{% url 'course_detail_view_page' course_id=each.id %}">{{each.name}}</a></h3>
+                <p>{{each.info}}</p>
+                <span class="plus"><a href="{% url 'course_enroll_view_page' course_id=each.id %}" title="Add Course"><i
+                            class="fas fa-plus"></i></a></span>
+            </div>
+            <span class="clearfix border" style="margin-top:3%"></span>
+        </article>
+        <br>
+        {% endfor %}
+    </section>
+</div>
+{% else %}
+<div class="container">
+    <div class="mb-5 p-2 border-bottom">
+        <h3>Search Results</h3>
+        <h4 class="lead">
+            {% if course_search_num > 1 %}
+            <span class="font-weight-bolder text-danger">{{ course_search_num }}</span> results were found for the
+            search for <span class="font-weight-bolder text-danger">"{{query}}"</span>
+            {% else %}
+            <span class="font-weight-bolder text-danger">{{ course_search_num }}</span> results was found for the
+            search for <span class="font-weight-bolder text-danger">"{{query}}"</span>
+            {% endif %}
+        </h4>
+    </div>
+</div>
+{% endif %}
+<section class="text-center">
+    <!--Pagination-->
+    <ul class="pagination justify-content-center">
+        <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
+                href="{%url 'course_search_view_page' page=1%}?q={{ query }}">First</a>
+        </li>
+        {% for each in page_bar %}
+        <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
+                href="{%url 'course_search_view_page' page=each %}?q={{ query }}">{{each}}</a>
+        </li>
+        {% endfor %}
+        <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
+                href="{%url 'course_search_view_page' page=page_obj.paginator.num_pages%}?q={{ query }}">Last</a>
+        </li>
+    </ul>
+    <span class="font-weight-light">
+        Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+    <!--Pagination-->
+</section>
+
+{% endblock content %}
+
+{% block script %}
+
+{% endblock script %}

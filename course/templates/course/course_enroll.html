@@ -112,11 +112,11 @@
     </div>
 </div>
 {% else %}
-    {% if message %}
-        <div class="alert alert-danger" role="alert">
-            {{ message }}
-        </div>
-    {% endif %}
+{% if message %}
+<div class="alert alert-danger" role="alert">
+    {{ message }}
+</div>
+{% endif %}
 {% endif %}
 {% endblock content %}
 
@@ -158,10 +158,10 @@
                 success: function (result) {
                     $("[id^=ajax_result]").remove();
                     $("#code").parent().append(
-                        '<div id="ajax_result" class="alert alert-success" role="alert">Discount ' + result.data[0].discount*100 + '% OFF</div>'
+                        '<div id="ajax_result" class="alert alert-success" role="alert">Discount ' + result.data[0].discount * 100 + '% OFF</div>'
                     );
                     $("#discount_number")[0].innerText = toDecimal2(parseFloat($("#price_number")[0].innerText) * result.data[0].discount);
-                    $("#need_to_pay_number")[0].innerText = toDecimal2(parseFloat($("#price_number")[0].innerText)-parseFloat($("#discount_number")[0].innerText));
+                    $("#need_to_pay_number")[0].innerText = toDecimal2(parseFloat($("#price_number")[0].innerText) - parseFloat($("#discount_number")[0].innerText));
                 },
                 error: function (e) {
                     $('#create_panel_save').prop('disabled', false);

@@ -76,12 +76,13 @@
                         <a class="nav-link" href="#">Home <span class="sr-only">(current)</span></a>
                     </li>-->
                         <div class="d-flex justify-content-center h-100">
-                            <div class="form-inline searchbar">
-                                <input class="form-control" type="text" name="" placeholder="Search..." />
-                                <a href="#" class="btn btn-light"><i class="fas fa-search"></i></a>
-                            </div>
+                            <form class="form-inline searchbar" action="{% url 'course_search_view'%}">
+                                <input id="q" class="form-control" type="text" name="q" placeholder="Search..." />
+                                <button type="submit" id="search" href="#" class="btn btn-light"><i class="fas fa-search"></i></button>
+                            </form>
                             <div class="nav-item">
-                                <a class="btn btn-light border border-light rounded waves-effect mr-2" href="{%url 'course_list_view'%}">Course</a>
+                                <a class="btn btn-light border border-light rounded waves-effect mr-2"
+                                    href="{%url 'course_list_view'%}">Course</a>
                             </div>
                         </div>
                     </ul>
