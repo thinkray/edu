@@ -8,8 +8,9 @@ from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
                           DecimalField, Form, IntegerField,
                           MultipleChoiceField)
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.template import loader
+from django.urls import reverse
 from django.utils.timezone import localtime, now
 from django.views import View
 
@@ -668,6 +669,7 @@ class CourseListView(View):
 
         return HttpResponse(template.render(context, request))
 
+
 class CourseDetailView(View):
 
     def get(self, request, course_id=1):
@@ -697,7 +699,47 @@ class CourseDetailView(View):
         else:
             context['is_authenticated'] = False
             context['is_superuser'] = False
+
+        context['hide_welcome'] = True
+
+        return HttpResponse(template.render(context, request))
+
+
+class CourseEnrollView(View):
+
+    def get(self, request, course_id=1):
+        if not request.user.is_authenticated:
+            response = redirect(reverse('user_login_view'))
+            response['Location'] += '?redirect_uri=' + request.path
+            return response
         
+        context = {}
+        context['status'] = 200
+        try:
+            course = Course.objects.get(pk=course_id)
+            context['course'] = course
+        except Exception as e:
+            context['status'] = 404
+            context['message'] = 'CourseNotFound'
+
+        context['page_name'] = 'Course Detail'
+
+        template = loader.get_template('course/course_enroll.html')
+
+        context['site_name'] = settings.SITE_NAME
+
+        if request.user.is_authenticated:
+            context['is_authenticated'] = True
+            context['is_superuser'] = request.user.is_superuser
+            context['is_teacher'] = request.session.get('is_teacher')
+            context['name'] = request.user.name
+            context['username'] = request.user.username
+            context['balance'] = request.user.balance
+
+        else:
+            context['is_authenticated'] = False
+            context['is_superuser'] = False
+
         context['hide_welcome'] = True
 
         return HttpResponse(template.render(context, request))

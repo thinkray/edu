@@ -1,0 +1,284 @@
+{% extends 'base.html' %}
+<!--remember to get rid of welcome to the one-on-one band-->
+{% block content %}
+{% if status == 200 %}
+<style>
+    body {
+        min-height: 100vh;
+        background-color: #4dc9ff;
+    }
+</style>
+<div class="container-fluid">
+    <div class="row justify-content-center">
+        <div class="col-12">
+            <div class="card-group my-5">
+                <div class="card" style="background-image: url(/static/img/gradient1.jpg);background-size: cover;">
+                    <div class="card-body">
+                        <div class="card-title text-white border-bottom">
+                            <h5>Course Enrollment</h5>
+                        </div>
+                        <h2 class="font-weight-bolder text-white">{{ course.name }}</h2>
+                        <br>
+                        <p class="lead text-white"><i class="fa fa-user icon_fixer"></i>
+                            by <a href="#"><span
+                                    class="text-white font-weight-bolder">{{ course.teacher.name }}</span></a>
+                        </p>
+                        <p class="text-white"><i class="fa fa-calendar icon_fixer"></i>&nbsp;From
+                            {{ course.start_date }} to {{ course.end_date }}</p>
+                        <p class="mb-7" style="color:white">{{ course.info }}</p>
+                    </div>
+                </div>
+                <div class="card">
+                    <div class="card-body bg-light">
+                        <div class="card-title border-bottom">
+                            <h5>Payment</h5>
+                        </div>
+                        <br>
+                        <div class="table-responsive">
+                            <table class="table table-striped text-center col">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Course</th>
+                                        <th>Session Quota</th>
+                                        <th>Date</th>
+                                        <th>Price</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>{{ course.id }}</td>
+                                        <td>{{ course.name }}</td>
+                                        <td>{{ course.quota }}</td>
+                                        <td>From {{ course.start_date }}<br>to {{ course.end_date }}</td>
+                                        <td>${{ course.price }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <p class="text-right">Total: $<span id="price_number">{{ course.price }}</span></p>
+                        <p class="text-right text-danger">Discount: -$<span id="discount_number">0.00</span></p>
+                        <h5 class="text-right">You need to pay: $<span id="need_to_pay_number">{{ course.price }}</span>
+                        </h5>
+                        <br>
+                        <div class="form-group row">
+                            <div class="col">
+                                <label for="code" class="col col-form-label text-center">Coupon Code</label>
+                            </div>
+                            <div class="col">
+                                <input type="text" class="form-control" id="code" placeholder="e.g. 1839210">
+                            </div>
+                            <div class="col">
+                                <a href="#" id="apply_coupon_code" href="#" class="col btn btn-primary">Apply</a>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="pay" class="col col-form-label text-center">Your balance is $<span
+                                    id="balance_number">{{ balance }}</span></label>
+                            <div class="col col-form-label text-center text-danger">Once sold, No refund.</div>
+                            <div class="col">
+                                <a href="#" id="pay" class="col btn btn-warning text-white" data-toggle="modal"
+                                    data-target="#pay_panel">Pay</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="modal fade" id="pay_panel">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <!-- Modal Header -->
+                        <div class="modal-header">
+                            <h4 class="modal-title">Warning</h4>
+                            <button type="button" class="close" data-dismiss="modal">
+                                &times;
+                            </button>
+                        </div>
+                        <!-- Modal body -->
+                        <div id="checkout_panel_modal_body" class="modal-body text-danger">
+                            Once sold, No refund!
+                        </div>
+                        <!-- Modal footer -->
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Back
+                            </button>
+                            <button id="checkout" type="button" class="btn btn-warning text-white">Checkout
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+    {% if message %}
+        <div class="alert alert-danger" role="alert">
+            {{ message }}
+        </div>
+    {% endif %}
+{% endif %}
+{% endblock content %}
+
+{% block script %}
+{% if status == 200 %}
+<script>
+    function toDecimal2(x) {
+        var f = parseFloat(x);
+        if (isNaN(f)) {
+            return false;
+        }
+        var f = Math.round(x * 100) / 100;
+        var s = f.toString();
+        var rs = s.indexOf('.');
+        if (rs < 0) {
+            rs = s.length;
+            s += '.';
+        }
+        while (s.length <= rs + 2) {
+            s += '0';
+        }
+        return s;
+    }
+    $('#apply_coupon_code').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["code"] = $("#code")[0].value;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'coupon_code_check_api'%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=ajax_result]").remove();
+                    $("#code").parent().append(
+                        '<div id="ajax_result" class="alert alert-success" role="alert">Discount ' + result.data[0].discount*100 + '% OFF</div>'
+                    );
+                    $("#discount_number")[0].innerText = toDecimal2(parseFloat($("#price_number")[0].innerText) * result.data[0].discount);
+                    $("#need_to_pay_number")[0].innerText = toDecimal2(parseFloat($("#price_number")[0].innerText)-parseFloat($("#discount_number")[0].innerText));
+                },
+                error: function (e) {
+                    $('#create_panel_save').prop('disabled', false);
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $("#code").parent().append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#" + index)
+                                        .parent()
+                                        .append(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            '</div>'
+                                        );
+                                }
+                            }
+                            $("#discount_number")[0].innerText = toDecimal2(0);
+                            $("#need_to_pay_number")[0].innerText = $("#price_number")[0].innerText;
+                            break;
+                        case 404:
+                            $("[id^=ajax_result]").remove();
+                            $("#code").parent().append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' + result['message'] + '</div>'
+                            );
+                            $("#discount_number")[0].innerText = toDecimal2(0);
+                            $("#need_to_pay_number")[0].innerText = $("#price_number")[0].innerText;
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $("#code").parent().append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+    $('#checkout').click(function () {
+        $(function () {
+            $('#checkout').prop('disabled', true);
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["course"] = "{{ course.id }}";
+            list["coupon_code"] = $("#code")[0].value;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'course_instance_list_api'%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=checkout_ajax_result]").remove();
+                    $("#checkout_panel_modal_body").append(
+                        '<div id="checkout_ajax_result" class="alert alert-success" role="alert">' +
+                        result["message"] +
+                        '</div>'
+                    );
+                    document.location = "{% url 'course_detail_view_page' course_id=course.id %}";
+                },
+                error: function (e) {
+                    $('#checkout').prop('disabled', false);
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=checkout_ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $("#checkout_panel_modal_body").append(
+                                    '<div id="checkout_ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#create_panel_" + index)
+                                        .parent()
+                                        .append(
+                                            '<div id="checkout_ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            '</div>'
+                                        );
+                                }
+                            }
+                            break;
+                        case 403:
+                            $("[id^=checkout_ajax_result]").remove();
+                            $("#checkout_panel_modal_body").append(
+                                '<div id="checkout_ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        default:
+                            $("[id^=checkout_ajax_result]").remove();
+                            $("#checkout_panel_modal_body").append(
+                                '<div id="checkout_ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+</script>
+{% endif %}
+{% endblock script %}

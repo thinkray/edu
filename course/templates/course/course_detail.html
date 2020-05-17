@@ -2,7 +2,7 @@
 
 {% block content %}
 {% if status == 200 %}
-<div class="card blue-gradient rounded-0 border-1" style="  background-image: url(/static/img/gradient1.jpg);background-size:cover;">
+<div class="card blue-gradient rounded-0 border-1" style="background-image: url(/static/img/gradient1.jpg);background-size:cover;">
     <div class="card-body text-white rgba-black-light" style="margin-left:10%;">
         <!--Grid row-->
         <h1>{{ course.name }}</h1>
@@ -11,7 +11,8 @@
         <p class="lead"><i class="fa fa-user icon_fixer"></i>&nbsp; by <a href=""><span class="text-white font-weight-bolder">{{ course.teacher.name}}</span></a>
         </p>
         </p>
-        <p><i class="fa fa-calendar icon_fixer"></i>&nbsp; From {{ course.start_date }} to {{ course.end_date }}</p>
+        <p><i class="fa fa-calendar icon_fixer"></i>&nbsp;From {{ course.start_date }} to {{ course.end_date }}</p>
+        <a href="{% url 'course_enroll_view_page' course_id=course.id %}" class="btn btn-warning text-white">Join Now</a>
         <!--Grid row-->
     </div>
 </div>
