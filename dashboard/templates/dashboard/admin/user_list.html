@@ -395,75 +395,6 @@
             });
         });
     });
-    $('#create').click(function () {
-        $(function () {
-            let list = {};
-            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            list["code"] = $("#code")[0].value;
-            list["amount"] = $("#amount")[0].value;
-            $.ajax({
-                type: "POST",
-                contentType: "application/json;charset=UTF-8",
-                url: "{%url 'redemption_code_list_api'%}",
-                data: JSON.stringify(list),
-                beforeSend: function (xhr, settings) {
-                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
-                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
-                    }
-                },
-                success: function (result) {
-                    $("[id^=ajax_result]").remove();
-                    $(".table-responsive").before(
-                        '<div id="ajax_result" class="alert alert-success" role="alert">' +
-                        result["message"] +
-                        '</div>'
-                    );
-                    window.location.reload();
-                },
-                error: function (e) {
-                    let result = e.responseJSON;
-                    switch (result["status"]) {
-                        case 400:
-                            $("[id^=ajax_result]").remove();
-                            for (var index in result["message"]) {
-                                $("#" + index)
-                                    .parent()
-                                    .append(
-                                        '<div id="ajax_result_' +
-                                        index +
-                                        '" class="alert alert-danger" role="alert">' +
-                                        result["message"][index][0] +
-                                        '</div>'
-                                    );
-                            }
-                            break;
-                        case 403:
-                            $("[id^=ajax_result]").remove();
-                            $(".table-responsive").before(
-                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
-                                result["message"] +
-                                '</div>'
-                            );
-                            break;
-                        case 409:
-                            $("[id^=ajax_result]").remove();
-                            $(".table-responsive").before(
-                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
-                                result["message"] +
-                                '</div>'
-                            );
-                            break;
-                        default:
-                            $("[id^=ajax_result]").remove();
-                            $(".table-responsive").before(
-                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
-                            );
-                            break;
-                    }
-                },
-            });
-        });
-    });
     $('#edit_panel_save').click(function () {
         $(function () {
             let list = {};
@@ -504,7 +435,7 @@
             list["username"] = $("#create_panel_username")[0].value;
             list["name"] = $("#create_panel_name")[0].value;
             list["profile"] = $("#create_panel_profile")[0].value;
-            list["role"] = $("#create_panel_role")[0].value
+            list["role"] = $("#create_panel_role")[0].value;
             if ($("#create_panel_password")[0].value == $("#create_panel_password2")[0].value) {
                 list["password"] = $("#create_panel_password")[0].value;
             }

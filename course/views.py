@@ -39,16 +39,7 @@ class CourseListAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = CourseListAPIGetForm(data)
+        form = CourseListAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -154,16 +145,7 @@ class CourseAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = CourseAPIGetForm(data)
+        form = CourseAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 

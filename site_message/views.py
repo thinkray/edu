@@ -411,8 +411,7 @@ class MessageDetailView(View):
                     context['status'] = 200
                     context['message_id'] = message_id
                     context['title'] = result['data'][0]['title']
-                    context['send_date'] = datetime.strptime(
-                        result['data'][0]['send_date'], '%Y-%m-%dT%H:%M:%S.%f%z')
+                    context['send_date'] = result['data'][0]['send_date']
                     context['sender'] = User.objects.filter(
                         pk=result['data'][0]['sender'])[0]
                     context['recipient'] = User.objects.filter(

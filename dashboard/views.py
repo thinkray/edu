@@ -8,6 +8,7 @@ from django.urls import reverse
 from django.views import View
 
 from account.models import User
+from course.models import Course
 from finance.models import Bill, CouponCode, RedemptionCode
 from site_log.models import Log
 
@@ -105,6 +106,36 @@ class UserBillListView(View):
         for i in range(page_start, page_end + 1):
             page_bar.append(i)
         context['page_bar'] = page_bar
+
+        return HttpResponse(template.render(context, request))
+
+
+class UserCalendarView(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            response = redirect(reverse('user_login_view'))
+            response['Location'] += '?redirect_uri=' + request.path
+            return response
+
+        context = {}
+        result = User.objects.all()
+        context['page_name'] = 'My Calendar'
+
+        template = loader.get_template('dashboard/user/calendar.html')
+
+        context['site_name'] = settings.SITE_NAME
+        context['is_authenticated'] = True
+        context['is_superuser'] = request.user.is_superuser
+        context['is_teacher'] = request.session.get('is_teacher')
+        context['name'] = request.user.name
+        context['username'] = request.user.username
+        context['hide_welcome'] = True
+        if request.user.is_superuser:
+            context['teach_course'] = Course.objects.all()
+        elif request.user.groups.filter(name='teacher').exists():
+            context['teach_course'] = Course.objects.filter(teacher=request.user)
+        else:
+            context['teach_course'] = []
 
         return HttpResponse(template.render(context, request))
 

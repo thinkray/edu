@@ -1,0 +1,872 @@
+{% extends 'base.html' %}
+
+{% block head %}
+<script type="text/javascript" src="/static/js/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
+<link rel="stylesheet" href="/static/css/tempusdominus-bootstrap-4.min.css" />
+{% endblock head %}
+
+{% block content %}
+<style>
+    .clearfix::after,
+    .calendar ol::after {
+        content: ".";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+    }
+
+    /* ================
+Calendar Styling */
+    .calendar {
+        border-radius: 10px;
+    }
+
+    .calendar ol li {
+        float: left;
+        width: 14.28571%;
+    }
+
+    .calendar .day-names {
+        border-bottom: 2px solid #eee;
+    }
+
+    .calendar .day-names li {
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .calendar .days li {
+        border-bottom: 1px solid #eee;
+        min-height: 8rem;
+    }
+
+    .calendar .days li .date {
+        margin: 0.5rem 0;
+    }
+
+    .calendar .days li .event {
+        font-size: 0.75rem;
+        padding: 0.4rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-radius: 4rem;
+        margin-bottom: 1px;
+    }
+
+    .calendar .days li .event.clear {
+        background: none;
+    }
+
+    /*
+*
+* ==========================================
+* FOR non this month days(the gray number)
+* ==========================================
+*
+*/
+    .calendar .days li:nth-child(n+29) {
+        border-bottom: none;
+    }
+
+    .calendar .days li.outside .date {
+        color: #ddd;
+    }
+
+    /*
+*
+* ==========================================
+* FOR back ground
+* ==========================================
+*
+*/
+    body {
+        min-height: 100vh;
+        background-color: #4dc9ff;
+
+    }
+</style>
+<div class="container py-5">
+
+    <!-- For Demo Purpose -->
+    <header class="text-center text-white mb-5">
+        <h1 class="display-4">Calendar</h1>
+        <p class="font-italic mb-0">This calendar provides you the schedule of your courses</p>
+    </header>
+    <!-- Calendar -->
+    <div class="calendar shadow bg-white p-5">
+        <div class="d-flex align-items-center">
+            <h2 class="month font-weight-bold mb-0"><i class="fa fa-calendar mr-3"></i><span id="month_year"></span>
+            </h2>
+        </div>
+        <div class="d-flex justify-content-between bd-highlight mb-3">
+            <p class="font-italic text-muted"><span id="today_overview"></span></p>
+            <div>
+                <div class="btn-group btn-group-toggle" data-toggle="buttons">
+                    {% if is_superuser %}
+                    <label class="btn btn-secondary active">
+                        <input type="radio" name="view" id="view_all" value="all" checked="">All
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="view" id="view_teacher" value="teacher">Teacher
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="view" id="view_student" value="student">Student
+                    </label>
+                    {% elif is_teacher %}
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="view" id="view_teacher" value="teacher" checked="">Teacher
+                    </label>
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="view" id="view_student" value="student">Student
+                    </label>
+                    {% else %}
+                    <label class="btn btn-secondary">
+                        <input type="radio" name="view" id="view_student" value="student" checked="">Refresh
+                    </label>
+                    {% endif %}
+                </div>
+                {% if is_superuser or is_teacher %}
+                <a id="create" class="btn btn-primary" href="#" data-toggle="modal"
+                    data-target="#create_panel">Create</a>
+                {% endif %}
+            </div>
+        </div>
+        <ol class="day-names list-unstyled">
+            <li class="font-weight-bold text-uppercase">Sun</li>
+            <li class="font-weight-bold text-uppercase">Mon</li>
+            <li class="font-weight-bold text-uppercase">Tue</li>
+            <li class="font-weight-bold text-uppercase">Wed</li>
+            <li class="font-weight-bold text-uppercase">Thu</li>
+            <li class="font-weight-bold text-uppercase">Fri</li>
+            <li class="font-weight-bold text-uppercase">Sat</li>
+        </ol>
+        <ol id="days_list" class="days list-unstyled">
+        </ol>
+        <div class="row">
+            <div class="mx-auto">
+                <div class="input-group date" id="month_picker" data-target-input="nearest">
+                    <input id="month_picker_input" type="text" class="form-control datetimepicker-input"
+                        data-target="#month_picker" />
+                    <div class="input-group-append" data-target="#month_picker" data-toggle="datetimepicker">
+                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="edit_panel" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="edit_panel_label">Edit</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="edit_panel_modal_body" class="modal-body">
+                        <form>
+                            <input type="text" class="form-control" id="edit_panel_id" style="display: none" disabled>
+                            <div class="form-group">
+                                <label for="edit_panel_course" class="col-form-label">Course:</label>
+                                <input type="text" class="form-control" id="edit_panel_course" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_panel_teacher" class="col-form-label">Teacher:</label>
+                                <input type="text" class="form-control" id="edit_panel_teacher" disabled>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_panel_start_date" class="col-form-label">From:</label>
+                                <div class="input-group date" id="edit_panel_start_date" data-target-input="nearest">
+                                    <input id="edit_panel_start_date_input" type="text"
+                                        class="form-control datetimepicker-input"
+                                        data-target="#edit_panel_start_date" />
+                                    <div class="input-group-append" data-target="#edit_panel_start_date"
+                                        data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="edit_panel_end_date" class="col-form-label">To:</label>
+                                <div class="input-group date" id="edit_panel_end_date" data-target-input="nearest">
+                                    <input id="edit_panel_end_date_input" type="text"
+                                        class="form-control datetimepicker-input" data-target="#edit_panel_end_date" />
+                                    <div class="input-group-append" data-target="#edit_panel_end_date"
+                                        data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="edit_panel_student_form_group" class="form-group">
+                                <label for="edit_panel_student" class="col-form-label">Student:</label>
+                                <input type="text" class="form-control" id="edit_panel_student" disabled>
+                            </div>
+                            <div id="edit_panel_book_form_group" class="form-group">
+                                <div class="custom-control custom-checkbox">
+                                    <input type="checkbox" class="custom-control-input" id="edit_panel_book" disabled>
+                                    <label class="custom-control-label" for="edit_panel_book">Book this session</label>
+                                </div>
+                            </div>
+                            <div id="edit_panel_info_form_group" class="form-group">
+                                <label for="edit_panel_info" class="col-form-label">Info:</label>
+                                <textarea type="text" class="form-control" id="edit_panel_info" disabled></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="edit_panel_delete" type="button" class="btn btn-danger" data-toggle="modal"
+                            data-target="#delete_panel">Delete</button>
+                        <button id="edit_panel_save" type="button" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="delete_panel">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <!-- Modal Header -->
+                    <div class="modal-header">
+                        <h4 class="modal-title">Warning</h4>
+                        <button type="button" class="close" data-dismiss="modal">
+                            &times;
+                        </button>
+                    </div>
+                    <!-- Modal body -->
+                    <div id="delete_panel_modal_body" class="modal-body">
+                        After deleting it, it will not come back again.
+                    </div>
+                    <input id="target_item" name="target_item" type="hidden">
+                    <!-- Modal footer -->
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" data-dismiss="modal">Back
+                        </button>
+                        <button id="delete_check" type="button" class="btn btn-danger">Delete
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal fade" id="create_panel" tabindex="-1" role="dialog">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="create_panel_label">Create a Booking</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div id="create_panel_modal_body" class="modal-body">
+                        <form>
+                            <div class="form-group">
+                                <label class="col-form-label" for="create_panel_course">Course:</label>
+                                <select class="custom-select" id="create_panel_course">
+                                    {% for each in teach_course %}
+                                    <option value="{{ each.id }}">{{ each.name }} (id:{{each.id}})</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div id="create_panel_teacher_form_group" class="form-group">
+                                <label for="create_panel_teacher"
+                                    class="col-form-label">Teacher{% if is_superuser %}(optional){% endif %}:</label>
+                                <input type="text" class="form-control" id="create_panel_teacher">
+                            </div>
+                            <div class="form-group">
+                                <label for="create_panel_start_date" class="col-form-label">From:</label>
+                                <div class="input-group date" id="create_panel_start_date" data-target-input="nearest">
+                                    <input id="create_panel_start_date_input" type="text"
+                                        class="form-control datetimepicker-input"
+                                        data-target="#create_panel_start_date" />
+                                    <div class="input-group-append" data-target="#create_panel_start_date"
+                                        data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="create_panel_end_date" class="col-form-label">To:</label>
+                                <div class="input-group date" id="create_panel_end_date" data-target-input="nearest">
+                                    <input id="create_panel_end_date_input" type="text"
+                                        class="form-control datetimepicker-input"
+                                        data-target="#create_panel_end_date" />
+                                    <div class="input-group-append" data-target="#create_panel_end_date"
+                                        data-toggle="datetimepicker">
+                                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="create_panel_info_form_group" class="form-group">
+                                <label for="create_panel_info" class="col-form-label">Info:</label>
+                                <textarea type="text" class="form-control" id="create_panel_info"></textarea>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                        <button id="create_panel_save" type="button" class="btn btn-primary">Save</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}
+
+{% block script %}
+<script>
+    var month;
+    var year;
+    var date_dict = { 1: 'Jan', 2: 'Feb', 3: 'Mar', 4: 'Apr', 5: 'May', 6: 'Jun', 7: 'Jul', 8: 'Aug', 9: 'Sep', 10: 'Oct', 11: 'Nov', 12: 'Dec', };
+    $("#month_picker").on("dp.show", function (e) {
+        $(e.target).data("DateTimePicker").viewMode("months");
+    });
+    $(function () {
+        $('#edit_panel_start_date').datetimepicker({
+            icons: {
+                time: "far fa-clock",
+            }
+        }
+        );
+        $('#edit_panel_end_date').datetimepicker({
+            icons: {
+                time: "far fa-clock",
+            }
+        }
+        );
+        $('#create_panel_start_date').datetimepicker({
+            icons: {
+                time: "far fa-clock",
+            }
+        }
+        );
+        $('#create_panel_end_date').datetimepicker({
+            icons: {
+                time: "far fa-clock",
+            }
+        }
+        );
+        $('#month_picker').datetimepicker({
+            viewMode: 'months',
+            format: 'MM/YYYY',
+            toolbarPlacement: "top",
+            allowInputToggle: true,
+            defaultDate: moment(),
+        });
+
+    });
+    function init(year, month) {
+        var date = new Date();
+        var year = year ? year : date.getFullYear();
+        var month = month ? month - 1 : date.getMonth();
+        let daysArr = [];
+        var firstDay = new Date(year, month, 1);
+        var weekday = firstDay.getDay();
+        var days = new Date(year, month + 1, 0).getDate();
+        var start_date = new Date(year, month, 1);
+        start_date.setDate(start_date.getDate() - weekday);
+        let arr = [];
+        for (var i = 0; i < weekday; i++) {
+            let temp_date = new Date(year, month - 1, 1);
+            temp_date.setDate(start_date.getDate() + i);
+            arr.push({
+                currentMonth: false,
+                date: temp_date,
+            });
+            if (arr.length == 7) {
+                daysArr.push(arr);
+                arr = [];
+            }
+        }
+
+        for (var i = 0; i < days; i++) {
+            let temp_date = new Date(year, month, 1);
+            temp_date.setDate(firstDay.getDate() + i);
+            arr.push({
+                currentMonth: true,
+                date: temp_date,
+            });
+            if (arr.length == 7) {
+                daysArr.push(arr);
+                arr = [];
+            }
+        }
+        if (arr.length) {
+            while (arr.length < 7) {
+                let temp_date = new Date(arr[arr.length - 1].date.valueOf());
+                temp_date.setDate(temp_date.getDate() + 1);
+                arr.push({
+                    currentMonth: false,
+                    date: temp_date,
+                });
+            }
+            daysArr.push(arr);
+        }
+        $("[id^=days_list_row_]").remove();
+        for (var i = 0; i < daysArr.length; i++) {
+            $("#days_list").append('<div id="days_list_row_' + i + '" class="row"></div>');
+            for (var j = 0; j < daysArr[i].length; j++) {
+                if (daysArr[i][j].currentMonth) {
+                    $("#days_list_row_" + i).append('<li id="days_list_day_' + moment(daysArr[i][j].date).format('YYYY-MM-DD') + '"><div id="month_day_' + daysArr[i][j].date.getDate() + '" class="date">' + daysArr[i][j].date.getDate() + '</div></div>');
+                }
+                else {
+                    $("#days_list_row_" + i).append('<li id="days_list_day_' + moment(daysArr[i][j].date).format('YYYY-MM-DD') + '" class="outside"><div class="date">' + daysArr[i][j].date.getDate() + '</div></li>');
+                }
+            }
+        }
+        $(function () {
+            let list = [];
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list.push({ name: 'column', value: 'start_date' });
+            list.push({ name: 'column', value: 'end_date' });
+            list.push({ name: 'column', value: 'course' });
+            list.push({ name: 'column', value: 'teacher' });
+            list.push({ name: 'column', value: 'student' });
+            list.push({ name: 'column', value: 'info' });
+            list.push({ name: 'panel', value: $("input[name='view']:checked").val() });
+            list.push({ name: 'start_date', value: moment(daysArr[0][0].date).format('YYYY-MM-DD') });
+            list.push({ name: 'end_date', value: moment(daysArr[daysArr.length - 1][6].date).format('YYYY-MM-DD') });
+            $.ajax({
+                type: "GET",
+                contentType: "application/json;charset=UTF-8",
+                url: "{% url 'booking_list_api' %}",
+                data: list,
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    var event_set = result.data;
+                    let current_date = new Date();
+                    let today_count = 0;
+                    let next_event;
+                    if (event_set.length > 0) {
+                        next_event = event_set[0];
+                    }
+                    for (var i = 0; i < event_set.length; i++) {
+                        let list = [];
+                        let api_url = "{%url 'course_api' course_id='0'%}";
+                        list.push({ name: 'column', value: 'name' });
+                        let course = $.parseJSON($.ajax({
+                            type: "GET",
+                            contentType: "application/json;charset=UTF-8",
+                            url: api_url.substr(0, api_url.length - 1) + event_set[i].course,
+                            data: list,
+                            beforeSend: function (xhr, settings) {
+                                if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                                    xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                }
+                            },
+                            async: false,
+                        }).responseText);
+                        event_set[i].course = course.data[0].name;
+
+                        if (event_set[i].teacher) {
+                            list = []
+                            list.push({ name: 'column', value: 'name' });
+                            list.push({ name: 'column', value: 'username' });
+                            api_url = "{%url 'user_api' user_id='0'%}"
+                            let teacher = $.parseJSON($.ajax({
+                                type: "GET",
+                                contentType: "application/json;charset=UTF-8",
+                                url: api_url.substr(0, api_url.length - 1) + event_set[i].teacher,
+                                data: list,
+                                beforeSend: function (xhr, settings) {
+                                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                    }
+                                },
+                                async: false,
+                            }).responseText);
+                            event_set[i].teacher = teacher.data[0];
+                        }
+
+                        if (event_set[i].student) {
+                            list = []
+                            list.push({ name: 'column', value: 'name' });
+                            list.push({ name: 'column', value: 'username' });
+                            api_url = "{%url 'user_api' user_id='0'%}"
+                            let student = $.parseJSON($.ajax({
+                                type: "GET",
+                                contentType: "application/json;charset=UTF-8",
+                                url: api_url.substr(0, api_url.length - 1) + event_set[i].student,
+                                data: list,
+                                beforeSend: function (xhr, settings) {
+                                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                                    }
+                                },
+                                async: false,
+                            }).responseText);
+                            event_set[i].student = student.data[0];
+                        }
+                        let event_date = new Date(event_set[i].start_date);
+                        if (('{{is_superuser}}' == 'True') || ('{{is_teacher}}' == 'True')) {
+                            if ((moment(event_set[i].start_date).diff() < 86400000) && (moment(event_set[i].start_date).diff() >= 0)) {
+                                today_count++;
+                                if ((moment(event_set[i].start_date).diff() < moment(next_event.start_date).diff()) || (moment(next_event.start_date).diff() < 0)) {
+                                    next_event = event_set[i];
+                                }
+                            }
+                        }
+                        else
+                            if ((moment(event_set[i].start_date).diff() < 86400000) && (moment(event_set[i].start_date).diff() >= 0) && (event_set[i].student)) {
+                                today_count++;
+                                if ((moment(event_set[i].start_date).diff() < moment(next_event.start_date).diff()) || (moment(next_event.start_date).diff() < 0)) {
+                                    next_event = event_set[i];
+                                }
+                            }
+                        $("#days_list_day_" + moment(event_date).format('YYYY-MM-DD')).append('<div id="days_list_event_' + event_set[i].id + '" class="event btn" data-toggle="modal" data-target="#edit_panel" title="Edit">' + event_set[i].course + '</div>');
+                        if (event_set[i].student) {
+                            if (event_set[i].student.username == '{{username}}') {
+                                $("#days_list_event_" + event_set[i].id).addClass("btn-success");
+                            }
+                            else {
+                                $("#days_list_event_" + event_set[i].id).addClass("btn-warning");
+                            }
+                            $("#days_list_event_" + event_set[i].id).data('student-id', event_set[i].student.id);
+                            $("#days_list_event_" + event_set[i].id).data('student-name', event_set[i].student.name);
+                            $("#days_list_event_" + event_set[i].id).data('student-username', event_set[i].student.username);
+                        }
+                        else if (event_set[i].student != 0) {
+                            $("#days_list_event_" + event_set[i].id).addClass("btn-outline-success");
+                        }
+                        else {
+                            $("#days_list_event_" + event_set[i].id).addClass("btn-outline-warning");
+                            $("#days_list_event_" + event_set[i].id).data('student-id', 0);
+                        }
+                        $("#days_list_event_" + event_set[i].id).data('booking-id', event_set[i].id);
+                        $("#days_list_event_" + event_set[i].id).data('teacher-id', event_set[i].teacher.id);
+                        $("#days_list_event_" + event_set[i].id).data('teacher-name', event_set[i].teacher.name);
+                        $("#days_list_event_" + event_set[i].id).data('teacher-username', event_set[i].teacher.username);
+                        $("#days_list_event_" + event_set[i].id).data('course', event_set[i].course);
+                        $("#days_list_event_" + event_set[i].id).data('start_date', event_set[i].start_date);
+                        $("#days_list_event_" + event_set[i].id).data('end_date', event_set[i].end_date);
+                        $("#days_list_event_" + event_set[i].id).data('info', event_set[i].info);
+                    }
+
+                    if ((current_date.getFullYear() == year) && (current_date.getMonth() == month)) {
+                        if (today_count > 1) {
+                            $("#today_overview")[0].innerText = 'We have ' + today_count + ' unfinished events today. Next event of ' + next_event.course + ' will start at ' + moment(next_event.start_date).format('hh:mm A') + '.';
+                        }
+                        else if (today_count == 1) {
+                            $("#today_overview")[0].innerText = 'We have 1 unfinished event today. Next event of ' + next_event.course + ' will start at ' + moment(next_event.start_date).format('hh:mm A') + '.';
+                        }
+                        else {
+                            $("#today_overview")[0].innerText = 'No unfinished event today.';
+                        }
+                    }
+                    $('[id^=days_list_event_]').click(function () {
+                        $("[id^=ajax_result]").remove();
+                        $("#edit_panel_id")[0].value = $(this).data('booking-id');
+                        $("#edit_panel_course")[0].value = $(this).data('course');
+                        $("#edit_panel_teacher")[0].value = $(this).data('teacher-username');
+                        if ($(this).data('student-username')) {
+                            $("#edit_panel_student")[0].value = $(this).data('student-username');
+                            if (($(this).data('teacher-username') == "{{username}}") || ('{{is_superuser}}' == 'True')) {
+                                $("#edit_panel_student_form_group").show();
+                                $("#edit_panel_book_form_group").hide();
+                                $("#edit_panel_info_form_group").show();
+                                $("#edit_panel_delete").show();
+                                $("#edit_panel_save").show();
+                            }
+                            else if ($(this).data('student-username') == "{{username}}") {
+                                $("#edit_panel_book").prop('disabled', false);
+                                $("#edit_panel_book").prop("checked", true);
+                                $("#edit_panel_student_form_group").hide();
+                                $("#edit_panel_book_form_group").show();
+                                $("#edit_panel_info_form_group").show();
+                                $("#edit_panel_delete").hide();
+                                $("#edit_panel_save").show();
+                            }
+                            else {
+                                $("#edit_panel_book").prop('disabled', true);
+                                $("#edit_panel_book").prop("checked", false);
+                                $("#edit_panel_student_form_group").hide();
+                                $("#edit_panel_book_form_group").hide();
+                                $("#edit_panel_info_form_group").hide();
+                                $("#edit_panel_delete").hide();
+                                $("#edit_panel_save").hide();
+                            }
+                        }
+                        else {
+                            if (($(this).data('teacher-username') == "{{username}}") || ('{{is_superuser}}' == 'True')) {
+                                $("#edit_panel_student_form_group").show();
+                                $("#edit_panel_book_form_group").hide();
+                                $("#edit_panel_info_form_group").show();
+                                $("#edit_panel_delete").show();
+                                $("#edit_panel_save").show();
+                            }
+                            else if ($(this).data('student-id') != 0) {
+                                $("#edit_panel_book").prop('disabled', false);
+                                $("#edit_panel_book").prop("checked", false);
+                                $("#edit_panel_student_form_group").hide();
+                                $("#edit_panel_book_form_group").show();
+                                $("#edit_panel_info_form_group").hide();
+                                $("#edit_panel_delete").hide();
+                                $("#edit_panel_save").show();
+                            }
+                            else {
+                                $("#edit_panel_book").prop('disabled', true);
+                                $("#edit_panel_book").prop("checked", false);
+                                $("#edit_panel_student_form_group").hide();
+                                $("#edit_panel_book_form_group").hide();
+                                $("#edit_panel_info_form_group").hide();
+                                $("#edit_panel_delete").hide();
+                                $("#edit_panel_save").hide();
+                            }
+                        }
+                        $('#edit_panel_start_date').datetimepicker('date', moment($(this).data('start_date')));
+                        $('#edit_panel_end_date').datetimepicker('date', moment($(this).data('end_date')));
+                        $("#edit_panel_info")[0].value = $(this).data('info');
+                        if (($(this).data('teacher-username') == "{{username}}") || ('{{is_superuser}}' == 'True')) {
+                            $('#edit_panel_start_date_input').prop('disabled', false);
+                            $("#edit_panel_end_date_input").prop('disabled', false);
+                            $("#edit_panel_student").prop('disabled', false);
+                            $("#edit_panel_info").prop('disabled', false);
+                        }
+                        else {
+                            $('#edit_panel_start_date_input').prop('disabled', true);
+                            $("#edit_panel_end_date_input").prop('disabled', true);
+                            $("#edit_panel_student").prop('disabled', true);
+                            $("#edit_panel_info").prop('disabled', true);
+                        }
+                    });
+                },
+                error: function (e) {
+                },
+            });
+        });
+    }
+    $('#edit_panel_save').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            let api_url = "{%url 'booking_api' booking_id='0'%}";
+            list["start_date"] = $('#edit_panel_start_date').datetimepicker('viewDate').format('YYYY-MM-DD HH:mm');
+            list["end_date"] = $('#edit_panel_end_date').datetimepicker('viewDate').format('YYYY-MM-DD HH:mm');
+            if (($("#days_list_event_" + $("#edit_panel_id")[0].value).data('teacher-username') == "{{username}}") || ('{{is_superuser}}' == 'True')) {
+                list["student"] = $("#edit_panel_student")[0].value;
+            }
+            else {
+                if ($('#edit_panel_book').is(':checked')) {
+                    list["student"] = "{{username}}";
+                }
+                else {
+                    list["student"] = "";
+                }
+            }
+            list["info"] = $("#edit_panel_info")[0].value;
+            $.ajax({
+                type: "PATCH",
+                contentType: "application/json;charset=UTF-8",
+                url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=ajax_result]").remove();
+                    $("#edit_panel_modal_body").append('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The booking was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $('#edit_panel').modal('hide');
+                    window.location.reload();
+                },
+                error: function (e) {
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $("#edit_panel_modal_body").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#edit_panel_" + index)
+                                        .parent()
+                                        .after(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            "</div>"
+                                        );
+                                }
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $("#edit_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                "</div>"
+                            );
+                            break;
+                        case 409:
+                            $("[id^=ajax_result]").remove();
+                            $("#edit_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                "</div>"
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $("#edit_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong. Try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+    $('[id^=view_]').click(function () {
+        init(year, month);
+        let current_date = new Date();
+        if ((current_date.getFullYear() == year) && (current_date.getMonth() + 1 == month)) {
+            $("#month_day_" + current_date.getDate()).addClass('text-danger');
+        }
+    });
+    $('#delete_check').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            let api_url = "{%url 'booking_api' booking_id='0'%}";
+            $.ajax({
+                type: "DELETE",
+                contentType: "application/json;charset=UTF-8",
+                url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $(".day-names").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The booking was successfully deleted. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $('#delete_panel').modal('hide');
+                    $('#edit_panel').modal('hide');
+                    window.location.reload();
+                },
+                error: function (e) {
+                    $(".day-names").before('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $('#delete_panel').modal('hide');
+                    $('#edit_panel').modal('hide');
+                    window.location.reload();
+                }
+            });
+        });
+    });
+    $('#create').click(function () {
+        $('#create_panel_start_date').datetimepicker('date', moment());
+        $('#create_panel_end_date').datetimepicker('date', moment());
+        if ('{{is_superuser}}' == 'True') {
+            $("#create_panel_teacher").prop('disabled', false);
+        }
+        else {
+            $("#create_panel_teacher").prop('disabled', true);
+            $("#create_panel_teacher")[0].value = "{{ username }}";
+        }
+    });
+    $('#create_panel_save').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["course"] = $("#create_panel_course")[0].value;
+            list["start_date"] = $('#create_panel_start_date').datetimepicker('viewDate').format('YYYY-MM-DD HH:mm');
+            list["end_date"] = $('#create_panel_end_date').datetimepicker('viewDate').format('YYYY-MM-DD HH:mm');
+            list["teacher"] = $("#create_panel_teacher")[0].value;
+            list["info"] = $("#create_panel_info")[0].value;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{% url 'booking_list_api' %}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $(".day-names").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The booking was successfully created. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $('#create_panel').modal('hide');
+                    window.location.reload();
+                },
+                error: function (e) {
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $("#create_panel_modal_body").append(
+                                    '<div id="checkout_ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#create_panel_" + index)
+                                        .parent()
+                                        .after(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            "</div>"
+                                        );
+                                }
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                "</div>"
+                            );
+                            break;
+                        case 409:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                "</div>"
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong. Try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+    $('#month_picker').on("change.datetimepicker", function (e) {
+        let flag = false;
+        if (parseInt($('#month_picker').datetimepicker('viewDate').format('MM')) != month) {
+            month = parseInt($('#month_picker').datetimepicker('viewDate').format('MM'));
+            flag = true;
+        }
+        if (parseInt($('#month_picker').datetimepicker('viewDate').format('YYYY')) != year) {
+            year = parseInt($('#month_picker').datetimepicker('viewDate').format('YYYY'));
+            flag = true;
+        }
+        if (flag) {
+            $("#month_year")[0].innerHTML = date_dict[month] + ' ' + year;
+            init(year, month);
+            let current_date = new Date();
+            if ((current_date.getFullYear() == year) && (current_date.getMonth() + 1 == month)) {
+                $("#month_day_" + current_date.getDate()).addClass('text-danger');
+            }
+        }
+    });
+</script>
+{% endblock script %}

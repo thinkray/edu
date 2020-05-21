@@ -6,7 +6,7 @@ from django.forms import (CharField, ChoiceField, DateTimeField, Form,
                           IntegerField, MultipleChoiceField)
 from django.http import JsonResponse
 from django.shortcuts import render
-from django.utils.timezone import localtime
+from django.utils.timezone import localtime, now
 from django.views import View
 
 from account.models import User
@@ -26,6 +26,8 @@ class BookingListAPI(View):
         class BookingListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
+            start_date = DateTimeField(required=False)
+            end_date = DateTimeField(required=False)
             choices = (
                 ("course", "course"),
                 ("start_date", "start_date"),
@@ -41,70 +43,123 @@ class BookingListAPI(View):
                 ("all", "all"),
             )
             panel = ChoiceField(choices=panel_choices)
-        try:
-            data = json.loads(request.body)
 
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = BookingListAPIGetForm(data)
+        form = BookingListAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
-            if cleaned_data['offset'] is None:
-                cleaned_data['offset'] = 0
-            if cleaned_data['limit'] is None:
-                cleaned_data['limit'] = 10
+            filter_param = {}
+            if cleaned_data['start_date'] is not None:
+                filter_param['start_date__gte'] = cleaned_data['start_date']
+            if cleaned_data['end_date'] is not None:
+                filter_param['start_date__lt'] = cleaned_data['end_date']
 
             result = []
-            if cleaned_data['panel'] == 'all':
-                if request.user.is_superuser:
-                    result = list(Booking.objects.all()[
-                        cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
-                else:
-                    return JsonResponse({
-                        'status': 403,
-                        'message': 'Forbidden'
-                    }, status=403)
-            elif cleaned_data['panel'] == 'teacher':
-                if request.user.groups.filter(name='teacher').exists() or request.user.is_superuser:
-                    result = list(Booking.objects.filter(teacher=request.user)[
-                        cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
-                else:
-                    return JsonResponse({
-                        'status': 403,
-                        'message': 'Forbidden'
-                    }, status=403)
-            elif cleaned_data['panel'] == 'student':
-                study_course_instance = CourseInstance.objects.filter(
-                    student=request.user, quota__gt=0)
-                study_course = []
-                for each in study_course_instance:
-                    study_course.append(each.course)
+            if cleaned_data['offset'] is not None or cleaned_data['limit'] is not None:
+                if cleaned_data['offset'] is None:
+                    cleaned_data['offset'] = 0
+                if cleaned_data['limit'] is None:
+                    cleaned_data['limit'] = 10
 
-                query_data = cleaned_data['column'].copy()
-                if not 'student' in cleaned_data['column']:
-                    query_data.append('student')
+                if cleaned_data['panel'] == 'all':
+                    if request.user.is_superuser:
+                        result = list(Booking.objects.filter(**filter_param)[
+                            cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+                    else:
+                        return JsonResponse({
+                            'status': 403,
+                            'message': 'Forbidden'
+                        }, status=403)
+                elif cleaned_data['panel'] == 'teacher':
+                    if request.user.groups.filter(name='teacher').exists() or request.user.is_superuser:
+                        result = list(Booking.objects.filter(**filter_param, teacher=request.user)[
+                            cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *cleaned_data['column']))
+                    else:
+                        return JsonResponse({
+                            'status': 403,
+                            'message': 'Forbidden'
+                        }, status=403)
+                elif cleaned_data['panel'] == 'student':
+                    study_course_instance = CourseInstance.objects.filter(
+                        student=request.user, quota__gt=0)
+                    study_course = []
+                    for each in study_course_instance:
+                        study_course.append(each.course)
 
-                result = list(Booking.objects.filter(course__in=study_course)[
-                    cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *query_data))
+                    query_data = cleaned_data['column'].copy()
+                    if not 'student' in cleaned_data['column']:
+                        query_data.append('student')
 
-                if 'info' in cleaned_data['column']:
-                    for each in result:
-                        if each['student'] is not None and each['student'] != request.user.id:
-                            each['student'] = 0
-                            each['info'] = ''
-                else:
-                    for each in result:
-                        if each['student'] is not None and each['student'] != request.user.id:
-                            each['student'] = 0
+                    result = list(Booking.objects.filter(**filter_param, course__in=study_course)[
+                        cleaned_data['offset']:cleaned_data['offset']+cleaned_data['limit']].values('id', *query_data))
 
-                if not 'student' in cleaned_data['column']:
-                    for each in result:
-                        del each['student']
+                    if 'info' in cleaned_data['column']:
+                        for each in result:
+                            if each['student'] is not None and each['student'] != request.user.id:
+                                each['student'] = 0
+                                each['info'] = ''
+                            if each['student'] is None:
+                                each['info'] = ''
+                    else:
+                        for each in result:
+                            if each['student'] is not None and each['student'] != request.user.id:
+                                each['student'] = 0
+                            if each['student'] is None:
+                                each['info'] = ''
+
+                    if not 'student' in cleaned_data['column']:
+                        for each in result:
+                            del each['student']
+            else:
+                if cleaned_data['panel'] == 'all':
+                    if request.user.is_superuser:
+                        result = list(Booking.objects.filter(
+                            **filter_param).values('id', *cleaned_data['column']))
+                    else:
+                        return JsonResponse({
+                            'status': 403,
+                            'message': 'Forbidden'
+                        }, status=403)
+                elif cleaned_data['panel'] == 'teacher':
+                    if request.user.groups.filter(name='teacher').exists() or request.user.is_superuser:
+                        result = list(Booking.objects.filter(
+                            **filter_param, teacher=request.user).values('id', *cleaned_data['column']))
+                    else:
+                        return JsonResponse({
+                            'status': 403,
+                            'message': 'Forbidden'
+                        }, status=403)
+                elif cleaned_data['panel'] == 'student':
+                    study_course_instance = CourseInstance.objects.filter(
+                        student=request.user, quota__gt=0)
+                    study_course = []
+                    for each in study_course_instance:
+                        study_course.append(each.course)
+
+                    query_data = cleaned_data['column'].copy()
+                    if not 'student' in cleaned_data['column']:
+                        query_data.append('student')
+
+                    result = list(Booking.objects.filter(
+                        **filter_param, course__in=study_course).values('id', *query_data))
+
+                    if 'info' in cleaned_data['column']:
+                        for each in result:
+                            if each['student'] is not None and each['student'] != request.user.id:
+                                each['student'] = 0
+                                each['info'] = ''
+                            if each['student'] is None:
+                                each['info'] = ''
+                    else:
+                        for each in result:
+                            if each['student'] is not None and each['student'] != request.user.id:
+                                each['student'] = 0
+                            if each['student'] is None:
+                                each['info'] = ''
+
+                    if not 'student' in cleaned_data['column']:
+                        for each in result:
+                            del each['student']
 
             if 'date' in cleaned_data['column']:
                 for each in result:
@@ -132,7 +187,7 @@ class BookingListAPI(View):
             course = IntegerField()
             start_date = DateTimeField()
             end_date = DateTimeField()
-            teacher = IntegerField(required=False)
+            teacher = CharField(required=False)
             info = CharField(required=False)
 
         try:
@@ -148,18 +203,6 @@ class BookingListAPI(View):
         if form.is_valid():
             cleaned_data = form.clean()
 
-            if request.user.is_superuser and 'teacher' in data:
-                try:
-                    cleaned_data['teacher'] = User.objects.get(
-                        pk=cleaned_data['teacher'])
-                except Exception as e:
-                    return JsonResponse({
-                        'status': 400,
-                        'message': 'TeacherNotFound',
-                    }, status=400)
-            else:
-                cleaned_data['teacher'] = request.user
-
             try:
                 cleaned_data['course'] = Course.objects.get(
                     pk=cleaned_data['course'])
@@ -168,6 +211,21 @@ class BookingListAPI(View):
                     'status': 400,
                     'message': 'CourseNotFound',
                 }, status=400)
+
+            if request.user.is_superuser:
+                if 'teacher' in data and cleaned_data['teacher'] is not None and cleaned_data['teacher'] != '':
+                    try:
+                        cleaned_data['teacher'] = User.objects.get(
+                            username=cleaned_data['teacher'])
+                    except Exception as e:
+                        return JsonResponse({
+                            'status': 400,
+                            'message': 'TeacherNotFound',
+                        }, status=400)
+                else:
+                    cleaned_data['teacher'] = cleaned_data['course'].teacher
+            else:
+                cleaned_data['teacher'] = request.user
 
             if cleaned_data['course'].teacher != request.user and not request.user.is_superuser:
                 return JsonResponse({
@@ -181,8 +239,8 @@ class BookingListAPI(View):
                     'message': 'InvalidDate',
                 }, status=400)
 
-            crash_booking = Booking.objects.filter(Q(start_date__gte=cleaned_data['start_date'], start_date__lt=cleaned_data['end_date'], teacher=cleaned_data['teacher']) | Q(
-                end_date__gte=cleaned_data['start_date'], end_date__lt=cleaned_data['end_date'], teacher=cleaned_data['teacher']))
+            crash_booking = Booking.objects.filter(Q(start_date__gt=cleaned_data['start_date'], start_date__lt=cleaned_data['end_date'], teacher=cleaned_data['teacher']) | Q(
+                end_date__gt=cleaned_data['start_date'], end_date__lt=cleaned_data['end_date'], teacher=cleaned_data['teacher']))
 
             if crash_booking:
                 return JsonResponse({
@@ -282,6 +340,9 @@ class BookingAPI(View):
                     result[0]['student'] = 0
                     if 'info' in cleaned_data['column']:
                         result[0]['info'] = ''
+                if result[0]['student'] is None:
+                    if 'info' in cleaned_data['column']:
+                        result[0]['info'] 
 
             if not 'student' in cleaned_data['column']:
                 del result[0]['student']
@@ -318,7 +379,7 @@ class BookingAPI(View):
         class BookingAPIPatchForm(Form):
             start_date = DateTimeField(required=False)
             end_date = DateTimeField(required=False)
-            student = IntegerField(required=False)
+            student = CharField(required=False)
             info = CharField(required=False)
 
         try:
@@ -355,8 +416,8 @@ class BookingAPI(View):
             cleaned_data = form.clean()
 
             if booking.teacher == request.user or request.user.is_superuser:
-                if cleaned_data['start_date'] is not None or cleaned_data['end_date'] is not None:
-                    if booking.student is not None:
+                if (cleaned_data['start_date'] is not None and booking.start_date != cleaned_data['start_date']) or (cleaned_data['end_date'] is not None and booking.end_date != cleaned_data['end_date']):
+                    if booking.student is not None and cleaned_data['student'] is not None and cleaned_data['student'] != '':
                         return JsonResponse({
                             'status': 400,
                             'message': 'StudentAlreadyBookedIt',
@@ -367,74 +428,109 @@ class BookingAPI(View):
                         if cleaned_data['end_date'] is None:
                             cleaned_data['end_date'] = booking.end_date
 
-                        if (cleaned_data['start_date'] > cleaned_data['end_date']) or (cleaned_data['start_date'] < cleaned_data['course'].start_date) or (cleaned_data['end_date'] > cleaned_data['course'].end_date):
+                        if (cleaned_data['start_date'] > cleaned_data['end_date']) or (cleaned_data['start_date'] < booking.course.start_date) or (cleaned_data['end_date'] > booking.course.end_date):
                             return JsonResponse({
                                 'status': 400,
                                 'message': 'InvalidDate',
                             }, status=400)
 
-                        crash_booking = Booking.objects.filter(Q(start_date__gte=cleaned_data['start_date'], start_date__lt=cleaned_data['end_date'], teacher=booking.teacher) | Q(
-                            end_date__gte=cleaned_data['start_date'], end_date__lt=cleaned_data['end_date'], teacher=booking.teacher))
+                        crash_booking = Booking.objects.filter(Q(start_date__gt=cleaned_data['start_date'], start_date__lt=cleaned_data['end_date'], teacher=booking.teacher) | Q(
+                            end_date__gt=cleaned_data['start_date'], end_date__lt=cleaned_data['end_date'], teacher=booking.teacher))
 
                         if crash_booking:
-                            return JsonResponse({
-                                'status': 400,
-                                'message': 'TimeCrash',
-                            }, status=400)
+                            for each in crash_booking:
+                                if each != booking:
+                                    return JsonResponse({
+                                        'status': 400,
+                                        'message': 'TimeCrash',
+                                    }, status=400)
 
                         if cleaned_data['start_date'] is not None:
                             booking.start_date = cleaned_data['start_date']
 
                         if cleaned_data['end_date'] is not None:
-                            booking.start_date = cleaned_data['end_date']
+                            booking.end_date = cleaned_data['end_date']
 
                         booking.save()
 
                 if cleaned_data['student'] is not None:
-                    try:
-                        cleaned_data['student'] = User.objects.get(
-                            pk=cleaned_data['student'])
-                    except Exception as e:
-                        return JsonResponse({
-                            'status': 400,
-                            'message': 'StudentNotFound',
-                        }, status=400)
+                    if cleaned_data['student'] != '':
+                        if booking.student is None or cleaned_data['student'] != booking.student.username:
+                            try:
+                                cleaned_data['student'] = User.objects.get(
+                                    username=cleaned_data['student'])
+                            except Exception as e:
+                                return JsonResponse({
+                                    'status': 400,
+                                    'message': 'StudentNotFound',
+                                }, status=400)
 
-                    course_instance = CourseInstance.objects.filter(
-                        course=booking.course, student=cleaned_data['student'], quota__gt=0)
-                    if not course_instance.exists():
-                        return JsonResponse({
-                            'status': 400,
-                            'message': 'InsufficientQuota',
-                        }, status=400)
+                            course_instance = CourseInstance.objects.filter(
+                                course=booking.course, student=cleaned_data['student'], quota__gt=0)
+                            if not course_instance.exists():
+                                return JsonResponse({
+                                    'status': 400,
+                                    'message': 'InsufficientQuota',
+                                }, status=400)
 
-                    crash_booking = Booking.objects.filter(Q(start_date__gte=booking.start_date, start_date__lt=booking.end_date, student=request.user) | Q(
-                        end_date__gte=booking.start_date, end_date__lt=booking.end_date, student=request.user))
+                            crash_booking = Booking.objects.filter(Q(start_date__gt=booking.start_date, start_date__lt=booking.end_date, student=request.user) | Q(
+                                end_date__gt=booking.start_date, end_date__lt=booking.end_date, student=request.user))
 
-                    if crash_booking:
-                        return JsonResponse({
-                            'status': 400,
-                            'message': 'TimeCrash',
-                        }, status=400)
+                            if crash_booking:
+                                for each in crash_booking:
+                                    if each != booking:
+                                        return JsonResponse({
+                                            'status': 400,
+                                            'message': 'TimeCrash',
+                                        }, status=400)
 
-                    course_instance_target = course_instance[0]
-                    try:
-                        with transaction.atomic():
-                            booking.student = cleaned_data['student']
-                            course_instance_target.quota = course_instance_target.quota - 1
-                            booking.save()
-                            course_instance_target.save()
-                    except Exception as e:
-                        return JsonResponse({
-                            'status': 500,
-                            'message': 'DatabaseError',
-                        }, status=500)
+                            if booking.start_date > now():
+                                course_instance_target = course_instance[0]
+                                try:
+                                    with transaction.atomic():
+                                        booking.student = cleaned_data['student']
+                                        course_instance_target.quota = course_instance_target.quota - 1
+                                        booking.save()
+                                        course_instance_target.save()
+                                except Exception as e:
+                                    return JsonResponse({
+                                        'status': 500,
+                                        'message': 'DatabaseError',
+                                    }, status=500)
+                            else:
+                                return JsonResponse({
+                                    'status': 400,
+                                    'message': 'AlreadyGone',
+                                }, status=400)
+                    else:
+                        if booking.student is not None:
+                            if booking.start_date > now():
+                                course_instance = CourseInstance.objects.filter(
+                                    course=booking.course, student=booking.student)
+
+                                course_instance_target = course_instance[0]
+                                try:
+                                    with transaction.atomic():
+                                        booking.student = None
+                                        course_instance_target.quota = course_instance_target.quota + 1
+                                        booking.save()
+                                        course_instance_target.save()
+                                except Exception as e:
+                                    return JsonResponse({
+                                        'status': 500,
+                                        'message': 'DatabaseError',
+                                    }, status=500)
+                            else:
+                                return JsonResponse({
+                                    'status': 400,
+                                    'message': 'AlreadyGone',
+                                }, status=400)
 
                 if 'info' in data:
                     booking.info = cleaned_data['info']
                     booking.save()
             else:
-                if cleaned_data['student'] is not None and booking.student is None:
+                if cleaned_data['student'] == request.user.username and booking.student is None:
                     course_instance = CourseInstance.objects.filter(
                         course=booking.course, student=request.user, quota__gt=0)
                     if not course_instance.exists():
@@ -443,27 +539,59 @@ class BookingAPI(View):
                             'message': 'InsufficientQuota',
                         }, status=400)
 
-                    crash_booking = Booking.objects.filter(Q(start_date__gte=booking.start_date, start_date__lt=booking.end_date, student=request.user) | Q(
-                        end_date__gte=booking.start_date, end_date__lt=booking.end_date, student=request.user))
+                    crash_booking = Booking.objects.filter(Q(start_date__gt=booking.start_date, start_date__lt=booking.end_date, student=request.user) | Q(
+                        end_date__gt=booking.start_date, end_date__lt=booking.end_date, student=request.user))
 
                     if crash_booking:
+                        for each in crash_booking:
+                            if each != booking:
+                                return JsonResponse({
+                                    'status': 400,
+                                    'message': 'TimeCrash',
+                                }, status=400)
+
+                    if booking.start_date > now():
+                        course_instance_target = course_instance[0]
+                        try:
+                            with transaction.atomic():
+                                booking.student = request.user
+                                course_instance_target.quota = course_instance_target.quota - 1
+                                booking.save()
+                                course_instance_target.save()
+                        except Exception as e:
+                            return JsonResponse({
+                                'status': 500,
+                                'message': 'DatabaseError',
+                            }, status=500)
+                    else:
                         return JsonResponse({
                             'status': 400,
-                            'message': 'TimeCrash',
+                            'message': 'AlreadyGone',
                         }, status=400)
+                elif booking.student == request.user and cleaned_data['student'] is not None and cleaned_data['student'] == '':
+                    if booking.start_date > now():
+                        try:
+                            with transaction.atomic():
+                                course_instance = CourseInstance.objects.filter(
+                                    course=booking.course, student=request.user)
+                                course_instance_target = course_instance[0]
+                                course_instance_target.quota = course_instance_target.quota + 1
+                                booking.student = None
 
-                    course_instance_target = course_instance[0]
-                    try:
-                        with transaction.atomic():
-                            booking.student = request.user
-                            course_instance_target.quota = course_instance_target.quota - 1
-                            booking.save()
-                            course_instance_target.save()
-                    except Exception as e:
+                                course_instance_target.save()
+                                booking.save()
+                        except Exception as e:
+                            return JsonResponse({
+                                'status': 500,
+                                'message': 'DatabaseError',
+                            }, status=500)
+                    else:
                         return JsonResponse({
-                            'status': 500,
-                            'message': 'DatabaseError',
-                        }, status=500)
+                            'status': 400,
+                            'message': 'AlreadyGone',
+                        }, status=400)
+                elif booking.student == request.user and (cleaned_data['student'] is None or cleaned_data['student'] == request.user.username):
+                    pass
                 else:
                     return JsonResponse({
                         'status': 403,
@@ -496,32 +624,15 @@ class BookingAPI(View):
             }, status=404)
 
         if booking.student == request.user:
-            try:
-                with transaction.atomic():
-                    course_instance = CourseInstance.objects.filter(
-                                course=booking.course, student=request.user, quota__gt=0)
-                    course_instance_target = course_instance[0]
-                    course_instance_target.quota = course_instance_target.quota + 1
-                    booking.student = None
-
-                    course_instance_target.save()
-                    booking.save()
-            except Exception as e:
-                return JsonResponse({
-                    'status': 500,
-                    'message': 'DatabaseError',
-                }, status=500)
-
-        elif booking.teacher == request.user or request.user.is_superuser:
-            if booking.student is not None:
+            if booking.start_date > now():
                 try:
                     with transaction.atomic():
                         course_instance = CourseInstance.objects.filter(
-                                    course=booking.course, student=booking.student, quota__gt=0)
+                            course=booking.course, student=request.user)
                         course_instance_target = course_instance[0]
                         course_instance_target.quota = course_instance_target.quota + 1
                         booking.student = None
-                        
+
                         course_instance_target.save()
                         booking.save()
                 except Exception as e:
@@ -529,6 +640,25 @@ class BookingAPI(View):
                         'status': 500,
                         'message': 'DatabaseError',
                     }, status=500)
+
+        elif booking.teacher == request.user or request.user.is_superuser:
+            if booking.student is not None:
+                if booking.start_date > now():
+                    try:
+                        with transaction.atomic():
+                            course_instance = CourseInstance.objects.filter(
+                                course=booking.course, student=booking.student)
+                            course_instance_target = course_instance[0]
+                            course_instance_target.quota = course_instance_target.quota + 1
+                            booking.student = None
+
+                            course_instance_target.save()
+                            booking.save()
+                    except Exception as e:
+                        return JsonResponse({
+                            'status': 500,
+                            'message': 'DatabaseError',
+                        }, status=500)
             booking.delete()
         else:
             return JsonResponse({

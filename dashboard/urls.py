@@ -13,6 +13,7 @@ urlpatterns = [
     #path('<int:question_id>/vote/', views.vote, name='vote'),
     path('bill/', views.UserBillListView.as_view(), name='bill_list_view'),
     path('bill/<int:page>', views.UserBillListView.as_view(), name='bill_list_view_page'),
+    path('calendar/', views.UserCalendarView.as_view(), name='user_calendar_list_view'),
     path('log/', views.UserLogListView.as_view(), name='user_log_list_view'),
     path('log/<int:page>', views.UserLogListView.as_view(), name='user_log_list_view_page'),
     path('admin/balance/', views.AdminBalanceListView.as_view(), name='admin_balance_list_view'),
