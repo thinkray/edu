@@ -420,10 +420,12 @@ class CourseInstanceListAPI(View):
                     request.user.balance = request.user.balance - need_to_pay
                     course_instance = CourseInstance(
                         course=cleaned_data['course'], student=request.user, teacher=cleaned_data['course'].teacher, quota=cleaned_data['course'].quota)
+                    cleaned_data['course'].sold += 1
 
                     bill.save()
                     request.user.save()
                     course_instance.save()
+                    cleaned_data['course'].save()
             except Exception as e:
                 return JsonResponse({
                     'status': 500,

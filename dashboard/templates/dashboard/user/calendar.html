@@ -1,12 +1,9 @@
-{% extends 'base.html' %}
+{% extends 'dashboard\user\base.html' %}
 
 {% block head %}
 <script type="text/javascript" src="/static/js/moment-with-locales.min.js"></script>
 <script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
 <link rel="stylesheet" href="/static/css/tempusdominus-bootstrap-4.min.css" />
-{% endblock head %}
-
-{% block content %}
 <style>
     .clearfix::after,
     .calendar ol::after {
@@ -88,13 +85,28 @@ Calendar Styling */
 
     }
 </style>
-<div class="container py-5">
+{% endblock head %}
 
+{% block inner_content %}
+<div class="row">
+    <div class="col-xs-12 col-md-12 px-0">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-white rounded-0">
+                <li class="breadcrumb-item"><a href="#">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Calendar
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="container py-5">
     <!-- For Demo Purpose -->
-    <header class="text-center text-white mb-5">
+    <!-- <header class="text-center text-white">
         <h1 class="display-4">Calendar</h1>
         <p class="font-italic mb-0">This calendar provides you the schedule of your courses</p>
-    </header>
+    </header> -->
     <!-- Calendar -->
     <div class="calendar shadow bg-white p-5">
         <div class="d-flex align-items-center">
@@ -206,7 +218,8 @@ Calendar Styling */
                             <div id="edit_panel_book_form_group" class="form-group">
                                 <div class="custom-control custom-checkbox">
                                     <input type="checkbox" class="custom-control-input" id="edit_panel_book" disabled>
-                                    <label class="custom-control-label" for="edit_panel_book">Book this session</label>
+                                    <label class="custom-control-label" for="edit_panel_book">Book this
+                                        session</label>
                                 </div>
                             </div>
                             <div id="edit_panel_info_form_group" class="form-group">
@@ -312,7 +325,7 @@ Calendar Styling */
         </div>
     </div>
 </div>
-{% endblock content %}
+{% endblock inner_content %}
 
 {% block script %}
 <script>

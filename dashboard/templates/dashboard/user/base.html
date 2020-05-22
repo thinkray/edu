@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-2 col-md-2 bg-light border-right left-nav">
+            <ul class="list-group row">
+                <a class="list-group-item btn btn-light text-left {% url 'user_overview_view' as user_overview_view %}{% if user_overview_view == request.path%}active{% endif %}" href="{% url 'user_overview_view' %}">
+                    <i class="fas fa-home icon_fixer"></i>
+                    Dashboard
+                </a>
+                {% comment %} <a class="list-group-item btn btn-light text-left {% url 'user_course_view' as user_course_view %}{% if user_course_view == request.path%}active{% endif %}" href="{% url 'user_course_view' %}">
+                    <i class="fas fa-check icon_fixer"></i>
+                    My Course
+                </a> {% endcomment %}
+                <a class="list-group-item btn btn-light text-left" data-toggle="collapse" href="#multiCollapse"
+                    role="button" aria-expanded="true" aria-controls="multiCollapse">
+                    <div class="float-left">
+                        <i class="fas fa-check icon_fixer"></i>
+                        My Course
+                    </div>
+                    <div class="float-right">
+                        <i class="fas fa-arrow-down icon_fixer"></i>
+                    </div>
+                </a>
+                <div class="collapse multi-collapse show" id="multiCollapse">
+                    <a class="list-group-item btn btn-light text-left ml-2 {% url 'user_course_view_panel' panel_name='study' as user_course_view_study %}{% if user_course_view_study == request.path%}active{% endif %}" href="{%url 'user_course_view_panel' panel_name='study' %}">
+                        <i class="icon_fixer fas fa-chalkboard-teacher"></i>
+                        Study
+                    </a>
+                    <a class="list-group-item btn btn-light text-left ml-2 {% url 'user_course_view_panel' panel_name='teaching' as user_course_view_study %}{% if user_course_view_study == request.path%}active{% endif %}" href="{%url 'user_course_view_panel' panel_name='teaching' %}">
+                        <i class="icon_fixer fas fa-chalkboard-teacher"></i>
+                        Teaching
+                    </a>
+                </div>
+                <a class="list-group-item btn btn-light text-left {% url 'user_calendar_list_view' as user_calendar_list_view %}{% if user_calendar_list_view == request.path%}active{% endif %}" href="{% url 'user_calendar_list_view' %}">
+                    <i class="far fa-calendar-alt icon_fixer"></i>
+                    Calendar
+                </a>
+
+                <a class="list-group-item btn btn-light text-left {% url 'bill_list_view' as bill_list_view %}{% if bill_list_view == request.path%}active{% endif %}" href="{%url 'bill_list_view' %}">
+                    <i class="fas fa-clipboard-list icon_fixer" aria-hidden="true"></i>
+                    Bill List
+                </a>
+                <a href="{%url 'user_log_list_view'%}" class="list-group-item btn btn-light text-left">
+                    <i class="fas fa-list-alt icon_fixer"></i>
+                    Log History
+                </a>
+                <a class="list-group-item btn btn-light text-left" data-toggle="collapse" href="#multiCollapse"
+                    role="button" aria-expanded="true" aria-controls="multiCollapse2">
+                    <div class="float-left">
+                        <i class="fa fa-envelope icon_fixer" aria-hidden="true"></i>
+                        Message
+                    </div>
+                    <div class="float-right">
+                        <i class="fas fa-arrow-down icon_fixer"></i>
+                    </div>
+                </a>
+                <div class="collapse multi-collapse show" id="multiCollapse2">
+                    <a class="list-group-item btn btn-light text-left ml-2 {% url 'message_view_box' box_name='inbox' as message_view_inbox %}{% if message_view_inbox == request.path%}active{% endif %}" href="{%url 'message_view_box' box_name='inbox'%}">
+                        <i class="fas fa-inbox icon_fixer"></i>
+                        Inbox
+                    </a>
+                    <a class="list-group-item btn btn-light text-left ml-2 {% url 'message_view_box' box_name='outbox' as message_view_outbox %}{% if message_view_outbox == request.path%}active{% endif %}" href="{%url 'message_view_box' box_name='outbox'%}">
+                        <i class="fas fa-inbox icon_fixer"></i>
+                        Outbox
+                    </a>
+                    <a class="list-group-item btn btn-light text-left ml-2 {% url 'message_send_view' as message_send_view %}{% if message_send_view == request.path%}active{% endif %}" href="{%url 'message_send_view'%}">
+                        <i class="far fa-edit icon_fixer"></i>
+                        New Message
+                    </a>
+                </div>
+
+                <a id="logout_2" class="list-group-item btn btn-light text-left" href="#">
+                    <i class="fas fa-sign-out-alt icon_fixer"></i>
+                    Log out
+                </a>
+            </ul>
+
+        </div>
+        <!--  main -->
+        <div class="col-xs-10 col-md-10">
+            {% block inner_content %}
+            {% endblock inner_content %}            
+        </div>
+    </div>
+</div>
+{% endblock content %}

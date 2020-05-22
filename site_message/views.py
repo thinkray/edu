@@ -340,11 +340,15 @@ class MessageView(View):
             result = Message.objects.filter(
                 recipient=request.user, is_deleted_by_recipient=False).order_by('-id')
             context['page_name'] = 'Message Inbox'
-
+            context['status'] = 200
         elif box_name == 'outbox':
             result = Message.objects.filter(
                 sender=request.user, is_deleted_by_sender=False).order_by('-id')
             context['page_name'] = 'Message Outbox'
+            context['status'] = 200
+        else:
+            result = []
+            context['status'] = 404
 
         paginator = Paginator(result, 10)
         page_obj = paginator.get_page(page)

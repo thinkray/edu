@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 <!--remember to get rid of welcome to the one-on-one band-->
-{% block content %}
+{% block head %}
 <style>
     .search-result .col-md-2 {
         border-right: 1px dotted #ccc;
@@ -59,6 +59,9 @@
         color: #fff !important;
     }
 </style>
+{% endblock head %}
+
+{% block content %}
 <br>
 {% if course_search_num %}
 <div class="container">

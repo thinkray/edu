@@ -54,12 +54,16 @@
                                 <td><a href="#">{{ course.teacher.name }}</a></td>
                             </tr>
                             <tr>
+                                <td><span class="text-primary font-weight-bolder">Session Quota</span></td>
+                                <td>{{ course.quota }}</td>
+                            </tr>
+                            <tr>
                                 <td><span class="text-primary font-weight-bolder">Price</span></td>
                                 <td>${{ course.price }}</td>
                             </tr>
                             <tr>
-                                <td><span class="text-primary font-weight-bolder">Session Quota</span></td>
-                                <td>{{ course.quota }}</td>
+                                <td><span class="text-primary font-weight-bolder">Sold</span></td>
+                                <td>{{ course.sold }}</td>
                             </tr>
                         </tbody>
                     </table>

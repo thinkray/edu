@@ -8,7 +8,7 @@ from django.urls import reverse
 from django.views import View
 
 from account.models import User
-from course.models import Course
+from course.models import Course, CourseInstance
 from finance.models import Bill, CouponCode, RedemptionCode
 from site_log.models import Log
 
@@ -133,9 +133,69 @@ class UserCalendarView(View):
         if request.user.is_superuser:
             context['teach_course'] = Course.objects.all()
         elif request.user.groups.filter(name='teacher').exists():
-            context['teach_course'] = Course.objects.filter(teacher=request.user)
+            context['teach_course'] = Course.objects.filter(
+                teacher=request.user)
         else:
             context['teach_course'] = []
+
+        return HttpResponse(template.render(context, request))
+
+
+class UserCourseView(View):
+
+    def get(self, request, panel_name='student', page=1):
+        if not request.user.is_authenticated:
+            response = redirect(reverse('user_login_view'))
+            response['Location'] += '?redirect_uri=' + request.path
+            return response
+
+        context = {}
+        if panel_name == 'study':
+            result = CourseInstance.objects.filter(student=request.user)
+            context['status'] = 200
+            context['course_enroll_num'] = len(result)
+            context['page_name'] = 'My Course | Study'
+        elif panel_name == 'teaching':
+            context['status'] = 200
+            result = Course.objects.filter(teacher=request.user)
+            context['course_enroll_num'] = len(result)
+            context['page_name'] = 'My Course | Teaching'
+        else:
+            result = []
+            context['status'] = 404
+
+        paginator = Paginator(result, 10)
+        page_obj = paginator.get_page(page)
+
+        template = loader.get_template('dashboard/user/course.html')
+
+        context['site_name'] = settings.SITE_NAME
+        context['panel_name'] = panel_name
+        context['is_authenticated'] = True
+        context['is_superuser'] = request.user.is_superuser
+        context['is_teacher'] = request.session.get('is_teacher')
+        context['name'] = request.user.name
+        context['username'] = request.user.username
+        context['hide_welcome'] = True
+        context['page_obj'] = page_obj
+
+        page_start = page_obj.number
+        page_bar_num = 5
+        for i in range(int(page_bar_num / 2)):
+            if page_start - 1 > 0:
+                page_start = page_start - 1
+        page_end = page_start
+        for i in range(int(page_bar_num / 2) * 2):
+            if page_end + 1 <= page_obj.paginator.num_pages:
+                page_end = page_end + 1
+        if page_end - page_start < int(page_bar_num / 2) * 2:
+            for i in range(int(page_bar_num / 2) * 2):
+                if page_start - 1 >= 1 and page_end - page_start < int(page_bar_num / 2) * 2:
+                    page_start = page_start - 1
+        page_bar = []
+        for i in range(page_start, page_end + 1):
+            page_bar.append(i)
+        context['page_bar'] = page_bar
 
         return HttpResponse(template.render(context, request))
 
@@ -247,6 +307,31 @@ class AdminUserListView(View):
         for i in range(page_start, page_end+1):
             page_bar.append(i)
         context['page_bar'] = page_bar
+
+        return HttpResponse(template.render(context, request))
+
+
+class UserOverviewView(View):
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            response = redirect(reverse('user_login_view'))
+            response['Location'] += '?redirect_uri=' + request.path
+            return response
+
+        context = {}
+        result = CourseInstance.objects.filter(student=request.user)
+        context['page_name'] = 'My Dashboard'
+
+        template = loader.get_template('dashboard/user/dashboard.html')
+
+        context['site_name'] = settings.SITE_NAME
+        context['is_authenticated'] = True
+        context['is_superuser'] = request.user.is_superuser
+        context['is_teacher'] = request.session.get('is_teacher')
+        context['name'] = request.user.name
+        context['username'] = request.user.username
+        context['hide_welcome'] = True
 
         return HttpResponse(template.render(context, request))
 

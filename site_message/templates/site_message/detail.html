@@ -1,24 +1,27 @@
-{% extends 'base.html' %}
-<!--remember to get rid of welcome to the one-on-one band-->
-{% block content %}
+{% extends 'dashboard\user\base.html' %}
 
-
+{% block inner_content %}
+<div class="row">
+    <div class="col-xs-12 col-md-12 px-0">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-white rounded-0">
+                <li class="breadcrumb-item"><a href="#">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Message
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Detail
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
 <div class="col-lg-12">
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-lg-3 border-lg-right">
-                    <div class="list-group">
-                        <a href="{%url 'message_send_view' %}" class="list-group-item list-group-item-action bg-success text-white">Send a
-                            message</a>
-                        <a href="{%url 'message_view_box' box_name='inbox'%}"
-                            class="list-group-item list-group-item-action {% if box_name == 'inbox'%}active{% endif %}">Inbox</a>
-                        <a href="{%url 'message_view_box' box_name='outbox'%}"
-                            class="list-group-item list-group-item-action {% if box_name == 'outbox'%}active{% endif %}">Outbox</a>
-                    </div>
-                </div>
-                <div class="col-lg-9">
-
+                <div class="col-lg-12 mb-5">
                     {% if status == 200 %}
                     <div class="email-head">
                         <div class="email-head-subject">
@@ -88,15 +91,11 @@
                     </div>
                     {% endif%}
                 </div>
-
             </div>
         </div>
-
     </div>
 </div>
-</div>
-
-{% endblock content %}
+{% endblock inner_content %}
 
 {% block script %}
 {% if status == 200 %}
