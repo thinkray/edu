@@ -431,6 +431,7 @@ Calendar Styling */
                 contentType: "application/json;charset=UTF-8",
                 url: "{% url 'booking_list_api' %}",
                 data: list,
+                async: false,
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                         xhr.setRequestHeader("X-CSRFToken", csrftoken);
