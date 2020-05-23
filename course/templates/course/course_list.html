@@ -117,7 +117,7 @@
                         <h4 class="card-title">{{ each.name }}</h4>
                         <!--Text-->
                         <p class="card-text">
-                        <p class="font-weight-bolder">{{ each.teacher.name }}</p>
+                        <p class="font-weight-bolder"><a href="{% url 'user_profile_view' user_id=each.teacher.id %}"><span>{{ each.teacher.name}}</span></a></p>
                         <p class="font-weight-normal">{{ each.info|truncatechars:255 }}</p>
                         <p class="font-weight-light">From {{ each.start_date }}</p>
                         <p class="font-weight-light">To {{ each.end_date }}</p>

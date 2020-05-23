@@ -9,7 +9,7 @@
         <h1>{{ course.name }}</h1>
         <p class="mb-0">{{ course.info|truncatechars:255 }}</p>
         <p class="h5 mb-2">
-        <p class="lead"><i class="fa fa-user icon_fixer"></i>&nbsp; by <a href=""><span
+        <p class="lead"><i class="fa fa-user icon_fixer"></i>&nbsp; by <a href="{% url 'user_profile_view' user_id=course.teacher.id %}"><span
                     class="text-white font-weight-bolder">{{ course.teacher.name}}</span></a>
         </p>
         </p>

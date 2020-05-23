@@ -42,7 +42,7 @@
                                     {% else %}
                                     <td class="action"><i class="fas fa-envelope-open-text"></i></td>
                                     {% endif%}
-                                    <td class="name"><a href="#">{{ each.sender.name }}</a></td>
+                                    <td class="name"><a href="{% url 'user_profile_view' user_id=each.sender.id %}">{{ each.sender.name }}</a></td>
                                     <td class="subject"><a class="subject_link"
                                             href="{%url 'message_detail_view' message_id=each.id%}">{{ each.title }}</a>
                                     </td>
@@ -57,7 +57,7 @@
                                     {% else %}
                                     <td class="action"><i class="fas fa-envelope-open-text"></i></td>
                                     {% endif%}
-                                    <td class="name"><a href="#">{{ each.recipient.name }}</a></td>
+                                    <td class="name"><a href="{% url 'user_profile_view' user_id=each.recipient.id %}">{{ each.recipient.name }}</a></td>
                                     <td class="subject"><a class="subject_link"
                                             href="{%url 'message_detail_view' message_id=each.id%}">{{ each.title }}</a>
                                     </td>

@@ -74,8 +74,8 @@
                                         class="rounded-circle user-avatar-md">
                                 </div> -->
                                 <div class="sender d-flex align-items-center">
-                                    From&nbsp;<a href="#">{{ sender.name }}</a>&nbsp;<span>to</span>&nbsp;<a
-                                        href="#">{{ recipient.name }}</a>
+                                    From&nbsp;<a href="{% url 'user_profile_view' user_id=sender.id %}">{{ sender.name }}</a>&nbsp;<span>to</span>&nbsp;<a
+                                        href="{% url 'user_profile_view' user_id=recipient.id %}">{{ recipient.name }}</a>
                                 </div>
                             </div>
                             <div class="date">{{ send_date }}</div>
