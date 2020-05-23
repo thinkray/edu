@@ -28,10 +28,12 @@
                         <i class="icon_fixer fas fa-chalkboard-teacher"></i>
                         Study
                     </a>
+                    {% if is_superuser or is_teacher %}
                     <a class="list-group-item btn btn-light text-left ml-2 {% url 'user_course_view_panel' panel_name='teaching' as user_course_view_study %}{% if user_course_view_study == request.path%}active{% endif %}" href="{%url 'user_course_view_panel' panel_name='teaching' %}">
                         <i class="icon_fixer fas fa-chalkboard-teacher"></i>
                         Teaching
                     </a>
+                    {% endif %}
                 </div>
                 <a class="list-group-item btn btn-light text-left {% url 'user_calendar_list_view' as user_calendar_list_view %}{% if user_calendar_list_view == request.path%}active{% endif %}" href="{% url 'user_calendar_list_view' %}">
                     <i class="far fa-calendar-alt icon_fixer"></i>

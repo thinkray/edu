@@ -156,10 +156,14 @@ class UserCourseView(View):
             context['course_enroll_num'] = len(result)
             context['page_name'] = 'My Course | Study'
         elif panel_name == 'teaching':
-            context['status'] = 200
-            result = Course.objects.filter(teacher=request.user)
-            context['course_enroll_num'] = len(result)
-            context['page_name'] = 'My Course | Teaching'
+            if request.user.groups.filter(name='teacher').exists() or request.user.is_superuser:
+                context['status'] = 200
+                result = Course.objects.filter(teacher=request.user)
+                context['course_enroll_num'] = len(result)
+                context['page_name'] = 'My Course | Teaching'
+            else:
+                result = []
+                context['status'] = 403
         else:
             result = []
             context['status'] = 404

@@ -179,6 +179,10 @@
         <h2> You have no course</h2>
         {% endif %}
     {% endif %}
+    {% elif status == 403 %}
+    <div class="alert alert-danger" role="alert">
+        Forbidden
+    </div>
     {% elif status == 404 %}
     <div class="alert alert-danger" role="alert">
         Panel Not Found
