@@ -549,4 +549,10 @@ class UserProfileView(View):
             context['status'] = 404
         
         context['site_name'] = settings.SITE_NAME
+        context['is_authenticated'] = True
+        context['is_superuser'] = request.user.is_superuser
+        context['is_teacher'] = request.session.get('is_teacher')
+        context['name'] = request.user.name
+        context['username'] = request.user.username
+
         return HttpResponse(template.render(context, request))
