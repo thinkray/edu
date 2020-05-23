@@ -470,6 +470,31 @@ class UserOverviewView(View):
         return HttpResponse(template.render(context, request))
 
 
+class UserProfileEditView(View):
+
+    def get(self, request):
+        if not request.user.is_authenticated:
+            response = redirect(reverse('user_login_view'))
+            response['Location'] += '?redirect_uri=' + request.path
+            return response
+
+        context = {}
+        result = CourseInstance.objects.filter(student=request.user)
+        context['page_name'] = 'Profile'
+
+        template = loader.get_template('dashboard/user/profile.html')
+
+        context['site_name'] = settings.SITE_NAME
+        context['is_authenticated'] = True
+        context['is_superuser'] = request.user.is_superuser
+        context['is_teacher'] = request.session.get('is_teacher')
+        context['name'] = request.user.name
+        context['username'] = request.user.username
+        context['hide_welcome'] = True
+
+        return HttpResponse(template.render(context, request))
+
+
 class AdminRedemptionCodeListView(View):
 
     def get(self, request, page=1):

@@ -1,0 +1,159 @@
+{% extends 'dashboard\user\base.html' %}
+
+{% block inner_content %}
+<div class="row">
+    <div class="col-xs-12 col-md-12 px-0">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-white rounded-0">
+                <li class="breadcrumb-item"><a href="#">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Profile
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
+<div class="col-lg-12 mb-5">
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="padding border-lg-right"></div>
+                <div class="col-md-12">
+                    <div class="panel panel-default">
+                        <div class="panel-body">
+                            <div>
+                                <div class="form-group">
+                                    <label for="edit_panel_id" class="col-form-label">ID:</label>
+                                    <input type="text" class="form-control" id="edit_panel_id"
+                                        value="{{ request.user.id }}" disabled="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_panel_username" class="col-form-label">Username:</label>
+                                    <input type="text" class="form-control" id="edit_panel_username"
+                                        value="{{ request.user.username }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_panel_name" class="col-form-label">Name:</label>
+                                    <input type="text" class="form-control" id="edit_panel_name"
+                                        value="{{ request.user.name }}">
+                                </div>
+                                <div class="custom-control custom-switch">
+                                    <input type="checkbox" class="custom-control-input" id="edit_panel_change_password">
+                                    <label class="custom-control-label" for="edit_panel_change_password">Change
+                                        password</label>
+                                </div>
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="fa fa-lock icon_fixer"></i>
+                                        </span>
+                                    </div>
+                                    <input id="edit_panel_password" name="password" class="form-control"
+                                        placeholder="Password" type="password" disabled="">
+                                </div>
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
+                                            <i class="fas fa-key icon_fixer"></i>
+                                        </span>
+                                    </div>
+                                    <input id="edit_panel_password2" name="password2" class="form-control"
+                                        placeholder="Repeat password" type="password" disabled="">
+                                </div>
+                                <div class="form-group">
+                                    <label for="edit_panel_profile" class="col-form-label">Profile:</label>
+                                    <textarea class="form-control" id="edit_panel_profile" name="body"
+                                        placeholder="Click here to write">{{ request.user.profile }}</textarea>
+                                </div>
+                                <div class="form-group">
+                                    <button id="submit" class="btn btn-success">Save</button>
+                                    <button id="reset" class="btn btn-danger">Discard</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock inner_content %}
+
+{% block script %}
+<script>
+    $('#edit_panel_change_password').change(function () {
+        if (this.checked) {
+            $('#edit_panel_password').prop('disabled', false);
+            $('#edit_panel_password2').prop('disabled', false);
+        } else {
+            $('#edit_panel_password').prop('disabled', true);
+            $('#edit_panel_password2').prop('disabled', true);
+        }
+    });
+    $("#edit_panel_password").blur(function () {
+        if ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value) {
+            $("#ajax_result_password2").remove();
+        } else {
+            if (
+                $("#edit_panel_password2")[0].value.length > 0 &&
+                !$("#ajax_result_password2").length
+            ) {
+                $("#edit_panel_password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
+            }
+        }
+    });
+    $("#edit_panel_password2").blur(function () {
+        if ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value) {
+            $("#ajax_result_password2").remove();
+        } else {
+            if (!$("#ajax_result_password2").length) {
+                $("#edit_panel_password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
+            }
+        }
+    });
+    $('#submit').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            let api_url = "{%url 'user_api' user_id='0'%}";
+            list["username"] = $("#edit_panel_username")[0].value;
+            list["name"] = $("#edit_panel_name")[0].value;
+            list["profile"] = $("#edit_panel_profile")[0].value;
+            if (($("#edit_panel_change_password").is(':checked')) && ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value)) {
+                list["password"] = $("#edit_panel_password")[0].value;
+            }
+            $.ajax({
+                type: "PATCH",
+                contentType: "application/json;charset=UTF-8",
+                url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The user was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
+                },
+                error: function (e) {
+                    $(".table-responsive").before('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    window.location.reload();
+                },
+            });
+        });
+    });
+    $('#reset').click(function () {
+        location.reload(true);
+    });
+</script>
+{% endblock script %}

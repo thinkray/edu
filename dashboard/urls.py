@@ -19,6 +19,7 @@ urlpatterns = [
     # path('course/', views.UserCourseView.as_view(), name='user_course_view'),
     path('course/<str:panel_name>/', views.UserCourseView.as_view(), name='user_course_view_panel'),
     path('course/<str:panel_name>/<int:page>', views.UserCourseView.as_view(), name='user_course_view_panel_page'),
+    path('profile/', views.UserProfileEditView.as_view(), name='user_profile_edit_view'),
     path('log/', views.UserLogListView.as_view(), name='user_log_list_view'),
     path('log/<int:page>', views.UserLogListView.as_view(), name='user_log_list_view_page'),
     path('admin/', views.AdminOverviewView.as_view(), name='admin_overview_view'),

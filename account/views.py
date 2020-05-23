@@ -334,7 +334,7 @@ class UserAPI(View):
 
             if cleaned_data['username'] != '' and user.username != cleaned_data['username']:
                 if not User.objects.filter(username=cleaned_data['username']).exists():
-                    user.username == cleaned_data['username']
+                    user.username = cleaned_data['username']
 
             if cleaned_data['password'] != '':
                 user.set_password(cleaned_data['password'])

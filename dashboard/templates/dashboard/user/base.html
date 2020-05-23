@@ -21,6 +21,11 @@
                     </div>
                 </a>
                 <div class="collapse multi-collapse show" id="multiCollapse">
+                    <a class="list-group-item btn btn-light text-left ml-2 {% url 'user_profile_edit_view' as user_profile_edit_view %}{% if user_profile_edit_view == request.path%}active{% endif %}"
+                        href="{%url 'user_profile_edit_view' %}">
+                        <i class="fas fa-address-card icon_fixer" aria-hidden="true"></i>
+                        Profile
+                    </a>
                     <a class="list-group-item btn btn-light text-left ml-2 {% if page_name == 'Bill List' %}active{% endif %}"
                         href="{%url 'bill_list_view' %}">
                         <i class="fas fa-money-bill icon_fixer" aria-hidden="true"></i>
