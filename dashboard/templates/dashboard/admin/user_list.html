@@ -1,21 +1,37 @@
-{% extends 'base.html' %}
+{% extends 'dashboard\admin\base.html' %}
 
-{% block content %}
-
+{% block head %}
 <style>
     body {
         min-height: 100vh;
         background-color: #4dc9ff;
     }
 </style>
+{% endblock head %}
 
-
+{% block inner_content %}
+<div class="row">
+    <div class="col-xs-12 col-md-12 px-0">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb bg-white rounded-0">
+                <li class="breadcrumb-item"><a href="{% url 'admin_overview_view' %}">Dashboard</a>
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    Manage User
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
+                    User List
+                </li>
+            </ol>
+        </nav>
+    </div>
+</div>
 <div class="container py-5">
-    <div class="text-center text-white">
+    <!-- <div class="text-center text-white">
         <h1 class="display-4">User List</h1>
         <p class="lead mb-0"> Administrator page</p>
-    </div>
-    <div class="row py-5">
+    </div> -->
+    <div class="row">
         <div class="col-lg-10 mx-auto">
             <div class="card rounded shadow border-0">
                 <div class="card-body p-4 bg-white rounded">
@@ -254,9 +270,7 @@
         </div>
     </div>
 </div>
-
-
-{% endblock content %}
+{% endblock inner_content %}
 
 {% block script %}
 <script>

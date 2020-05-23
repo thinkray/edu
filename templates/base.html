@@ -111,7 +111,7 @@
                                 <a class="dropdown-item" href="{% url 'user_overview_view'%}">Dashboard</a>
                                 <a class="dropdown-item" href="#">Profile</a>
                                 {% if is_superuser %}
-                                <a class="dropdown-item" href="#">Manage site</a>
+                                <a class="dropdown-item" href="{% url 'admin_overview_view' %}">Manage site</a>
                                 {% endif %}
                             </div>
                         </li>

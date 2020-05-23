@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-xs-2 col-md-2 bg-light border-right left-nav">
+            <ul class="list-group row">
+                <a class="list-group-item btn btn-light text-left {% url 'admin_overview_view' as admin_overview_view %}{% if admin_overview_view == request.path%}active{% endif %}"
+                    href="{% url 'admin_overview_view' %}">
+                    <i class="fas fa-home icon_fixer"></i>
+                    Admin Dashboard
+                </a>
+                <a class="list-group-item btn btn-light text-left" data-toggle="collapse" href="#multiCollapse"
+                    role="button" aria-expanded="true" aria-controls="multiCollapse">
+                    <div class="float-left">
+                        <i class="fas fa-school icon_fixer"></i>
+                        Manage Course
+                    </div>
+                    <div class="float-right">
+                        <i class="fas fa-arrow-down icon_fixer"></i>
+                    </div>
+                </a>
+                <div class="collapse multi-collapse show" id="multiCollapse">
+                <a class="list-group-item btn btn-light text-left ml-2 {% if page_name == 'Course List'%}active{% endif %}"
+                    href="{%url 'admin_course_view' %}">
+                    <i class="icon_fixer fas fa-chalkboard-teacher"></i>
+                    Course List
+                </a>
+                <a class="list-group-item btn btn-light text-left ml-2 {% url 'admin_calendar_list_view' as admin_calendar_list_view %}{% if admin_calendar_list_view == request.path%}active{% endif %}"
+                    href="{% url 'admin_calendar_list_view' %}">
+                    <i class="far fa-calendar-alt icon_fixer"></i>
+                    Calendar
+                </a>
+                </div>
+                <a class="list-group-item btn btn-light text-left" data-toggle="collapse" href="#multiCollapse2"
+                    role="button" aria-expanded="true" aria-controls="multiCollapse2">
+                    <div class="float-left">
+                        <i class="fas fa-users-cog icon_fixer"></i>
+                        Manage User
+                    </div>
+                    <div class="float-right">
+                        <i class="fas fa-arrow-down icon_fixer"></i>
+                    </div>
+                </a>
+                <div class="collapse multi-collapse show" id="multiCollapse2">
+                    <a class="list-group-item btn btn-light text-left ml-2 {% if page_name == 'User List'%}active{% endif %}" href="{% url 'admin_user_list_view' %}">
+                        <i class="fas fa-users icon_fixer"></i>
+                        User List
+                    </a>
+                    <a class="list-group-item btn btn-light text-left ml-2 {% if page_name == 'Balance List'%}active{% endif %}" href="{% url 'admin_balance_list_view' %}">
+                        <i class="fas fa-wallet icon_fixer"></i>
+                        Balance List
+                    </a>
+                    <a class="list-group-item btn btn-light text-left ml-2 {% if page_name == 'Bill List'%}active{% endif %}" href="{% url 'admin_bill_list_view' %}">
+                        <i class="fas fa-money-bill icon_fixer"></i>
+                        Bill List
+                    </a>
+                    <a class="list-group-item btn btn-light text-left ml-2 {% if page_name == 'Log List'%}active{% endif %}" href="{% url 'admin_log_list_view' %}">
+                        <i class="fas fa-clipboard-list icon_fixer"></i>
+                        Log List
+                    </a>
+                </div>
+                <a class="list-group-item btn btn-light text-left" data-toggle="collapse" href="#multiCollapse3"
+                    role="button" aria-expanded="true" aria-controls="multiCollaps2">
+                    <div class="float-left">
+                        <i class="fas fa-list-ul icon_fixer"></i>
+                        Manage Code
+                    </div>
+                    <div class="float-right">
+                        <i class="fas fa-arrow-down icon_fixer"></i>
+                    </div>
+                </a>
+                <div class="collapse multi-collapse show" id="multiCollapse3">
+                    <a class="list-group-item btn btn-light text-left ml-2 {% if page_name == 'Coupon Code List'%}active{% endif %}"
+                        href="{% url 'admin_coupon_code_list_view' %}">
+                        <i class="far fa-list-alt icon_fixer"></i>
+                        Coupon Code List
+                    </a>
+                    <a class="list-group-item btn btn-light text-left ml-2 {% if page_name == 'Redemption Code List'%}active{% endif %}"
+                        href="{% url 'admin_redemption_code_list_view' %}">
+                        <i class="fas fa-list-alt icon_fixer"></i>
+                        Redemption Code List
+                    </a>
+                </div>
+                <a class="list-group-item btn btn-light text-left" href="{% url 'user_overview_view' %}">
+                    <i class="fas fa-exchange-alt icon_fixer"></i>
+                    User Dashboard
+                </a>
+                <a id="logout_2" class="list-group-item btn btn-light text-left" href="#">
+                    <i class="fas fa-sign-out-alt icon_fixer"></i>
+                    Logout
+                </a>
+            </ul>
+
+        </div>
+        <!--  main -->
+        <div class="col-xs-10 col-md-10">
+            {% block inner_content %}
+            {% endblock inner_content %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

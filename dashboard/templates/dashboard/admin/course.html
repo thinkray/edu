@@ -1,4 +1,4 @@
-{% extends 'dashboard\user\base.html' %}
+{% extends 'dashboard\admin\base.html' %}
 
 {% block head %}
 <style>
@@ -69,53 +69,16 @@
                 <li class="breadcrumb-item"><a href="{% url 'user_overview_view' %}">Dashboard</a>
                 </li>
                 <li class="breadcrumb-item active" aria-current="page">
-                    My Course
-                </li>
-                <li class="breadcrumb-item active" aria-current="page">
-                    {{ panel_name|capfirst }}
+                    Course List
                 </li>
             </ol>
         </nav>
     </div>
 </div>
 <div class="container">
-    {% if status == 200 %}
     {% if page_obj %}
-        {% if panel_name == 'study' %}
-        <label>You have enrolled in <span class="font-weight-bolder text-danger">{{ course_enroll_num }}</span>
-            course{{ course_enroll_num|pluralize }}</label>
-        <section class="col-xs-12 col-sm-12 col-md-12">
-            {% for each in page_obj %}
-            <article class="search-result row border-bottom">
-                <div class="col-xs-12 col-sm-12 col-md-3">
-                    <a href="#" title="Details" class="thumbnail"> <img
-                            src="https://mdbootstrap.com/wp-content/uploads/2018/01/push-fb.jpg" class="card-img-top"
-                            alt="" /></a>
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-2">
-                    <ul class="meta-search">
-                        <li><i class="icon_fixer far fa-calendar-alt"></i> <span>From
-                                {{each.course.start_date | date:"M d, Y"}}</span></li>
-                        <li><i class="icon_fixer far fa-calendar-alt"></i> <span>To
-                                {{each.course.end_date | date:"M d, Y"}}</span></li>
-                        <!-- <li><i class="far fa-clock"></i> <span>midnight</span></li> -->
-                        <li><i class="icon_fixer fas fa-chalkboard-teacher"></i> <span>{{each.teacher.name}}</span></li>
-                        <li><i class="icon_fixer fas fa-leaf"></i> <span>{{each.quota}}
-                                session{{each.quota|pluralize}} left</span></li>
-                    </ul>
-                </div>
-                <div class="col-xs-12 col-sm-12 col-md-7 excerpet">
-                    <h3><a href="{% url 'course_detail_view_page' course_id=each.id %}">{{each.course.name}}</a></h3>
-                    <p>{{each.course.info}}</p>
-                </div>
-                <span class="clearfix border" style="margin-top:3%"></span>
-            </article>
-            <br>
-            {% endfor %}
-        </section>
-        {% elif panel_name == 'teaching' %}
-        <label>You teach <span class="font-weight-bolder text-danger">{{ course_enroll_num }}</span>
-            course{{ course_enroll_num|pluralize }}</label>
+        <label>We have <span class="font-weight-bolder text-danger">{{ course_enroll_num }}</span>
+            course{{ course_enroll_num|pluralize }} in total</label>
         <section class="col-xs-12 col-sm-12 col-md-12">
             {% for each in page_obj %}
             <article class="search-result row border-bottom">
@@ -133,34 +96,32 @@
                         <!-- <li><i class="far fa-clock"></i> <span>midnight</span></li> -->
                         <li><i class="icon_fixer fas fa-chalkboard-teacher"></i> <span>{{each.teacher.name}}</span></li>
                         <li><i class="icon_fixer fas fa-leaf"></i> <span>{{each.quota}}
-                                session{{each.quota|pluralize}}</span></li>
-                        <li><i class="icon_fixer fas fa-spa"></i> <span>Sold {{each.sold}}</span></li>
+                                session{{each.quota|pluralize}} left</span></li>
                     </ul>
                 </div>
                 <div class="col-xs-12 col-sm-12 col-md-7 excerpet">
-                    <h3><a href="{% url 'course_detail_view_page' course_id=each.id %}">{{each.course.name}}</a></h3>
-                    <p>{{each.course.info}}</p>
+                    <h3><a href="{% url 'course_detail_view_page' course_id=each.id %}">{{each.name}}</a></h3>
+                    <p>{{each.info}}</p>
                 </div>
                 <span class="clearfix border" style="margin-top:3%"></span>
             </article>
             <br>
             {% endfor %}
         </section>
-        {% endif %}
         <br>
         <section class="text-center">
             <!--Pagination-->
             <ul class="pagination justify-content-center">
                 <li class="page-item {% if not page_obj.has_previous %}disabled{% endif %}"><a class="page-link"
-                        href="{%url 'user_course_view_panel_page' panel_name=panel_name page=1%}?q={{ query }}">First</a>
+                        href="{%url 'admin_course_view_page' page=1%}?q={{ query }}">First</a>
                 </li>
                 {% for each in page_bar %}
                 <li class="page-item {% if page_obj.number == each %}active{% endif %}"><a class="page-link"
-                        href="{%url 'user_course_view_panel_page' panel_name=panel_name page=each %}?q={{ query }}">{{each}}</a>
+                        href="{%url 'admin_course_view_page' page=each %}?q={{ query }}">{{each}}</a>
                 </li>
                 {% endfor %}
                 <li class="page-item {% if not page_obj.has_next %}disabled{% endif %}"><a class="page-link"
-                        href="{%url 'user_course_view_panel_page' panel_name=panel_name page=page_obj.paginator.num_pages%}?q={{ query }}">Last</a>
+                        href="{%url 'admin_course_view_page' page=page_obj.paginator.num_pages%}?q={{ query }}">Last</a>
                 </li>
             </ul>
             <span class="font-weight-light">
@@ -168,26 +129,7 @@
             </span>
             <!--Pagination-->
         </section>
-    {% else %}
-        {% if panel_name == 'study' %}
-        <h2> You have not yet enroll in any course</h2>
-        <br>
-        <h3> Go ahead to enroll a <i class="fas fa-hand-point-right"></i><a
-                href="{% url 'course_list_view' %}"><strong>course</strong></a>
-        </h3>
-        {% elif panel_name == 'teaching' %}
-        <h2> You have no course</h2>
-        {% endif %}
-    {% endif %}
-    {% elif status == 403 %}
-    <div class="alert alert-danger" role="alert">
-        Forbidden
-    </div>
-    {% elif status == 404 %}
-    <div class="alert alert-danger" role="alert">
-        Panel Not Found
-    </div>
-    {% endif %}
     <br>
+    {% endif %}
 </div>
 {% endblock inner_content %}

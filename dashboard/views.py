@@ -141,6 +141,34 @@ class UserCalendarView(View):
         return HttpResponse(template.render(context, request))
 
 
+class AdminCalendarView(View):
+    def get(self, request):
+        if not request.user.is_authenticated:
+            response = redirect(reverse('user_login_view'))
+            response['Location'] += '?redirect_uri=' + request.path
+            return response
+
+        if not request.user.is_superuser:
+            raise PermissionDenied()
+
+        context = {}
+        result = User.objects.all()
+        context['page_name'] = 'Admin Calendar'
+
+        template = loader.get_template('dashboard/admin/calendar.html')
+
+        context['site_name'] = settings.SITE_NAME
+        context['is_authenticated'] = True
+        context['is_superuser'] = request.user.is_superuser
+        context['is_teacher'] = request.session.get('is_teacher')
+        context['name'] = request.user.name
+        context['username'] = request.user.username
+        context['hide_welcome'] = True
+        context['teach_course'] = Course.objects.all()
+
+        return HttpResponse(template.render(context, request))
+
+
 class UserCourseView(View):
 
     def get(self, request, panel_name='student', page=1):
@@ -175,6 +203,58 @@ class UserCourseView(View):
 
         context['site_name'] = settings.SITE_NAME
         context['panel_name'] = panel_name
+        context['is_authenticated'] = True
+        context['is_superuser'] = request.user.is_superuser
+        context['is_teacher'] = request.session.get('is_teacher')
+        context['name'] = request.user.name
+        context['username'] = request.user.username
+        context['hide_welcome'] = True
+        context['page_obj'] = page_obj
+
+        page_start = page_obj.number
+        page_bar_num = 5
+        for i in range(int(page_bar_num / 2)):
+            if page_start - 1 > 0:
+                page_start = page_start - 1
+        page_end = page_start
+        for i in range(int(page_bar_num / 2) * 2):
+            if page_end + 1 <= page_obj.paginator.num_pages:
+                page_end = page_end + 1
+        if page_end - page_start < int(page_bar_num / 2) * 2:
+            for i in range(int(page_bar_num / 2) * 2):
+                if page_start - 1 >= 1 and page_end - page_start < int(page_bar_num / 2) * 2:
+                    page_start = page_start - 1
+        page_bar = []
+        for i in range(page_start, page_end + 1):
+            page_bar.append(i)
+        context['page_bar'] = page_bar
+
+        return HttpResponse(template.render(context, request))
+
+
+class AdminCourseView(View):
+
+    def get(self, request, page=1):
+        if not request.user.is_authenticated:
+            response = redirect(reverse('user_login_view'))
+            response['Location'] += '?redirect_uri=' + request.path
+            return response
+
+        if not request.user.is_superuser:
+            raise PermissionDenied()
+
+        context = {}
+        result = Course.objects.all()
+        context['status'] = 200
+        context['course_enroll_num'] = len(result)
+        context['page_name'] = 'Course List'
+
+        paginator = Paginator(result, 10)
+        page_obj = paginator.get_page(page)
+
+        template = loader.get_template('dashboard/admin/course.html')
+
+        context['site_name'] = settings.SITE_NAME
         context['is_authenticated'] = True
         context['is_superuser'] = request.user.is_superuser
         context['is_teacher'] = request.session.get('is_teacher')
@@ -267,7 +347,7 @@ class AdminUserListView(View):
 
         context = {}
         result = User.objects.all()
-        context['page_name'] = 'Coupon Code List'
+        context['page_name'] = 'User List'
 
         paginator = Paginator(result, 10)
         page_obj = paginator.get_page(page)
@@ -315,6 +395,56 @@ class AdminUserListView(View):
         return HttpResponse(template.render(context, request))
 
 
+class AdminOverviewView(View):
+
+    def get(self, request, page=1):
+        if not request.user.is_authenticated:
+            response = redirect(reverse('user_login_view'))
+            response['Location'] += '?redirect_uri=' + request.path
+            return response
+
+        if not request.user.is_superuser:
+            raise PermissionDenied()
+
+        context = {}
+        result = Log.objects.all()
+        context['page_name'] = 'Admin Dashboard'
+
+        paginator = Paginator(result, 10)
+        page_obj = paginator.get_page(page)
+
+        template = loader.get_template('dashboard/admin/dashboard.html')
+
+        context['site_name'] = settings.SITE_NAME
+        context['is_authenticated'] = True
+        context['is_superuser'] = request.user.is_superuser
+        context['is_teacher'] = request.session.get('is_teacher')
+        context['name'] = request.user.name
+        context['username'] = request.user.username
+        context['hide_welcome'] = True
+        context['page_obj'] = page_obj
+
+        page_start = page_obj.number
+        page_bar_num = 5
+        for i in range(int(page_bar_num / 2)):
+            if page_start - 1 > 0:
+                page_start = page_start - 1
+        page_end = page_start
+        for i in range(int(page_bar_num / 2) * 2):
+            if page_end + 1 <= page_obj.paginator.num_pages:
+                page_end = page_end + 1
+        if page_end - page_start < int(page_bar_num / 2) * 2:
+            for i in range(int(page_bar_num / 2) * 2):
+                if page_start - 1 >= 1 and page_end - page_start < int(page_bar_num / 2) * 2:
+                    page_start = page_start - 1
+        page_bar = []
+        for i in range(page_start, page_end + 1):
+            page_bar.append(i)
+        context['page_bar'] = page_bar
+
+        return HttpResponse(template.render(context, request))
+
+
 class UserOverviewView(View):
 
     def get(self, request):
@@ -353,7 +483,7 @@ class AdminRedemptionCodeListView(View):
 
         context = {}
         result = RedemptionCode.objects.all()
-        context['page_name'] = 'Coupon Code List'
+        context['page_name'] = 'Redemption Code List'
 
         paginator = Paginator(result, 10)
         page_obj = paginator.get_page(page)
