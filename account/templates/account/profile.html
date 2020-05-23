@@ -1,0 +1,89 @@
+{% extends 'base.html' %}
+
+{% block head%}
+<style>
+    .icon_box {
+        height: 3rem;
+        width: 3rem;
+    }
+
+    .navbar_dropdown_fixer {
+        min-width: auto;
+    }
+
+    .icon_fixer {
+        min-width: 1.25rem;
+        text-align: center;
+    }
+
+    .navbar .navbar-brand {
+        padding-top: 0;
+    }
+
+    .navbar .nav-link {
+        color: #444343 !important;
+    }
+
+    .navbar .button-collapse {
+        padding-top: 1px;
+    }
+
+    .profile-img {
+        text-align: center;
+    }
+
+    .profile-img img {
+        width: 70%;
+        height: 100%;
+    }
+
+    .profile-img .file {
+        position: relative;
+        overflow: hidden;
+        margin-top: -20%;
+        width: 70%;
+        border: none;
+        border-radius: 0;
+        font-size: 15px;
+        background: #212529b8;
+    }
+
+    .profile-img .file input {
+        position: absolute;
+        opacity: 0;
+        right: 0;
+        top: 0;
+    }
+</style>
+{% endblock head%}
+
+{% block content %}
+<div class="container">
+    {% if status == 200 %}
+    <div class="card bg-light my-2"> 
+        <article class="card-body mx-auto">
+            <div class="row my-2">
+                <div class="col-md-4">
+                    <img class="img-fluid" src="https://mdbootstrap.com/img/Marketing/mdb-press-pack/mdb-angular.jpg"
+                        alt="" />
+                </div>
+                <div class="col-md-8">
+                    <p>
+                        <span class="font-weight-bolder">{{ user.name }}</span>
+                        <span class="font-weight-lighter">{{ user.username }}</span>
+                        <span class="badge badge-primary">{{ role }}</span>
+                    </p>
+                    <div>
+                        {{ user.profile }}
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+    {% else %}
+    <div class="col-md-12 alert alert-danger my-2" role="alert">
+        User Not Found
+    </div>
+    {% endif %}
+</div>
+{% endblock content %}

@@ -527,3 +527,26 @@ class UserLoginView(View):
         context['site_name'] = settings.SITE_NAME
         context['hide_login'] = True
         return HttpResponse(template.render(context, request))
+
+class UserProfileView(View):
+
+    def get(self, request, user_id):
+
+        template = loader.get_template('account/profile.html')
+
+        context = {}
+        try:
+            user = User.objects.get(pk=user_id)
+            context['status'] = 200
+            context['user'] = user
+            if user.is_superuser:
+                context['role'] = 'Admin'
+            elif user.groups.filter(name='teacher').exists():
+                context['role'] = 'Teacher'
+            else:
+                context['role'] = 'Student'
+        except Exception as e:
+            context['status'] = 404
+        
+        context['site_name'] = settings.SITE_NAME
+        return HttpResponse(template.render(context, request))
