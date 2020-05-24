@@ -10,6 +10,7 @@ from django.urls import reverse
 from django.views import View
 
 from account.models import User
+from booking.models import Booking
 from course.models import Course, CourseInstance
 from finance.models import Bill, CouponCode, RedemptionCode
 from site_log.models import Log
@@ -467,7 +468,7 @@ class AdminUserListView(View):
 
 class AdminOverviewView(View):
 
-    def get(self, request, page=1):
+    def get(self, request):
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -477,11 +478,7 @@ class AdminOverviewView(View):
             raise PermissionDenied()
 
         context = {}
-        result = Log.objects.all()
         context['page_name'] = 'Admin Dashboard'
-
-        paginator = Paginator(result, 10)
-        page_obj = paginator.get_page(page)
 
         template = loader.get_template('dashboard/admin/dashboard.html')
 
@@ -492,25 +489,10 @@ class AdminOverviewView(View):
         context['name'] = request.user.name
         context['username'] = request.user.username
         context['hide_welcome'] = True
-        context['page_obj'] = page_obj
-
-        page_start = page_obj.number
-        page_bar_num = 5
-        for i in range(int(page_bar_num / 2)):
-            if page_start - 1 > 0:
-                page_start = page_start - 1
-        page_end = page_start
-        for i in range(int(page_bar_num / 2) * 2):
-            if page_end + 1 <= page_obj.paginator.num_pages:
-                page_end = page_end + 1
-        if page_end - page_start < int(page_bar_num / 2) * 2:
-            for i in range(int(page_bar_num / 2) * 2):
-                if page_start - 1 >= 1 and page_end - page_start < int(page_bar_num / 2) * 2:
-                    page_start = page_start - 1
-        page_bar = []
-        for i in range(page_start, page_end + 1):
-            page_bar.append(i)
-        context['page_bar'] = page_bar
+        context['user_count'] = User.objects.count()
+        context['bill_count'] = Bill.objects.count()
+        context['booking_count'] = Booking.objects.count()
+        context['course_count'] = Course.objects.count()
 
         return HttpResponse(template.render(context, request))
 

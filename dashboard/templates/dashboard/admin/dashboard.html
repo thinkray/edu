@@ -5,10 +5,159 @@
     <div class="col-xs-12 col-md-12 px-0">
         <nav aria-label="breadcrumb">
             <ol class="breadcrumb bg-white rounded-0">
-                <li class="breadcrumb-item"><a href="#">Dashboard</a>
+                <li class="breadcrumb-item"><a href="#">Admin Dashboard</a>
+                </li>
+                <li class="breadcrumb-item">
+                    Overview
                 </li>
             </ol>
         </nav>
+    </div>
+</div>
+<div class="container">
+    <div class="row my-2">
+        <div class="col-xs-12 col-md-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xs-3 col-md-3 border-right">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div
+                                    class="d-flex bg-light rounded-circle align-items-center justify-content-center icon_box">
+                                    <h5 class="fas fa-user-graduate mx-2 my-2 text-primary"></h5>
+                                </div>
+                            </div>
+                            <div class="text-center text-info">
+                                {{ user_count }} <br />
+                                User{{ user_count|pluralize }} <br />
+                            </div>
+                        </div>
+                        <div class="col-xs-3 col-md-3 border-right">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div
+                                    class="d-flex bg-light rounded-circle align-items-center justify-content-center icon_box">
+                                    <h5 class="fas fa-money-bill mx-2 my-2 text-success"></h5>
+                                </div>
+                            </div>
+                            <div class="text-center text-success">
+                                {{ bill_count }} <br />
+                                Bill{{ bill_count|pluralize }} <br />
+                            </div>
+                        </div>
+                        <div class="col-xs-3 col-md-3 border-right">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div
+                                    class="d-flex bg-light rounded-circle align-items-center justify-content-center icon_box">
+                                    <h5 class="fas fa-chalkboard-teacher mx-2 my-2 text-warning"></h5>
+                                </div>
+                            </div>
+                            <div class="text-center text-warning">
+                                {{ course_count }} <br />
+                                Course{{ course_count|pluralize }} <br />
+                            </div>
+                        </div>
+                        <div class="col-xs-3 col-md-3">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div
+                                    class="d-flex bg-light rounded-circle align-items-center justify-content-center icon_box">
+                                    <h5 class="far fa-calendar-alt mx-2 my-2 text-danger"></h5>
+                                </div>
+                            </div>
+                            <div class="text-center text-danger">
+                                {{ booking_count }} <br />
+                                Booking{{ booking_count|pluralize }} <br />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+        <div class="col-xs-3 col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Manage Courses</h6>
+                    <p class="card-text">Manage all courses on this website.</p>
+                    <a href="{%url 'admin_course_view' %}" class="btn btn-primary">Go <i
+                            class="fas fa-hand-point-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Calendar</h6>
+                    <p class="card-text">Schedule and check what happens next.</p>
+                    <a href="{% url 'admin_calendar_list_view' %}" class="btn btn-primary">Go <i
+                            class="fas fa-hand-point-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Manage Users</h6>
+                    <p class="card-text">Maintain user information and manage user permissions</p>
+                    <a href="{%url 'admin_user_list_view'%}" class="btn btn-primary">Go <i
+                            class="fas fa-hand-point-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Manage Users' Balance</h6>
+                    <p class="card-text">With this function, you can change user's balance</p>
+                    <a href="{%url 'admin_balance_list_view'%}" class="btn btn-primary">Go <i
+                            class="fas fa-hand-point-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+        <div class="col-xs-3 col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Manage Bill of Users</h6>
+                    <p class="card-text">With this function, you can edit the info of user's bill or create a
+                        bill for the user.</p>
+                    <a href="{%url 'admin_bill_list_view'%}" class="btn btn-primary">Go <i
+                            class="fas fa-hand-point-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Manage Log History of Users</h6>
+                    <p class="card-text">With this function, you can create and review the log history for each user.</p>
+                    <a href="{%url 'user_log_list_view'%}" class="btn btn-primary">Go <i
+                            class="fas fa-hand-point-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Manage Coupon Code</h6>
+                    <p class="card-text">With this function, you can create or delete a coupon code.</p>
+                    <a href="{%url 'admin_coupon_code_list_view'%}" class="btn btn-primary">Go <i
+                            class="fas fa-hand-point-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-3 col-md-3">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Manage Redemption Code</h6>
+                    <p class="card-text">With this function, you can create, edit or delete a redemption code.</p>
+                    <a href="{%url 'admin_redemption_code_list_view'%}" class="btn btn-primary">Go <i
+                            class="fas fa-hand-point-right"></i></a>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock inner_content %}

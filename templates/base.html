@@ -109,9 +109,9 @@
                             <div class="dropdown-menu dropdown-menu-right dropdown-default"
                                 aria-labelledby="navbarDropdownMenuLink">
                                 <a class="dropdown-item" href="{% url 'user_overview_view'%}">Dashboard</a>
-                                <a class="dropdown-item" href="#">Profile</a>
+                                <a class="dropdown-item" href="{% url 'user_profile_edit_view'%}">Profile</a>
                                 {% if is_superuser %}
-                                <a class="dropdown-item" href="{% url 'admin_overview_view' %}">Manage site</a>
+                                <a class="dropdown-item" href="{% url 'admin_overview_view' %}">Manage Site</a>
                                 {% endif %}
                             </div>
                         </li>
@@ -171,7 +171,7 @@
 
     <footer>
         <div class="bg-secondary card-body text-center">
-            <p class="text-black text-white">©2020 {{ site_name }}. All Rights Reserved.</p>
+            <p class="text-black text-white">©{{ site_name }}. All Rights Reserved.</p>
         </div>
     </footer>
     <script>
