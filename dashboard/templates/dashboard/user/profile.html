@@ -8,6 +8,9 @@
                 <li class="breadcrumb-item"><a href="#">Dashboard</a>
                 </li>
                 <li class="breadcrumb-item active" aria-current="page">
+                    My Account
+                </li>
+                <li class="breadcrumb-item active" aria-current="page">
                     Profile
                 </li>
             </ol>
@@ -37,6 +40,15 @@
                                     <label for="edit_panel_name" class="col-form-label">Name:</label>
                                     <input type="text" class="form-control" id="edit_panel_name"
                                         value="{{ request.user.name }}">
+                                </div>
+                                <div class="form-group mb-3">
+                                    <label for="edit_panel_picture" class="col-form-label">Photo:</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="edit_panel_picture">
+                                        <label id='edit_panel_picture_label' class="custom-file-label"
+                                            for="edit_panel_picture" aria-describedby="edit_panel_picture">Choose
+                                            file</label>
+                                    </div>
                                 </div>
                                 <div class="custom-control custom-switch">
                                     <input type="checkbox" class="custom-control-input" id="edit_panel_change_password">
@@ -125,35 +137,63 @@
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
             let api_url = "{%url 'user_api' user_id='0'%}";
-            list["username"] = $("#edit_panel_username")[0].value;
-            list["name"] = $("#edit_panel_name")[0].value;
-            list["profile"] = $("#edit_panel_profile")[0].value;
+            let data = new FormData();
+            data.append("username", $("#edit_panel_username")[0].value);
+            data.append("name", $("#edit_panel_name")[0].value);
+            data.append("profile", $("#edit_panel_profile")[0].value);
             if (($("#edit_panel_change_password").is(':checked')) && ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value)) {
-                list["password"] = $("#edit_panel_password")[0].value;
+                data.append("password", $("#edit_panel_password")[0].value);
             }
+            data.append("picture", $("#edit_panel_picture")[0].files[0]);
             $.ajax({
-                type: "PATCH",
-                contentType: "application/json;charset=UTF-8",
+                type: "POST",
+                contentType: false,
+                processData: false,
+                cache: false,
                 url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
-                data: JSON.stringify(list),
+                data: data,
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                         xhr.setRequestHeader("X-CSRFToken", csrftoken);
                     }
                 },
                 success: function (result) {
-                    $(".table-responsive").before('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The user was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $(".panel-body").append('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The user was successfully updated. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                     window.location.reload();
                 },
                 error: function (e) {
-                    $(".table-responsive").before('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
-                    window.location.reload();
+                    let result = e.responseJSON;
+                    $("[id^=ajax_result]").remove();
+                    if (typeof result['message'] == 'string') {
+                        $(".panel-body").append(
+                            '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                        );
+                    }
+                    else {
+                        for (var index in result["message"]) {
+                            $("#" + index)
+                                .after(
+                                    '<div id="ajax_result_' +
+                                    index +
+                                    '" class="alert alert-danger" role="alert">' +
+                                    result["message"][index][0] +
+                                    '</div>'
+                                );
+                        }
+                    }
                 },
             });
         });
     });
     $('#reset').click(function () {
         location.reload(true);
+    });
+    if (typeof ($('#edit_panel_picture')[0].files[0]) != "undefined") {
+        $('#edit_panel_picture_label').html($('#edit_panel_picture')[0].files[0].name);
+    }
+    $('#edit_panel_picture').change(function (e) {
+        var fileName = e.target.files[0].name;
+        $('#edit_panel_picture_label').html(fileName);
     });
 </script>
 {% endblock script %}

@@ -1,3 +1,5 @@
+import base64
+
 from django.conf import settings
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
@@ -183,6 +185,7 @@ class UserCourseView(View):
             context['status'] = 200
             context['course_enroll_num'] = len(result)
             context['page_name'] = 'My Course | Study'
+
         elif panel_name == 'teaching':
             if request.user.groups.filter(name='teacher').exists() or request.user.is_superuser:
                 context['status'] = 200
@@ -210,6 +213,51 @@ class UserCourseView(View):
         context['username'] = request.user.username
         context['hide_welcome'] = True
         context['page_obj'] = page_obj
+
+        if panel_name == 'study':
+            course_set = []
+            for each in page_obj:
+                if each.course.picture is not None:
+                    current_item = {'picture': 'data:' + each.course.picture.content_type +
+                                    ';base64,' +
+                                    str(base64.b64encode(each.course.picture.data), encoding='utf-8')}
+                else:
+                    current_item = {'picture': ''}
+
+                current_item['id'] = each.course.id
+                current_item['name'] = each.course.name
+                current_item['teacher_id'] = each.course.teacher.id
+                current_item['teacher_name'] = each.course.teacher.name
+                current_item['info'] = each.course.info
+                current_item['start_date'] = each.course.start_date
+                current_item['end_date'] = each.course.end_date
+                current_item['price'] = each.course.price
+                current_item['quota'] = each.quota
+                current_item['sold'] = each.course.sold
+                course_set.append(current_item)
+            context['course_set'] = course_set
+        elif panel_name == 'teaching':
+            course_set = []
+            for each in page_obj:
+                if each.picture is not None:
+                    current_item = {'picture': 'data:' + each.picture.content_type +
+                                    ';base64,' +
+                                    str(base64.b64encode(each.picture.data), encoding='utf-8')}
+                else:
+                    current_item = {'picture': ''}
+
+                current_item['id'] = each.id
+                current_item['name'] = each.name
+                current_item['teacher_id'] = each.teacher.id
+                current_item['teacher_name'] = each.teacher.name
+                current_item['info'] = each.info
+                current_item['start_date'] = each.start_date
+                current_item['end_date'] = each.end_date
+                current_item['price'] = each.price
+                current_item['quota'] = each.quota
+                current_item['sold'] = each.sold
+                course_set.append(current_item)
+            context['course_set'] = course_set
 
         page_start = page_obj.number
         page_bar_num = 5
@@ -262,6 +310,28 @@ class AdminCourseView(View):
         context['username'] = request.user.username
         context['hide_welcome'] = True
         context['page_obj'] = page_obj
+
+        course_set = []
+        for each in page_obj:
+            if each.picture is not None:
+                current_item = {'picture': 'data:' + each.picture.content_type +
+                                ';base64,' +
+                                str(base64.b64encode(each.picture.data), encoding='utf-8')}
+            else:
+                current_item = {'picture': ''}
+
+            current_item['id'] = each.id
+            current_item['name'] = each.name
+            current_item['teacher_id'] = each.teacher.id
+            current_item['teacher_name'] = each.teacher.name
+            current_item['info'] = each.info
+            current_item['start_date'] = each.start_date
+            current_item['end_date'] = each.end_date
+            current_item['price'] = each.price
+            current_item['quota'] = each.quota
+            current_item['sold'] = each.sold
+            course_set.append(current_item)
+        context['course_set'] = course_set
 
         page_start = page_obj.number
         page_bar_num = 5

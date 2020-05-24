@@ -64,8 +64,11 @@
         <article class="card-body mx-auto">
             <div class="row my-2">
                 <div class="col-md-4">
-                    <img class="img-fluid" src="https://mdbootstrap.com/img/Marketing/mdb-press-pack/mdb-angular.jpg"
-                        alt="" />
+                    {% if picture %}
+                    <img class="img-fluid" src="{{ picture }}"/>
+                    {% else %}
+                    <img class="img-fluid" src="/static/img/default_profile.jpg"/>
+                    {% endif %}
                 </div>
                 <div class="col-md-8">
                     <p>

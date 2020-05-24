@@ -20,7 +20,7 @@
                     </strong>
                 </p>
                 {% if is_authenticated %}
-                <a href="#" class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
+                <a href="{%url 'course_list_view'%}" class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
                     <i class="fas fa-graduation-cap ml-2"></i>
                 </a>
                 {% else %}
@@ -291,7 +291,7 @@
         </p>
         <br />
         {% if is_authenticated %}
-        <a href="#" class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
+        <a href="{%url 'course_list_view'%}" class="btn btn-warning text-white btn-outline-white btn-lg">Start Now
             <i class="fas fa-graduation-cap ml-2"></i>
         </a>
         {% else %}

@@ -1,3 +1,4 @@
+import base64
 import json
 
 from django.conf import settings
@@ -6,7 +7,7 @@ from django.core.validators import MinValueValidator
 from django.db import transaction
 from django.db.models import Q
 from django.forms import (BooleanField, CharField, ChoiceField, DateTimeField,
-                          DecimalField, Form, IntegerField,
+                          DecimalField, FileField, Form, IntegerField,
                           MultipleChoiceField)
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
@@ -87,21 +88,13 @@ class CourseListAPI(View):
             quota = IntegerField(validators=[MinValueValidator(0)])
             sold = IntegerField(
                 validators=[MinValueValidator(0)], required=False)
+            picture = FileField(required=False)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = CourseListAPIPostForm(data)
+        form = CourseListAPIPostForm(request.POST, request.FILES)
         if form.is_valid():
             cleaned_data = form.clean()
 
-            if request.user.is_superuser and 'teacher' in data:
+            if request.user.is_superuser and 'teacher' in request.POST:
                 try:
                     cleaned_data['teacher'] = User.objects.get(
                         username=cleaned_data['teacher'])
@@ -118,7 +111,28 @@ class CourseListAPI(View):
 
             course = Course(name=cleaned_data['name'], info=cleaned_data['info'], start_date=cleaned_data['start_date'], end_date=cleaned_data['end_date'],
                             teacher=cleaned_data['teacher'], price=cleaned_data['price'], quota=cleaned_data['quota'], sold=cleaned_data['sold'])
+
+            if cleaned_data['picture'] is not None:
+                if cleaned_data['picture'].content_type[:5] != 'image':
+                    return JsonResponse({
+                        'status': 400,
+                        'message': 'IllegalFileType'
+                    }, status=400)
+                try:
+                    with transaction.atomic():
+                        blob_storage = BlobStorage(data=cleaned_data['picture'].file.read(
+                        ), content_type=cleaned_data['picture'].content_type)
+                        blob_storage.save()
+                        course.picture = blob_storage
+                        course.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
+
             course.save()
+
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
@@ -184,8 +198,8 @@ class CourseAPI(View):
                 'message': form.errors
             }, status=400)
 
-    def put(self, request, course_id):
-        class CourseAPIPutForm(Form):
+    def post(self, request, course_id):
+        class CourseAPIPostForm(Form):
             name = CharField(max_length=200)
             info = CharField(required=False)
             start_date = DateTimeField()
@@ -194,17 +208,9 @@ class CourseAPI(View):
             quota = IntegerField(validators=[MinValueValidator(0)])
             sold = IntegerField(
                 validators=[MinValueValidator(0)], required=False)
+            picture = FileField(required=False)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = CourseAPIPutForm(data)
+        form = CourseAPIPostForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 course = Course.objects.get(pk=course_id)
@@ -248,6 +254,39 @@ class CourseAPI(View):
 
             if cleaned_data['sold'] is not None:
                 course.sold = cleaned_data['sold']
+
+            if cleaned_data['picture'] is not None:
+                if cleaned_data['picture'].content_type[:5] != 'image':
+                    return JsonResponse({
+                        'status': 400,
+                        'message': 'IllegalFileType'
+                    }, status=400)
+                if course.picture is None:
+                    try:
+                        with transaction.atomic():
+                            blob_storage = BlobStorage(data=cleaned_data['picture'].file.read(
+                            ), content_type=cleaned_data['picture'].content_type)
+                            blob_storage.save()
+                            course.picture = blob_storage
+                            course.save()
+                    except Exception as e:
+                        return JsonResponse({
+                            'status': 500,
+                            'message': 'DatabaseError',
+                        }, status=500)
+                else:
+                    try:
+                        with transaction.atomic():
+                            course.picture.data = cleaned_data['picture'].file.read(
+                            )
+                            course.picture.content_type = cleaned_data['picture'].content_type
+                            course.picture.save()
+                            course.save()
+                    except Exception as e:
+                        return JsonResponse({
+                            'status': 500,
+                            'message': 'DatabaseError',
+                        }, status=500)
 
             course.save()
             return JsonResponse({
@@ -615,7 +654,7 @@ class CourseListView(View):
         result = Course.objects.all()
         context['page_name'] = 'Course List'
 
-        paginator = Paginator(result, 10)
+        paginator = Paginator(result, 9)
         page_obj = paginator.get_page(page)
 
         template = loader.get_template('course/course_list.html')
@@ -633,6 +672,27 @@ class CourseListView(View):
             context['is_superuser'] = False
 
         context['page_obj'] = page_obj
+        course_set = []
+        for each in page_obj:
+            if each.picture is not None:
+                current_item = {'picture': 'data:' + each.picture.content_type +
+                                ';base64,' +
+                                str(base64.b64encode(each.picture.data), encoding='utf-8')}
+            else:
+                current_item = {'picture': ''}
+
+            current_item['id'] = each.id
+            current_item['name'] = each.name
+            current_item['teacher_id'] = each.teacher.id
+            current_item['teacher_name'] = each.teacher.name
+            current_item['info'] = each.info
+            current_item['start_date'] = each.start_date
+            current_item['end_date'] = each.end_date
+            current_item['price'] = each.price
+            current_item['quota'] = each.quota
+            current_item['sold'] = each.sold
+            course_set.append(current_item)
+        context['course_set'] = course_set
 
         page_start = page_obj.number
         page_bar_num = 5
@@ -664,6 +724,12 @@ class CourseDetailView(View):
         try:
             course = Course.objects.get(pk=course_id)
             context['course'] = course
+            if course.picture:
+                context['picture'] = 'data:' + course.picture.content_type + \
+                    ';base64,' + \
+                    str(base64.b64encode(course.picture.data), encoding='utf-8')
+            else:
+                context['picture'] = ''
         except Exception as e:
             context['status'] = 404
             context['message'] = 'CourseNotFound'
@@ -763,6 +829,29 @@ class CourseSearchView(View):
             context['is_superuser'] = False
 
         context['page_obj'] = page_obj
+        
+        course_set = []
+        for each in page_obj:
+            if each.picture is not None:
+                current_item = {'picture': 'data:' + each.picture.content_type +
+                                ';base64,' +
+                                str(base64.b64encode(each.picture.data), encoding='utf-8')}
+            else:
+                current_item = {'picture': ''}
+
+            current_item['id'] = each.id
+            current_item['name'] = each.name
+            current_item['teacher_id'] = each.teacher.id
+            current_item['teacher_name'] = each.teacher.name
+            current_item['info'] = each.info
+            current_item['start_date'] = each.start_date
+            current_item['end_date'] = each.end_date
+            current_item['price'] = each.price
+            current_item['quota'] = each.quota
+            current_item['sold'] = each.sold
+            course_set.append(current_item)
+        context['course_set'] = course_set
+        
         context['query'] = str(query)
 
         page_start = page_obj.number

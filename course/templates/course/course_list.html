@@ -1,5 +1,79 @@
 {% extends 'base.html' %}
-<!--remember to get rid of welcome to the one-on-one band-->
+
+{% block head %}
+<script type="text/javascript" src="/static/js/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
+<link rel="stylesheet" href="/static/css/tempusdominus-bootstrap-4.min.css" />
+<style>
+    .clearfix::after,
+    .calendar ol::after {
+        content: ".";
+        display: block;
+        height: 0;
+        clear: both;
+        visibility: hidden;
+    }
+
+    /* ================
+Calendar Styling */
+    .calendar {
+        border-radius: 10px;
+    }
+
+    .calendar ol li {
+        float: left;
+        width: 14.28571%;
+    }
+
+    .calendar .day-names {
+        border-bottom: 2px solid #eee;
+    }
+
+    .calendar .day-names li {
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+    }
+
+    .calendar .days li {
+        border-bottom: 1px solid #eee;
+        min-height: 8rem;
+    }
+
+    .calendar .days li .date {
+        margin: 0.5rem 0;
+    }
+
+    .calendar .days li .event {
+        font-size: 0.75rem;
+        padding: 0.4rem;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        border-radius: 4rem;
+        margin-bottom: 1px;
+    }
+
+    .calendar .days li .event.clear {
+        background: none;
+    }
+
+    /*
+*
+* ==========================================
+* FOR non this month days(the gray number)
+* ==========================================
+*
+*/
+    .calendar .days li:nth-child(n+29) {
+        border-bottom: none;
+    }
+
+    .calendar .days li.outside .date {
+        color: #ddd;
+    }
+</style>
+{% endblock head %}
+
 {% block content %}
 <br><br>
 <div class="container">
@@ -42,13 +116,31 @@
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="create_panel_start_date" class="col-form-label">Start Date:</label>
-                                    <input type="date" class="form-control" id="create_panel_start_date">
+                                    <div class="input-group date" id="create_panel_start_date"
+                                        data-target-input="nearest">
+                                        <input id="create_panel_start_date_input" type="text"
+                                            class="form-control datetimepicker-input"
+                                            data-target="#create_panel_start_date" />
+                                        <div class="input-group-append" data-target="#create_panel_start_date"
+                                            data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label for="create_panel_end_date" class="col-form-label">End Date:</label>
-                                    <input type="date" class="form-control" id="create_panel_end_date">
+                                    <div class="input-group date" id="create_panel_end_date"
+                                        data-target-input="nearest">
+                                        <input id="create_panel_end_date_input" type="text"
+                                            class="form-control datetimepicker-input"
+                                            data-target="#create_panel_end_date" />
+                                        <div class="input-group-append" data-target="#create_panel_end_date"
+                                            data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -69,6 +161,19 @@
                                 <div class="form-group">
                                     <label for="create_panel_sold" class="col-form-label">Sold:</label>
                                     <input type="text" class="form-control" id="create_panel_sold" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label for="create_panel_picture" class="col-form-label">Picture:</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="create_panel_picture">
+                                        <label id='create_panel_picture_label' class="custom-file-label"
+                                            for="create_panel_picture" aria-describedby="create_panel_picture">Choose
+                                            file</label>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -96,28 +201,28 @@
     <section class="text-center">
         <!--Grid row-->
         <div class="row row-cols-3 mb-4 wow fadeIn">
-            {% for each in page_obj %}
+            {% for each in course_set %}
             <!--Grid column-->
             <div class="col mb-4">
                 <!--Card-->
                 <div class="card">
                     <!--Card image-->
                     <div class="view overlay">
-                        <img src="https://mdbootstrap.com/wp-content/uploads/2018/01/push-fb.jpg" class="card-img-top"
-                            alt="" />
-                        <a href="https://mdbootstrap.com/education/tech-marketing/web-push-introduction/"
-                            target="_blank">
-                            <div class="mask rgba-white-slight"></div>
-                        </a>
+                        <a class='text-warning' href="{% url 'course_detail_view_page' course_id=each.id %}">
+                            <img src="{% if each.picture == '' %}/static/img/logo.svg{% else %}{{each.picture}}{% endif %}"
+                                class="card-img-top" alt="" /></a>
                     </div>
 
                     <!--Card content-->
                     <div class="card-body">
                         <!--Title-->
-                        <h4 class="card-title">{{ each.name }}</h4>
+                        <h4 class="card-title"><a class='text-warning'
+                                href="{% url 'course_detail_view_page' course_id=each.id %}">{{each.name}}</a></h4>
                         <!--Text-->
                         <p class="card-text">
-                        <p class="font-weight-bolder"><a href="{% url 'user_profile_view' user_id=each.teacher.id %}"><span>{{ each.teacher.name}}</span></a></p>
+                        <p class="font-weight-bolder"><a
+                                href="{% url 'user_profile_view' user_id=each.teacher_id %}"><span>{{ each.teacher_name}}</span></a>
+                        </p>
                         <p class="font-weight-normal">{{ each.info|truncatechars:255 }}</p>
                         <p class="font-weight-light">From {{ each.start_date }}</p>
                         <p class="font-weight-light">To {{ each.end_date }}</p>
@@ -169,24 +274,44 @@
 {% block script %}
 {% if is_teacher or is_superuser %}
 <script>
+    $(function () {
+        $('#create_panel_start_date').datetimepicker({
+            icons: {
+                time: "far fa-clock",
+            },
+            date: moment('{{ course.start_date|date:"Y-m-d\TH:i:sO" }}'),
+        }
+        );
+        $('#create_panel_end_date').datetimepicker({
+            icons: {
+                time: "far fa-clock",
+            },
+            date: moment('{{ course.end_date|date:"Y-m-d\TH:i:sO" }}'),
+        }
+        );
+    });
     $('#create_panel_save').click(function () {
         $(function () {
             $('#create_panel_save').prop('disabled', true);
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
-            list["name"] = $("#create_panel_name")[0].value;
-            list["teacher"] = $("#create_panel_teacher")[0].value;
-            list["start_date"] = $("#create_panel_start_date")[0].value;
-            list["end_date"] = $("#create_panel_end_date")[0].value;
-            list["price"] = $("#create_panel_price")[0].value;
-            list["quota"] = $("#create_panel_quota")[0].value;
-            list["sold"] = $("#create_panel_sold")[0].value;
-            list["info"] = $("#create_panel_info")[0].value;
+            let data = new FormData();
+            data.append("name", $("#create_panel_name")[0].value);
+            data.append("teacher", $("#create_panel_teacher")[0].value);
+            data.append("start_date", $('#create_panel_start_date').datetimepicker('viewDate').format('YYYY-MM-DD HH:mm'));
+            data.append("end_date", $('#create_panel_end_date').datetimepicker('viewDate').format('YYYY-MM-DD HH:mm'));
+            data.append("price", $("#create_panel_price")[0].value);
+            data.append("quota", $("#create_panel_quota")[0].value);
+            data.append("sold", $("#create_panel_sold")[0].value);
+            data.append("info", $("#create_panel_info")[0].value);
+            data.append("picture", $("#create_panel_picture")[0].files[0]);
             $.ajax({
                 type: "POST",
-                contentType: "application/json;charset=UTF-8",
+                contentType: false,
+                processData: false,
+                cache: false,
                 url: "{%url 'course_list_api'%}",
-                data: JSON.stringify(list),
+                data: data,
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                         xhr.setRequestHeader("X-CSRFToken", csrftoken);
@@ -254,6 +379,13 @@
                 },
             });
         });
+    });
+    if (typeof ($('#create_panel_picture')[0].files[0]) != "undefined") {
+        $('#create_panel_picture_label').html($('#create_panel_picture')[0].files[0].name);
+    }
+    $('#create_panel_picture').change(function (e) {
+        var fileName = e.target.files[0].name;
+        $('#create_panel_picture_label').html(fileName);
     });
 </script>
 {% endif %}

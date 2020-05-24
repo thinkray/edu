@@ -1,3 +1,4 @@
+import base64
 import json
 
 from django.conf import settings
@@ -5,9 +6,10 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from django.core.validators import ValidationError
 from django.db import models, transaction
-from django.forms import (BooleanField, CharField, DecimalField, Form,
-                          IntegerField, MultipleChoiceField, PasswordInput)
-from django.http import HttpResponse, JsonResponse
+from django.forms import (BooleanField, CharField, DecimalField, FileField,
+                          Form, IntegerField, MultipleChoiceField,
+                          PasswordInput)
+from django.http import HttpResponse, JsonResponse, QueryDict
 from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
@@ -294,14 +296,14 @@ class UserAPI(View):
                 'message': form.errors
             }, status=400)
 
-    def patch(self, request, user_id):
+    def post(self, request, user_id):
         if not request.user.is_superuser and request.user.id != user_id:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
-        class UserAPIPatchForm(Form):
+        class UserAPIPostForm(Form):
             username = CharField(required=False)
             password = CharField(widget=PasswordInput, required=False)
             name = CharField(required=False)
@@ -309,17 +311,9 @@ class UserAPI(View):
             balance = DecimalField(
                 max_digits=15, decimal_places=2, required=False)
             profile = CharField(required=False)
+            picture = FileField(required=False)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = UserAPIPatchForm(data)
+        form = UserAPIPostForm(request.POST, request.FILES)
         if form.is_valid():
             try:
                 user = User.objects.get(pk=user_id)
@@ -357,6 +351,39 @@ class UserAPI(View):
 
             if cleaned_data['profile'] != '':
                 user.profile = cleaned_data['profile']
+
+            if cleaned_data['picture'] is not None:
+                if cleaned_data['picture'].content_type[:5] != 'image':
+                    return JsonResponse({
+                        'status': 400,
+                        'message': 'IllegalFileType'
+                    }, status=400)
+                if user.picture is None:
+                    try:
+                        with transaction.atomic():
+                            blob_storage = BlobStorage(data=cleaned_data['picture'].file.read(
+                            ), content_type=cleaned_data['picture'].content_type)
+                            blob_storage.save()
+                            user.picture = blob_storage
+                            user.save()
+                    except Exception as e:
+                        return JsonResponse({
+                            'status': 500,
+                            'message': 'DatabaseError',
+                        }, status=500)
+                else:
+                    try:
+                        with transaction.atomic():
+                            user.picture.data = data = cleaned_data['picture'].file.read(
+                            )
+                            user.picture.content_type = cleaned_data['picture'].content_type
+                            user.picture.save()
+                            user.save()
+                    except Exception as e:
+                        return JsonResponse({
+                            'status': 500,
+                            'message': 'DatabaseError',
+                        }, status=500)
 
             user.save()
 
@@ -528,6 +555,7 @@ class UserLoginView(View):
         context['hide_login'] = True
         return HttpResponse(template.render(context, request))
 
+
 class UserProfileView(View):
 
     def get(self, request, user_id):
@@ -547,12 +575,16 @@ class UserProfileView(View):
                 context['role'] = 'Student'
         except Exception as e:
             context['status'] = 404
-        
+
         context['site_name'] = settings.SITE_NAME
         context['is_authenticated'] = True
         context['is_superuser'] = request.user.is_superuser
         context['is_teacher'] = request.session.get('is_teacher')
         context['name'] = request.user.name
         context['username'] = request.user.username
+        if user.picture is not None:
+            context['picture'] = 'data:' + user.picture.content_type + \
+                ';base64,' + \
+                str(base64.b64encode(user.picture.data), encoding='utf-8')
 
         return HttpResponse(template.render(context, request))

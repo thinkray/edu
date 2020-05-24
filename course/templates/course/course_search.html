@@ -79,20 +79,25 @@
     </div>
 
     <section class="col-xs-12 col-sm-12 col-md-12">
-        {% for each in page_obj %}
+        {% for each in course_set %}
         <article class="search-result row border-bottom">
             <div class="col-xs-12 col-sm-12 col-md-3">
-                <a href="#" title="Details" class="thumbnail"> <img
-                        src="https://mdbootstrap.com/wp-content/uploads/2018/01/push-fb.jpg" class="card-img-top"
-                        alt="" /></a>
+                <a class='text-warning' href="{% url 'course_detail_view_page' course_id=each.id %}">
+                <img src="{% if each.picture == '' %}/static/img/logo.svg{% else %}{{each.picture}}{% endif %}"
+                    class="card-img-top" alt="" /></a>
             </div>
             <div class="col-xs-12 col-sm-12 col-md-2">
                 <ul class="meta-search">
-                    <li><i class="icon_fixer far fa-calendar-alt"></i> <span>From {{each.start_date | date:"M d, Y"}}</span></li>
-                    <li><i class="icon_fixer far fa-calendar-alt"></i> <span>To {{each.end_date | date:"M d, Y"}}</span></li>
+                    <li><i class="icon_fixer far fa-calendar-alt"></i> <span>From
+                            {{each.start_date | date:"M d, Y"}}</span></li>
+                    <li><i class="icon_fixer far fa-calendar-alt"></i> <span>To {{each.end_date | date:"M d, Y"}}</span>
+                    </li>
                     <!-- <li><i class="far fa-clock"></i> <span>midnight</span></li> -->
-                    <li><i class="icon_fixer fas fa-chalkboard-teacher"></i> <span>{{each.teacher.name}}</span></li>
-                    <li><i class="icon_fixer fas fa-leaf"></i> <span>{{each.quota}} session{{each.quota|pluralize}}</span></li>
+                    <li><i class="icon_fixer fas fa-chalkboard-teacher"></i> <a
+                            href="{% url 'user_profile_view' user_id=each.teacher_id %}"><span>{{ each.teacher_name}}</span></a>
+                    </li>
+                    <li><i class="icon_fixer fas fa-leaf"></i> <span>{{each.quota}}
+                            session{{each.quota|pluralize}}</span></li>
                     <li><i class="icon_fixer fas fa-coins"></i> <span>${{each.price}}</span></li>
                     <li><i class="icon_fixer fas fa-spa"></i> <span>Sold {{each.sold}}</span></li>
                 </ul>

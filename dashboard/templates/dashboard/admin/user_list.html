@@ -135,6 +135,15 @@
                                                 <label for="edit_panel_name" class="col-form-label">Name:</label>
                                                 <input type="text" class="form-control" id="edit_panel_name">
                                             </div>
+                                            <div class="form-group mb-3">
+                                                <label for="edit_panel_picture" class="col-form-label">Photo:</label>
+                                                <div class="custom-file">
+                                                    <input type="file" class="custom-file-input"
+                                                        id="edit_panel_picture">
+                                                    <label id="edit_panel_picture_label" class="custom-file-label" for="edit_panel_picture"
+                                                        aria-describedby="edit_panel_picture">Choose file</label>
+                                                </div>
+                                            </div>
                                             <div class="form-group">
                                                 <label class="col-form-label" for="edit_panel_role">Role:</label>
                                                 <select class="custom-select" id="edit_panel_role">
@@ -414,18 +423,22 @@
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
             let api_url = "{%url 'user_api' user_id='0'%}";
-            list["username"] = $("#edit_panel_username")[0].value;
-            list["name"] = $("#edit_panel_name")[0].value;
-            list["profile"] = $("#edit_panel_profile")[0].value;
-            list["role"] = $("#edit_panel_role")[0].value
+            let data = new FormData();
+            data.append("username", $("#edit_panel_username")[0].value);
+            data.append("name", $("#edit_panel_name")[0].value);
+            data.append("role", $("#edit_panel_role")[0].value);
+            data.append("profile", $("#edit_panel_profile")[0].value);
             if (($("#edit_panel_change_password").is(':checked')) && ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value)) {
-                list["password"] = $("#edit_panel_password")[0].value;
+                data.append("password", $("#edit_panel_password")[0].value);
             }
+            data.append("picture", $("#edit_panel_picture")[0].files[0]);
             $.ajax({
-                type: "PATCH",
-                contentType: "application/json;charset=UTF-8",
+                type: "POST",
+                contentType: false,
+                processData: false,
+                cache: false,
                 url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
-                data: JSON.stringify(list),
+                data: data,
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                         xhr.setRequestHeader("X-CSRFToken", csrftoken);
@@ -511,6 +524,13 @@
                 },
             });
         });
+    });
+    if (typeof ($('#edit_panel_picture')[0].files[0]) != "undefined") {
+        $('#edit_panel_picture_label').html($('#edit_panel_picture')[0].files[0].name);
+    }
+    $('#edit_panel_picture').change(function (e) {
+        var fileName = e.target.files[0].name;
+        $('#edit_panel_picture_label').html(fileName);
     });
 </script>
 {% endblock script %}
