@@ -71,11 +71,11 @@ Any user registered on the website is a student by default.
 To add a admin role to a user, you may use following command in `python manage.py shell`
 
     ```
-	from django.contrib.auth.models import Group
-	from account.models import User
+    from django.contrib.auth.models import Group
+    from account.models import User
     user = User.objects.get(pk=1) # Replace 1 with the user's id
     user.is_superuser = 1
-	user.save()
+    user.save()
     ```
 	
 To add a teacher role to a user, you may use following command in `python manage.py shell`
@@ -83,7 +83,7 @@ To add a teacher role to a user, you may use following command in `python manage
     ```
     # For the first time
     from django.contrib.auth.models import Group
-	from account.models import User
+    from account.models import User
     group = Group(name="Teacher")
     group.save()
 
