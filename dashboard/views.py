@@ -7,6 +7,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.template import loader
 from django.urls import reverse
+from django.utils.timezone import now
 from django.views import View
 
 from account.models import User
@@ -518,6 +519,12 @@ class UserOverviewView(View):
         context['name'] = request.user.name
         context['username'] = request.user.username
         context['hide_welcome'] = True
+        context['user_balance'] = request.user.balance
+        context['bill_count'] = Bill.objects.filter(user=request.user).count()
+        context['booking_count'] = Booking.objects.filter(
+            student=request.user, end_date__gt=now()).count()
+        context['course_count'] = CourseInstance.objects.filter(
+            student=request.user).count() + Course.objects.filter(teacher=request.user).count()
 
         return HttpResponse(template.render(context, request))
 

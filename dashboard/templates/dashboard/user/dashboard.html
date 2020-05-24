@@ -7,8 +7,264 @@
             <ol class="breadcrumb bg-white rounded-0">
                 <li class="breadcrumb-item"><a href="#">Dashboard</a>
                 </li>
+                <li class="breadcrumb-item">
+                    Overview
+                </li>
             </ol>
         </nav>
     </div>
 </div>
+<div class="container">
+    <div class="row my-2">
+        <div class="col-xs-12 col-md-12">
+            <ul class="nav">
+                <li class="nav-item">
+                    <a id="redeem_redemption_code" href="#" class="btn btn-light btn-sm" data-toggle="modal"
+                        data-target="#redeem_panel">Redeem a Redemption Code</a>
+                </li>
+            </ul>
+            <div class="modal fade" id="redeem_panel" tabindex="-1" role="dialog">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="redeem_panel_label">Redeem a Redemption Code</h5>
+                            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <form>
+                                <div class="form-group">
+                                    <label for="redeem_panel_username" class="col-form-label">Username:</label>
+                                    <input type="text" class="form-control" id="redeem_panel_username"
+                                        value="{{ username }}">
+                                </div>
+                                <div class="form-group">
+                                    <label for="redeem_panel_code" class="col-form-label">Code:</label>
+                                    <input type="text" class="form-control" id="redeem_panel_code">
+                                </div>
+                            </form>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                            <button id="redeem_panel_save" type="button" class="btn btn-primary">Redeem</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-xs-3 col-md-3 border-right">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div
+                                    class="d-flex bg-light rounded-circle align-items-center justify-content-center icon_box">
+                                    <h5 class="fas fa-coins mx-2 my-2 text-warning"></h5>
+                                </div>
+                            </div>
+                            <div class="text-center text-warning">
+                                ${{ user_balance }} <br />
+                                Balance <br />
+                            </div>
+                        </div>
+                        <div class="col-xs-3 col-md-3 border-right">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div
+                                    class="d-flex bg-light rounded-circle align-items-center justify-content-center icon_box">
+                                    <h5 class="fas fa-money-bill mx-2 my-2 text-success"></h5>
+                                </div>
+                            </div>
+                            <div class="text-center text-success">
+                                {{ bill_count }} <br />
+                                Bill{{ bill_count|pluralize }} <br />
+                            </div>
+                        </div>
+                        <div class="col-xs-3 col-md-3 border-right">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div
+                                    class="d-flex bg-light rounded-circle align-items-center justify-content-center icon_box">
+                                    <h5 class="fas fa-chalkboard-teacher mx-2 my-2 text-primary"></h5>
+                                </div>
+                            </div>
+                            <div class="text-center text-primary">
+                                {{ course_count }} <br />
+                                Course{{ course_count|pluralize }} <br />
+                            </div>
+                        </div>
+                        <div class="col-xs-3 col-md-3">
+                            <div class="d-flex align-items-center justify-content-center">
+                                <div
+                                    class="d-flex bg-light rounded-circle align-items-center justify-content-center icon_box">
+                                    <h5 class="far fa-calendar-alt mx-2 my-2 text-danger"></h5>
+                                </div>
+                            </div>
+                            <div class="text-center text-danger">
+                                {{ booking_count }} <br />
+                                Booking{{ booking_count|pluralize }} <br />
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+        <div class="col-xs-4 col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Manage Profile</h6>
+                    <p class="card-text">Manage your account information.</p>
+                    <a href="{%url 'user_profile_edit_view' %}" class="btn btn-primary">Go <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4 col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">View Bill List</h6>
+                    <p class="card-text">Check your bill information.</p>
+                    <a href="{%url 'bill_list_view' %}" class="btn btn-primary">Go <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4 col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">View Log List</h6>
+                    <p class="card-text">Check your account activity.</p>
+                    <a href="{%url 'user_log_list_view'%}" class="btn btn-primary">Go <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row my-2">
+        <div class="col-xs-4 col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">View Your Course</h6>
+                    <p class="card-text">With this function, you can change user's balance</p>
+                    <a href="{%url 'user_course_view_panel' panel_name='study' %}" class="btn btn-primary">Study <i
+                            class="fas fa-arrow-right"></i></a>
+                    {% if is_superuser or is_teacher %}
+                    <a href="{%url 'user_course_view_panel' panel_name='teaching' %}" class="btn btn-primary">Teaching <i class="fas fa-arrow-right"></i></a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4 col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Calendar</h6>
+                    <p class="card-text">Schedule and check what happens next.</p>
+                    <a href="{% url 'user_calendar_list_view' %}" class="btn btn-primary">Go <i
+                            class="fas fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-xs-4 col-md-4">
+            <div class="card h-100">
+                <div class="card-body">
+                    <h6 class="card-title">Message</h6>
+                    <p class="card-text">With this function, you can create and review the log history for each user.
+                    </p>
+                    <p>
+                        <a href="{%url 'message_view_box' box_name='inbox'%}" class="btn btn-primary">Inbox <i
+                                class="fas fa-arrow-right"></i></a>
+                        <a href="{%url 'message_view_box' box_name='outbox'%}" class="btn btn-primary">Outbox <i
+                                class="fas fa-arrow-right"></i></a>
+                    </p>
+                    <p>
+                        <a href="{%url 'message_send_view'%}" class="btn btn-primary">New Message <i
+                                class="fas fa-arrow-right"></i></a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock inner_content %}
+
+{% block script %}
+<script>
+    $('#redeem_panel_save').click(function () {
+        $(function () {
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            list["username"] = $("#redeem_panel_username")[0].value;
+            list["code"] = $("#redeem_panel_code")[0].value;
+            $.ajax({
+                type: "POST",
+                contentType: "application/json;charset=UTF-8",
+                url: "{%url 'redeem_redemption_code_api'%}",
+                data: JSON.stringify(list),
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=ajax_result]").remove();
+                    $(".modal-body").append(
+                        '<div id="ajax_result" class="alert alert-success" role="alert">' +
+                        result["message"] +
+                        '</div>'
+                    );
+                    window.location.reload();
+                },
+                error: function (e) {
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $(".modal-body").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#redeem_panel_" + index)
+                                        .parent()
+                                        .append(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            '</div>'
+                                        );
+                                }
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $(".modal-body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        case 404:
+                            $("[id^=ajax_result]").remove();
+                            $(".modal-body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $(".modal-body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+</script>
+{% endblock script %}

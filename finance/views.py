@@ -265,7 +265,7 @@ class RedeemRedemptionCodeAPI(View):
             }, status=403)
 
         class RedeemRedemptionCodeAPIPostForm(Form):
-            user = IntegerField()
+            username = CharField()
             code = CharField()
 
         try:
@@ -282,8 +282,8 @@ class RedeemRedemptionCodeAPI(View):
             cleaned_data = form.clean()
 
             try:
-                cleaned_data['user'] = User.objects.get(
-                    pk=cleaned_data['user'])
+                cleaned_data['username'] = User.objects.get(
+                    username=cleaned_data['username'])
             except Exception as e:
                 return JsonResponse({
                     'status': 400,
@@ -308,13 +308,13 @@ class RedeemRedemptionCodeAPI(View):
             try:
                 with transaction.atomic():
                     redemption_code.is_available = False
-                    cleaned_data['user'].balance = cleaned_data['user'].balance + \
+                    cleaned_data['username'].balance = cleaned_data['username'].balance + \
                         redemption_code.amount
-                    bill = Bill(user=cleaned_data['user'], amount=redemption_code.amount, date=now(
+                    bill = Bill(user=cleaned_data['username'], amount=redemption_code.amount, date=now(
                     ), info='Redeem the redemption code ' + cleaned_data['code'])
 
                     redemption_code.save()
-                    cleaned_data['user'].save()
+                    cleaned_data['username'].save()
                     bill.save()
             except Exception as e:
                 return JsonResponse({
