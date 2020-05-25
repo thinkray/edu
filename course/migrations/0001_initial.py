@@ -41,4 +41,20 @@ class Migration(migrations.Migration):
                 ('teacher', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, related_name='course_instance_teacher', to=settings.AUTH_USER_MODEL)),
             ],
         ),
+        migrations.RunSQL("""
+            CREATE TRIGGER before_course_course_insert BEFORE INSERT ON course_course FOR EACH ROW
+            BEGIN
+                DECLARE
+                    errorMessage VARCHAR ( 255 );
+                
+                SET errorMessage = CONCAT( NEW.price, ' is a negative number. It should be a positive one' );
+                IF
+                    NEW.price < 0 THEN
+                        SIGNAL SQLSTATE '45000' 
+                        SET MYSQL_ERRNO = 0906,
+                        MESSAGE_TEXT = errorMessage;
+                    
+                END IF;
+            END
+        """),
     ]
