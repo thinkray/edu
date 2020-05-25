@@ -11,6 +11,7 @@ from django.utils.timezone import localtime, now
 from django.views import View
 
 from account.models import User
+from site_log.models import Log
 
 from .models import Bill, CouponCode, RedemptionCode
 
@@ -117,6 +118,9 @@ class BillListAPI(View):
 
                     bill.save()
                     cleaned_data['username'].save()
+                    log = Log(user=request.user, date=now(),
+                              operation='Create a bill (id:' + str(bill.id) + ')')
+                    log.save()
             except Exception as e:
                 return JsonResponse({
                     'status': 500,
@@ -243,7 +247,17 @@ class BillAPI(View):
             if 'info' in data:
                 bill.info = cleaned_data['info']
 
-            bill.save()
+            try:
+                with transaction.atomic():
+                    log = Log(user=request.user, date=now(
+                    ), operation='Update info of the bill (id:' + str(bill.id) + ')')
+                    log.save()
+                    bill.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success',
@@ -316,6 +330,9 @@ class RedeemRedemptionCodeAPI(View):
                     redemption_code.save()
                     cleaned_data['username'].save()
                     bill.save()
+                    log = Log(user=request.user, date=now(), operation='Redeem the redemption code ' +
+                              cleaned_data['code'] + ' for the user (username:' + cleaned_data['username'].username + ')')
+                    log.save()
             except Exception as e:
                 return JsonResponse({
                     'status': 500,
@@ -420,7 +437,17 @@ class RedemptionCodeListAPI(View):
             redemption_code = RedemptionCode(
                 code=cleaned_data['code'], amount=cleaned_data['amount'], is_available=True)
 
-            redemption_code.save()
+            try:
+                with transaction.atomic():
+                    redemption_code.save()
+                    log = Log(user=request.user, date=now(
+                    ), operation='Create a redemption code (id:' + str(redemption_code.id) + ')')
+                    log.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
@@ -532,7 +559,17 @@ class RedemptionCodeAPI(View):
             if 'is_available' in data:
                 redemption_code.is_available = cleaned_data['is_available']
 
-            redemption_code.save()
+            try:
+                with transaction.atomic():
+                    redemption_code.save()
+                    log = Log(user=request.user, date=now(
+                    ), operation='Edit the redemption code (id:' + str(redemption_code.id) + ')')
+                    log.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success',
@@ -558,7 +595,17 @@ class RedemptionCodeAPI(View):
                 'message': 'Not Found',
             }, status=404)
 
-        redemption_code.delete()
+        try:
+            with transaction.atomic():
+                log = Log(user=request.user, date=now(), operation='Delete a redemption code (id:' +
+                          str(redemption_code.id) + ' code:' + redemption_code.code + ')')
+                log.save()
+                redemption_code.delete()
+        except Exception as e:
+            return JsonResponse({
+                'status': 500,
+                'message': 'DatabaseError',
+            }, status=500)
 
         return JsonResponse({
             'status': 200,
@@ -652,7 +699,17 @@ class CouponCodeListAPI(View):
             coupon_code = CouponCode(
                 code=cleaned_data['code'], discount=cleaned_data['discount'])
 
-            coupon_code.save()
+            try:
+                with transaction.atomic():
+                    coupon_code.save()
+                    log = Log(user=request.user, date=now(
+                    ), operation='Create a coupon code (id:' + str(coupon_code.id) + ')')
+                    log.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
@@ -734,7 +791,17 @@ class CouponCodeAPI(View):
                 'message': 'Not Found',
             }, status=404)
 
-        coupon_code.delete()
+        try:
+            with transaction.atomic():
+                log = Log(user=request.user, date=now(), operation='Delete a coupon code (id:' +
+                          str(coupon_code.id) + ' code:' + coupon_code.code + ')')
+                log.save()
+                coupon_code.delete()
+        except Exception as e:
+            return JsonResponse({
+                'status': 500,
+                'message': 'DatabaseError',
+            }, status=500)
 
         return JsonResponse({
             'status': 200,
