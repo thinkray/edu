@@ -44,7 +44,6 @@ INSTALLED_APPS = [
     'site_message.apps.SiteMessageConfig',
     'site_log.apps.SiteLogConfig',
     'storage.apps.StorageConfig',
-    'django_extensions',
 ]
 
 if DEBUG:

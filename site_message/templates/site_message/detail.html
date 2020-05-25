@@ -115,11 +115,11 @@
                     }
                 },
                 success: function (result) {
-                    $("nav").after('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The message was successfully deleted. We are redirecting the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $("nav").first().after('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The message was successfully deleted. We are redirecting the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                     window.location = "{%url 'message_view_box' box_name=box_name%}";
                 },
                 error: function (e) {
-                    $("nav").after('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
+                    $("nav").first().after('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
                     window.location.reload();
                 }
             });
