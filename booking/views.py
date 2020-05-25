@@ -11,6 +11,7 @@ from django.views import View
 
 from account.models import User
 from course.models import Course, CourseInstance
+from site_log.models import Log
 
 from .models import Booking
 
@@ -250,7 +251,17 @@ class BookingListAPI(View):
 
             booking = Booking(course=cleaned_data['course'], start_date=cleaned_data['start_date'],
                               end_date=cleaned_data['end_date'], teacher=cleaned_data['teacher'], info=cleaned_data['info'])
-            booking.save()
+            try:
+                with transaction.atomic():
+                    booking.save()
+                    log = Log(user=request.user, date=now(
+                    ), operation='Create a booking for course ' + cleaned_data['course'].name + '(booking id:' + str(booking.id) + ')')
+                    log.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
@@ -342,7 +353,7 @@ class BookingAPI(View):
                         result[0]['info'] = ''
                 if result[0]['student'] is None:
                     if 'info' in cleaned_data['column']:
-                        result[0]['info'] 
+                        result[0]['info']
 
             if not 'student' in cleaned_data['column']:
                 del result[0]['student']
@@ -451,7 +462,17 @@ class BookingAPI(View):
                         if cleaned_data['end_date'] is not None:
                             booking.end_date = cleaned_data['end_date']
 
-                        booking.save()
+                        try:
+                            with transaction.atomic():
+                                booking.save()
+                                log = Log(user=request.user, date=now(
+                                ), operation='Update a booking\'s date (course:' + booking.course.name + ' booking id:' + str(booking.id) + ')')
+                                log.save()
+                        except Exception as e:
+                            return JsonResponse({
+                                'status': 500,
+                                'message': 'DatabaseError',
+                            }, status=500)
 
                 if cleaned_data['student'] is not None:
                     if cleaned_data['student'] != '':
@@ -490,6 +511,9 @@ class BookingAPI(View):
                                     with transaction.atomic():
                                         booking.student = cleaned_data['student']
                                         course_instance_target.quota = course_instance_target.quota - 1
+                                        log = Log(user=request.user, date=now(), operation='Update a booking\'s student (course:' +
+                                                  booking.course.name + ' booking id:' + str(booking.id) + ' student id:' + str(cleaned_data['student'].id) + ')')
+                                        log.save()
                                         booking.save()
                                         course_instance_target.save()
                                 except Exception as e:
@@ -511,6 +535,9 @@ class BookingAPI(View):
                                 course_instance_target = course_instance[0]
                                 try:
                                     with transaction.atomic():
+                                        log = Log(user=request.user, date=now(), operation='Cancel a booking (course:' +
+                                                  booking.course.name + ' booking id:' + str(booking.id) + ' student id:' + str(booking.student.id) + ')')
+                                        log.save()
                                         booking.student = None
                                         course_instance_target.quota = course_instance_target.quota + 1
                                         booking.save()
@@ -527,8 +554,18 @@ class BookingAPI(View):
                                 }, status=400)
 
                 if 'info' in data:
-                    booking.info = cleaned_data['info']
-                    booking.save()
+                    try:
+                        with transaction.atomic():
+                            booking.info = cleaned_data['info']
+                            log = Log(user=request.user, date=now(), operation='Update a booking\'s info (course:' +
+                                      booking.course.name + ' booking id:' + str(booking.id) + ')')
+                            log.save()
+                            booking.save()
+                    except Exception as e:
+                        return JsonResponse({
+                            'status': 500,
+                            'message': 'DatabaseError',
+                        }, status=500)
             else:
                 if cleaned_data['student'] == request.user.username and booking.student is None:
                     course_instance = CourseInstance.objects.filter(
@@ -558,6 +595,9 @@ class BookingAPI(View):
                                 course_instance_target.quota = course_instance_target.quota - 1
                                 booking.save()
                                 course_instance_target.save()
+                                log = Log(user=request.user, date=now(), operation='Update a booking\'s student (course:' +
+                                          booking.course.name + ' booking id:' + str(booking.id) + ' student id:' + str(request.user.id) + ')')
+                                log.save()
                         except Exception as e:
                             return JsonResponse({
                                 'status': 500,
@@ -572,6 +612,9 @@ class BookingAPI(View):
                     if booking.start_date > now():
                         try:
                             with transaction.atomic():
+                                log = Log(user=request.user, date=now(), operation='Cancel a booking (course:' +
+                                          booking.course.name + ' booking id:' + str(booking.id) + ' student id:' + str(booking.student.id) + ')')
+                                log.save()
                                 course_instance = CourseInstance.objects.filter(
                                     course=booking.course, student=request.user)
                                 course_instance_target = course_instance[0]
@@ -627,6 +670,9 @@ class BookingAPI(View):
             if booking.start_date > now():
                 try:
                     with transaction.atomic():
+                        log = Log(user=request.user, date=now(), operation='Cancel a booking (course:' +
+                                  booking.course.name + ' booking id:' + str(booking.id) + ' student id:' + str(booking.student.id) + ')')
+                        log.save()
                         course_instance = CourseInstance.objects.filter(
                             course=booking.course, student=request.user)
                         course_instance_target = course_instance[0]
@@ -646,6 +692,9 @@ class BookingAPI(View):
                 if booking.start_date > now():
                     try:
                         with transaction.atomic():
+                            log = Log(user=request.user, date=now(), operation='Cancel a booking (course:' +
+                                      booking.course.name + ' booking id:' + str(booking.id) + ' student id:' + str(booking.student.id) + ')')
+                            log.save()
                             course_instance = CourseInstance.objects.filter(
                                 course=booking.course, student=booking.student)
                             course_instance_target = course_instance[0]
@@ -659,7 +708,17 @@ class BookingAPI(View):
                             'status': 500,
                             'message': 'DatabaseError',
                         }, status=500)
-            booking.delete()
+            try:
+                with transaction.atomic():
+                    log = Log(user=request.user, date=now(), operation='Delete a booking (course:' +
+                              booking.course.name + ' booking id:' + str(booking.id) + ')')
+                    log.save()
+                    booking.delete()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
         else:
             return JsonResponse({
                 'status': 403,

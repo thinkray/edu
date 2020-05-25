@@ -139,7 +139,7 @@ class UserListAPI(View):
                 try:
                     with transaction.atomic():
                         user.save()
-                        log = Log(user=user, date=now(), operation='Add by an administrator ' + request.user.username)
+                        log = Log(user=user, date=now(), operation='Add by an administrator (id:' + str(request.user.id) + ')')
                         log.save()
                 except Exception as e:
                     return JsonResponse({
@@ -305,7 +305,7 @@ class UserAPI(View):
                 try:
                     with transaction.atomic():
                         user.save()
-                        log = Log(user=user, date=now(), operation='Update profile by an administrator ' + request.user.username)
+                        log = Log(user=user, date=now(), operation='Update profile by an administrator (id:' + str(request.user.id) + ')')
                         log.save()
                 except Exception as e:
                     return JsonResponse({
@@ -443,7 +443,7 @@ class UserAPI(View):
                 try:
                     with transaction.atomic():
                         user.save()
-                        log = Log(user=user, date=now(), operation='Update profile by an administrator ' + request.user.username)
+                        log = Log(user=user, date=now(), operation='Update profile by an administrator (id:' + str(request.user.id) + ')')
                         log.save()
                 except Exception as e:
                     return JsonResponse({
@@ -496,7 +496,7 @@ class UserAPI(View):
             with transaction.atomic():
                 if user.picture is not None:
                     user.picture.delete()
-                log = Log(user=request.user, date=now(), operation='Delete a user ' + user.username + '(id:' + user.id + ')')
+                log = Log(user=request.user, date=now(), operation='Delete a user ' + user.username + ' (id:' + str(user.id) + ')')
                 log.save()
                 user.delete()
         except Exception as e:
