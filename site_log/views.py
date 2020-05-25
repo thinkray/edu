@@ -24,16 +24,7 @@ class LogListAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = LogListAPIGetForm(data)
+        form = LogListAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -134,16 +125,7 @@ class LogAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = LogAPIGetForm(data)
+        form = LogAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 

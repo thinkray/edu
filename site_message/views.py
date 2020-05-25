@@ -44,16 +44,8 @@ class MessageListAPI(View):
                 ("outbox", "outbox"),
             )
             box = ChoiceField(choices=box_choices)
-        try:
-            data = json.loads(request.body)
 
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = MessageListAPIGetForm(data)
+        form = MessageListAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -208,16 +200,7 @@ class MessageAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = MessageAPIGetForm(data)
+        form = MessageAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
             query_data = cleaned_data['column'].copy()

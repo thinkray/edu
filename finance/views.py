@@ -35,16 +35,7 @@ class BillListAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = BillListAPIGetForm(data)
+        form = BillListAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -155,16 +146,7 @@ class BillAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = BillAPIGetForm(data)
+        form = BillAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
             query_data = cleaned_data['column'].copy()
@@ -368,16 +350,7 @@ class RedemptionCodeListAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = RedemptionCodeListAPIGetForm(data)
+        form = RedemptionCodeListAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -475,16 +448,7 @@ class RedemptionCodeAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = RedemptionCodeAPIGetForm(data)
+        form = RedemptionCodeAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -630,16 +594,7 @@ class CouponCodeListAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = CouponCodeListAPIGetForm(data)
+        form = CouponCodeListAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
@@ -736,16 +691,7 @@ class CouponCodeAPI(View):
             )
             column = MultipleChoiceField(choices=choices)
 
-        try:
-            data = json.loads(request.body)
-
-        except:
-            return JsonResponse({
-                'status': 400,
-                'message': 'JSONDecodeError'
-            }, status=400)
-
-        form = CouponCodeAPIGetForm(data)
+        form = CouponCodeAPIGetForm(request.GET)
         if form.is_valid():
             cleaned_data = form.clean()
 
