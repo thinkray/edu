@@ -19,12 +19,14 @@ from .models import Message
 
 class MessageListAPI(View):
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class MessageListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -47,6 +49,7 @@ class MessageListAPI(View):
 
         form = MessageListAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             if cleaned_data['offset'] is None:
@@ -79,12 +82,14 @@ class MessageListAPI(View):
             }, status=400)
 
     def post(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class MessageListAPIPostForm(Form):
             title = CharField(max_length=255)
             recipient = CharField()
@@ -101,6 +106,7 @@ class MessageListAPI(View):
 
         form = MessageListAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             try:
@@ -129,12 +135,14 @@ class MessageListAPI(View):
 
 class MessageCountAPI(View):
     def post(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class MessageCountAPIPostForm(Form):
             choices = (
                 ("unread", "unread"),
@@ -154,6 +162,7 @@ class MessageCountAPI(View):
 
         form = MessageCountAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             count = 0
@@ -181,12 +190,14 @@ class MessageCountAPI(View):
 
 class MessageAPI(View):
     def get(self, request, message_id):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class MessageAPIGetForm(Form):
             choices = (
                 ("title", "title"),
@@ -202,6 +213,7 @@ class MessageAPI(View):
 
         form = MessageAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
             query_data = cleaned_data['column'].copy()
             if not 'sender' in cleaned_data['column']:
@@ -272,6 +284,7 @@ class MessageAPI(View):
             }, status=400)
 
     def delete(self, request, message_id):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
@@ -312,11 +325,13 @@ class MessageAPI(View):
 class MessageView(View):
 
     def get(self, request, box_name='inbox', page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Prepare view
         context = {}
         result = Message.objects.none()
         if box_name == 'inbox':
@@ -372,17 +387,20 @@ class MessageView(View):
 class MessageDetailView(View):
 
     def get(self, request, message_id):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Ger information
         messsage_api = MessageAPI()
         request._body = json.dumps({
             "column": ["title", "send_date", "sender", "recipient", "content", "is_unread"]
         })
         result = json.loads(messsage_api.get(request, message_id).content)
 
+        # Prepare view
         context = {}
         context['site_name'] = settings.SITE_NAME
         context['is_authenticated'] = True
@@ -426,11 +444,13 @@ class MessageDetailView(View):
 class MessageSendView(View):
 
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Prepare view
         context = {}
         context['site_name'] = settings.SITE_NAME
         context['is_authenticated'] = True

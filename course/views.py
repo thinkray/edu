@@ -26,6 +26,7 @@ from .models import Course, CourseInstance
 
 class CourseListAPI(View):
     def get(self, request):
+        # Initialization form
         class CourseListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -43,6 +44,7 @@ class CourseListAPI(View):
 
         form = CourseListAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             if cleaned_data['offset'] is None:
@@ -73,12 +75,14 @@ class CourseListAPI(View):
             }, status=400)
 
     def post(self, request):
+        # Check permission
         if not request.user.is_superuser and not request.user.groups.filter(name='teacher').exists():
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CourseListAPIPostForm(Form):
             name = CharField(max_length=200)
             info = CharField(required=False)
@@ -94,6 +98,7 @@ class CourseListAPI(View):
 
         form = CourseListAPIPostForm(request.POST, request.FILES)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             if request.user.is_superuser and 'teacher' in request.POST:
@@ -162,6 +167,7 @@ class CourseListAPI(View):
 
 class CourseAPI(View):
     def get(self, request, course_id):
+        # Initialization form
         class CourseAPIGetForm(Form):
             choices = (
                 ("name", "name"),
@@ -177,6 +183,7 @@ class CourseAPI(View):
 
         form = CourseAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             try:
@@ -215,6 +222,7 @@ class CourseAPI(View):
             }, status=400)
 
     def post(self, request, course_id):
+        # Initialization form
         class CourseAPIPostForm(Form):
             name = CharField(max_length=200)
             info = CharField(required=False)
@@ -229,6 +237,7 @@ class CourseAPI(View):
 
         form = CourseAPIPostForm(request.POST, request.FILES)
         if form.is_valid():
+            # Update information
             try:
                 course = Course.objects.get(pk=course_id)
             except Exception as e:
@@ -363,12 +372,14 @@ class CourseAPI(View):
 
 class CourseInstanceListAPI(View):
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CourseInstanceListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -388,6 +399,7 @@ class CourseInstanceListAPI(View):
 
         form = CourseInstanceListAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             if cleaned_data['offset'] is None:
@@ -430,12 +442,14 @@ class CourseInstanceListAPI(View):
             }, status=400)
 
     def post(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CourseInstanceListAPIPostForm(Form):
             course = IntegerField()
             coupon_code = CharField(required=False)
@@ -451,6 +465,7 @@ class CourseInstanceListAPI(View):
 
         form = CourseInstanceListAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             try:
@@ -517,12 +532,14 @@ class CourseInstanceListAPI(View):
 
 class CourseInstanceAPI(View):
     def get(self, request, course_instance_id):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CourseInstanceAPIGetForm(Form):
             choices = (
                 ("course", "course"),
@@ -534,6 +551,7 @@ class CourseInstanceAPI(View):
 
         form = CourseInstanceAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
             query_data = cleaned_data['column'].copy()
             if not 'student' in cleaned_data['column']:
@@ -583,12 +601,14 @@ class CourseInstanceAPI(View):
             }, status=400)
 
     def patch(self, request, course_instance_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CourseInstanceAPIPatchForm(Form):
             quota = IntegerField(validators=[MinValueValidator(0)])
 
@@ -603,6 +623,7 @@ class CourseInstanceAPI(View):
 
         form = CourseInstanceAPIPatchForm(data)
         if form.is_valid():
+            # Update information
             try:
                 course_instance = CourseInstance.objects.get(
                     pk=course_instance_id)
@@ -636,6 +657,7 @@ class CourseInstanceAPI(View):
             }, status=400)
 
     def delete(self, request, course_instance_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
@@ -671,7 +693,7 @@ class CourseInstanceAPI(View):
 class CourseHomeView(View):
 
     def get(self, request, page=1):
-
+        # Prepare view
         context = {}
         result = Course.objects.all()
         context['page_name'] = 'Home'
@@ -740,7 +762,7 @@ class CourseHomeView(View):
 class CourseListView(View):
 
     def get(self, request, page=1):
-
+        # Prepare view
         context = {}
         result = Course.objects.all()
         context['page_name'] = 'Course List'
@@ -809,7 +831,7 @@ class CourseListView(View):
 class CourseDetailView(View):
 
     def get(self, request, course_id=1):
-
+        # Prepare view
         context = {}
         context['status'] = 200
         try:
@@ -850,6 +872,7 @@ class CourseDetailView(View):
 class CourseEnrollView(View):
 
     def get(self, request, course_id=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -890,6 +913,7 @@ class CourseEnrollView(View):
 class CourseSearchView(View):
 
     def get(self, request, page=1):
+        # Prepare view
         context = {}
         query = ""
         if request.GET:

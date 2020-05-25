@@ -28,12 +28,14 @@ from .models import User, UserManager
 
 class UserListAPI(View):
     def get(self, request):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class UserListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -50,6 +52,7 @@ class UserListAPI(View):
 
         form = UserListAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             if cleaned_data['offset'] is None:
@@ -76,6 +79,7 @@ class UserListAPI(View):
             }, status=400)
 
     def post(self, request):
+        # Initialization form
         class UserListAPIPostForm(Form):
             username = CharField()
             password = CharField(widget=PasswordInput)
@@ -96,6 +100,7 @@ class UserListAPI(View):
 
         form = UserListAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             if User.objects.filter(username=cleaned_data['username']).exists():
@@ -175,6 +180,7 @@ class UserListAPI(View):
 
 class UserAPI(View):
     def get(self, request, user_id):
+        # Initialization form
         class UserAPIGetForm(Form):
             choices = (
                 ("last_login", "last_login"),
@@ -189,6 +195,7 @@ class UserAPI(View):
 
         form = UserAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
             if 'balance' in cleaned_data['column']:
                 if not request.user.is_superuser and request.user.id != user_id:
@@ -227,12 +234,14 @@ class UserAPI(View):
             }, status=400)
 
     def put(self, request, user_id):
+        # Check permission
         if not request.user.is_superuser and request.user.id != user_id:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class UserAPIPutForm(Form):
             username = CharField()
             password = CharField(widget=PasswordInput)
@@ -253,6 +262,7 @@ class UserAPI(View):
 
         form = UserAPIPutForm(data)
         if form.is_valid():
+            # Update information
             try:
                 user = User.objects.get(pk=user_id)
             except Exception as e:
@@ -340,12 +350,14 @@ class UserAPI(View):
             }, status=400)
 
     def post(self, request, user_id):
+        # Check permission
         if not request.user.is_superuser and request.user.id != user_id:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class UserAPIPostForm(Form):
             username = CharField(required=False)
             old_password = CharField(widget=PasswordInput, required=False)
@@ -359,6 +371,7 @@ class UserAPI(View):
 
         form = UserAPIPostForm(request.POST, request.FILES)
         if form.is_valid():
+            # Update information
             try:
                 user = User.objects.get(pk=user_id)
             except Exception as e:
@@ -493,6 +506,7 @@ class UserAPI(View):
             }, status=400)
 
     def delete(self, request, user_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
@@ -528,6 +542,7 @@ class UserAPI(View):
 
 class UserLoginAPI(View):
     def get(self, request):
+        # Check permission
         if request.user.is_authenticated:
             return JsonResponse({
                 'status': 200,
@@ -547,6 +562,7 @@ class UserLoginAPI(View):
             })
 
     def post(self, request):
+        # Initialization form
         class UserLoginForm(Form):
             username = CharField()
             password = CharField(widget=PasswordInput)
@@ -563,6 +579,7 @@ class UserLoginAPI(View):
 
         form = UserLoginForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
             if 'redirect_uri' in data and cleaned_data['redirect_uri'] != url_has_allowed_host_and_scheme(iri_to_uri(cleaned_data['redirect_uri']), settings.ALLOWED_HOSTS):
                 cleaned_data['redirect_uri'] = iri_to_uri(
@@ -626,12 +643,14 @@ class UserLogoutAPI(View):
 class UserSignupView(View):
 
     def get(self, request):
+        # Check login status
         if request.user.is_authenticated:
             if url_has_allowed_host_and_scheme(iri_to_uri(request.GET.get('redirect_uri', default='/')), settings.ALLOWED_HOSTS):
                 return redirect(iri_to_uri(request.GET.get('redirect_uri', default='/')))
             else:
                 return redirect(reverse('home'))
 
+        # Prepare view
         template = loader.get_template('account/signup.html')
         context = {}
         context['site_name'] = settings.SITE_NAME
@@ -643,12 +662,14 @@ class UserSignupView(View):
 class UserLoginView(View):
 
     def get(self, request):
+        # Check login status
         if request.user.is_authenticated:
             if url_has_allowed_host_and_scheme(iri_to_uri(request.GET.get('redirect_uri', default='/')), settings.ALLOWED_HOSTS):
                 return redirect(iri_to_uri(request.GET.get('redirect_uri', default='/')))
             else:
                 return redirect(reverse('home'))
 
+        # Prepare view
         template = loader.get_template('account/login.html')
         context = {}
         context['site_name'] = settings.SITE_NAME
@@ -661,6 +682,7 @@ class UserProfileView(View):
 
     def get(self, request, user_id):
 
+        # Prepare view
         template = loader.get_template('account/profile.html')
 
         context = {}

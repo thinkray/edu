@@ -233,7 +233,7 @@
                         result["message"] +
                         '</div>'
                     );
-                    document.location = "{% url 'course_detail_view_page' course_id=course.id %}";
+                    document.location = "{%url 'user_course_view_panel' panel_name='study' %}";
                 },
                 error: function (e) {
                     $('#checkout').prop('disabled', false);

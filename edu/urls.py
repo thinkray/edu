@@ -18,7 +18,6 @@ from django.urls import include, path
 from course.views import CourseHomeView
 
 urlpatterns = [
-    #path('admin/', admin.site.urls),
     path('', CourseHomeView.as_view(), name='home'),
     path('<int:page>', CourseHomeView.as_view(), name='home_page'),
     path('dashboard/', include('dashboard.urls')),

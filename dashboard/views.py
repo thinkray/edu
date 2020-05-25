@@ -20,6 +20,7 @@ from site_log.models import Log
 class AdminBalanceListView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -27,7 +28,8 @@ class AdminBalanceListView(View):
 
         if not request.user.is_superuser:
             raise PermissionDenied()
-
+        
+        # Prepare view
         context = {}
         result = User.objects.all()
         context['page_name'] = 'Balance List'
@@ -70,11 +72,13 @@ class AdminBalanceListView(View):
 class UserBillListView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Prepare view
         context = {}
         result = Bill.objects.filter(user=request.user)
         context['page_name'] = 'Bill List'
@@ -116,11 +120,13 @@ class UserBillListView(View):
 
 class UserCalendarView(View):
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Prepare view
         context = {}
         result = User.objects.all()
         context['page_name'] = 'My Calendar'
@@ -147,6 +153,7 @@ class UserCalendarView(View):
 
 class AdminCalendarView(View):
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -155,6 +162,7 @@ class AdminCalendarView(View):
         if not request.user.is_superuser:
             raise PermissionDenied()
 
+        # Prepare view
         context = {}
         result = User.objects.all()
         context['page_name'] = 'Admin Calendar'
@@ -176,11 +184,13 @@ class AdminCalendarView(View):
 class UserCourseView(View):
 
     def get(self, request, panel_name='student', page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Prepare view
         context = {}
         if panel_name == 'study':
             result = CourseInstance.objects.filter(student=request.user)
@@ -285,6 +295,7 @@ class UserCourseView(View):
 class AdminCourseView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -293,6 +304,7 @@ class AdminCourseView(View):
         if not request.user.is_superuser:
             raise PermissionDenied()
 
+        # Prepare view
         context = {}
         result = Course.objects.all()
         context['status'] = 200
@@ -359,6 +371,7 @@ class AdminCourseView(View):
 class AdminBillListView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -367,6 +380,7 @@ class AdminBillListView(View):
         if not request.user.is_superuser:
             raise PermissionDenied()
 
+        # Prepare view
         context = {}
         result = Bill.objects.all()
         context['page_name'] = 'Bill List'
@@ -409,6 +423,7 @@ class AdminBillListView(View):
 class AdminUserListView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -417,6 +432,7 @@ class AdminUserListView(View):
         if not request.user.is_superuser:
             raise PermissionDenied()
 
+        # Prepare view
         context = {}
         result = User.objects.all()
         context['page_name'] = 'User List'
@@ -470,6 +486,7 @@ class AdminUserListView(View):
 class AdminOverviewView(View):
 
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -478,6 +495,7 @@ class AdminOverviewView(View):
         if not request.user.is_superuser:
             raise PermissionDenied()
 
+        # Prepare view
         context = {}
         context['page_name'] = 'Admin Dashboard'
 
@@ -501,11 +519,13 @@ class AdminOverviewView(View):
 class UserOverviewView(View):
 
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Prepare view
         context = {}
         result = CourseInstance.objects.filter(student=request.user)
         context['page_name'] = 'My Dashboard'
@@ -569,11 +589,13 @@ class UserOverviewView(View):
 class UserProfileEditView(View):
 
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Prepare view
         context = {}
         result = CourseInstance.objects.filter(student=request.user)
         context['page_name'] = 'Profile'
@@ -594,6 +616,7 @@ class UserProfileEditView(View):
 class AdminRedemptionCodeListView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -602,6 +625,7 @@ class AdminRedemptionCodeListView(View):
         if not request.user.is_superuser:
             raise PermissionDenied()
 
+        # Prepare view
         context = {}
         result = RedemptionCode.objects.all()
         context['page_name'] = 'Redemption Code List'
@@ -645,6 +669,7 @@ class AdminRedemptionCodeListView(View):
 class AdminCouponCodeListView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -653,6 +678,7 @@ class AdminCouponCodeListView(View):
         if not request.user.is_superuser:
             raise PermissionDenied()
 
+        # Prepare view
         context = {}
         result = CouponCode.objects.all()
         context['page_name'] = 'Coupon Code List'
@@ -695,11 +721,13 @@ class AdminCouponCodeListView(View):
 class UserLogListView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
             return response
 
+        # Prepare view
         context = {}
         result = Log.objects.filter(user=request.user)
         context['page_name'] = 'Log List'
@@ -742,6 +770,7 @@ class UserLogListView(View):
 class AdminLogListView(View):
 
     def get(self, request, page=1):
+        # Check permission
         if not request.user.is_authenticated:
             response = redirect(reverse('user_login_view'))
             response['Location'] += '?redirect_uri=' + request.path
@@ -750,6 +779,7 @@ class AdminLogListView(View):
         if not request.user.is_superuser:
             raise PermissionDenied()
 
+        # Prepare view
         context = {}
         result = Log.objects.all()
         context['page_name'] = 'Log List'

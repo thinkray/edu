@@ -1,22 +1,14 @@
 from django.urls import path
+from django.views.generic.base import RedirectView
 
 from . import views
 
 urlpatterns = [
-    # ex: /polls/
-    #path('', views.index, name='index'),
-    # ex: /polls/5/
-    #path('<int:question_id>/', views.detail, name='detail'),
-    # ex: /polls/5/results/
-    #path('<int:question_id>/results/', views.results, name='results'),
-    # ex: /polls/5/vote/
-    #path('<int:question_id>/vote/', views.vote, name='vote'),
-
     path('', views.UserOverviewView.as_view(), name='user_overview_view'),
     path('bill/', views.UserBillListView.as_view(), name='bill_list_view'),
     path('bill/<int:page>', views.UserBillListView.as_view(), name='bill_list_view_page'),
     path('calendar/', views.UserCalendarView.as_view(), name='user_calendar_list_view'),
-    # path('course/', views.UserCourseView.as_view(), name='user_course_view'),
+    path('course/', RedirectView.as_view(url='study'), name='user_course_redirect_view'),
     path('course/<str:panel_name>/', views.UserCourseView.as_view(), name='user_course_view_panel'),
     path('course/<str:panel_name>/<int:page>', views.UserCourseView.as_view(), name='user_course_view_panel_page'),
     path('profile/', views.UserProfileEditView.as_view(), name='user_profile_edit_view'),

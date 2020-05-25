@@ -18,12 +18,14 @@ from .models import Bill, CouponCode, RedemptionCode
 
 class BillListAPI(View):
     def get(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class BillListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -37,6 +39,7 @@ class BillListAPI(View):
 
         form = BillListAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             if cleaned_data['offset'] is None:
@@ -67,12 +70,14 @@ class BillListAPI(View):
             }, status=400)
 
     def post(self, request):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden',
             }, status=403)
 
+        # Initialization form
         class BillListAPIPostForm(Form):
             username = CharField()
             amount = DecimalField(max_digits=17, decimal_places=2)
@@ -89,6 +94,7 @@ class BillListAPI(View):
 
         form = BillListAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             try:
@@ -131,12 +137,14 @@ class BillListAPI(View):
 
 class BillAPI(View):
     def get(self, request, bill_id):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class BillAPIGetForm(Form):
             choices = (
                 ("user", "user"),
@@ -148,6 +156,7 @@ class BillAPI(View):
 
         form = BillAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
             query_data = cleaned_data['column'].copy()
             if not 'user' in cleaned_data['column']:
@@ -195,12 +204,14 @@ class BillAPI(View):
             }, status=400)
 
     def patch(self, request, bill_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden',
             }, status=403)
 
+        # Initialization form
         class BillAPIPatchForm(Form):
             info = CharField(required=False)
 
@@ -215,6 +226,7 @@ class BillAPI(View):
 
         form = BillAPIPatchForm(data)
         if form.is_valid():
+            # Update information
             try:
                 bill = Bill.objects.get(
                     pk=bill_id)
@@ -254,12 +266,14 @@ class BillAPI(View):
 class RedeemRedemptionCodeAPI(View):
 
     def post(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class RedeemRedemptionCodeAPIPostForm(Form):
             username = CharField()
             code = CharField()
@@ -275,6 +289,7 @@ class RedeemRedemptionCodeAPI(View):
 
         form = RedeemRedemptionCodeAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             try:
@@ -334,12 +349,14 @@ class RedeemRedemptionCodeAPI(View):
 
 class RedemptionCodeListAPI(View):
     def get(self, request):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class RedemptionCodeListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -352,6 +369,7 @@ class RedemptionCodeListAPI(View):
 
         form = RedemptionCodeListAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             if cleaned_data['offset'] is None:
@@ -374,12 +392,14 @@ class RedemptionCodeListAPI(View):
             }, status=400)
 
     def post(self, request):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class RedemptionCodeListAPIPostForm(Form):
             code = CharField()
             amount = DecimalField(max_digits=17, decimal_places=2, validators=[
@@ -396,6 +416,7 @@ class RedemptionCodeListAPI(View):
 
         form = RedemptionCodeListAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             exist_redemption_code = list(
@@ -434,12 +455,14 @@ class RedemptionCodeListAPI(View):
 
 class RedemptionCodeAPI(View):
     def get(self, request, redemption_code_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class RedemptionCodeAPIGetForm(Form):
             choices = (
                 ("code", "code"),
@@ -450,6 +473,7 @@ class RedemptionCodeAPI(View):
 
         form = RedemptionCodeAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             try:
@@ -480,12 +504,14 @@ class RedemptionCodeAPI(View):
             }, status=400)
 
     def patch(self, request, redemption_code_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class RedemptionCodeAPIPatchForm(Form):
             code = CharField(required=False)
             amount = DecimalField(max_digits=17, decimal_places=2, validators=[
@@ -503,6 +529,7 @@ class RedemptionCodeAPI(View):
 
         form = RedemptionCodeAPIPatchForm(data)
         if form.is_valid():
+            # Update information
             try:
                 redemption_code = RedemptionCode.objects.get(
                     pk=redemption_code_id)
@@ -545,6 +572,7 @@ class RedemptionCodeAPI(View):
             }, status=400)
 
     def delete(self, request, redemption_code_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
@@ -579,12 +607,14 @@ class RedemptionCodeAPI(View):
 
 class CouponCodeListAPI(View):
     def get(self, request):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CouponCodeListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -596,6 +626,7 @@ class CouponCodeListAPI(View):
 
         form = CouponCodeListAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             if cleaned_data['offset'] is None:
@@ -618,12 +649,14 @@ class CouponCodeListAPI(View):
             }, status=400)
 
     def post(self, request):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CouponCodeListAPIPostForm(Form):
             code = CharField()
             discount = DecimalField(max_digits=2, decimal_places=2, validators=[
@@ -640,6 +673,7 @@ class CouponCodeListAPI(View):
 
         form = CouponCodeListAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             exist_coupon_code = list(
@@ -678,12 +712,14 @@ class CouponCodeListAPI(View):
 
 class CouponCodeAPI(View):
     def get(self, request, coupon_code_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CouponCodeAPIGetForm(Form):
             choices = (
                 ("code", "code"),
@@ -693,6 +729,7 @@ class CouponCodeAPI(View):
 
         form = CouponCodeAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             try:
@@ -723,6 +760,7 @@ class CouponCodeAPI(View):
             }, status=400)
 
     def delete(self, request, coupon_code_id):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
@@ -757,12 +795,14 @@ class CouponCodeAPI(View):
 
 class CouponCodeCheckAPI(View):
     def post(self, request):
+        # Check permission
         if not request.user.is_authenticated:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden'
             }, status=403)
 
+        # Initialization form
         class CouponCodeCheckAPIPostForm(Form):
             code = CharField()
 
@@ -777,6 +817,7 @@ class CouponCodeCheckAPI(View):
 
         form = CouponCodeCheckAPIPostForm(data)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             coupon_code = list(CouponCode.objects.filter(

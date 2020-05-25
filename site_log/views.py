@@ -14,6 +14,7 @@ from .models import Log
 
 class LogListAPI(View):
     def get(self, request):
+        # Initialization form
         class LogListAPIGetForm(Form):
             offset = IntegerField(initial=1, required=False)
             limit = IntegerField(initial=10, required=False)
@@ -26,6 +27,7 @@ class LogListAPI(View):
 
         form = LogListAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             if cleaned_data['offset'] is None:
@@ -56,12 +58,14 @@ class LogListAPI(View):
             }, status=400)
 
     def post(self, request):
+        # Check permission
         if not request.user.is_superuser:
             return JsonResponse({
                 'status': 403,
                 'message': 'Forbidden',
             }, status=403)
 
+        # Initialization form
         class LogListAPIPostForm(Form):
             username = CharField()
             operation = CharField()
@@ -77,6 +81,7 @@ class LogListAPI(View):
 
         form = LogListAPIPostForm(data)
         if form.is_valid():
+            # Update information
             cleaned_data = form.clean()
 
             try:
@@ -117,6 +122,7 @@ class LogListAPI(View):
 
 class LogAPI(View):
     def get(self, request, log_id):
+        # Initialization form
         class LogAPIGetForm(Form):
             choices = (
                 ("user", "user"),
@@ -127,6 +133,7 @@ class LogAPI(View):
 
         form = LogAPIGetForm(request.GET)
         if form.is_valid():
+            # Prepare result
             cleaned_data = form.clean()
 
             try:
