@@ -144,12 +144,15 @@
             let list = {};
             let csrftoken = $("[name=csrfmiddlewaretoken]").val();
             let api_url = "{%url 'user_api' user_id='0'%}";
-            list["balance"] = $("#edit_panel_balance")[0].value;
+            let data = new FormData();
+            data.append("balance", $("#edit_panel_balance")[0].value);
             $.ajax({
-                type: "PATCH",
-                contentType: "application/json;charset=UTF-8",
+                type: "POST",
+                contentType: false,
+                processData: false,
+                cache: false,
                 url: api_url.substr(0, api_url.length - 1) + $("#edit_panel_id")[0].value,
-                data: JSON.stringify(list),
+                data: data,
                 beforeSend: function (xhr, settings) {
                     if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
                         xhr.setRequestHeader("X-CSRFToken", csrftoken);
