@@ -639,10 +639,19 @@ class CourseInstanceAPI(View):
 
 class CourseHomeView(View):
 
-    def get(self, request):
-        template = loader.get_template('course/index.html')
+    def get(self, request, page=1):
+
         context = {}
+        result = Course.objects.all()
+        context['page_name'] = 'Home'
+
+        paginator = Paginator(result, 9)
+        page_obj = paginator.get_page(page)
+
+        template = loader.get_template('course/index.html')
+
         context['site_name'] = settings.SITE_NAME
+
         if request.user.is_authenticated:
             context['is_authenticated'] = True
             context['is_superuser'] = request.user.is_superuser
@@ -652,6 +661,48 @@ class CourseHomeView(View):
         else:
             context['is_authenticated'] = False
             context['is_superuser'] = False
+
+        context['page_obj'] = page_obj
+        course_set = []
+        for each in page_obj:
+            if each.picture is not None:
+                current_item = {'picture': 'data:' + each.picture.content_type +
+                                ';base64,' +
+                                str(base64.b64encode(each.picture.data), encoding='utf-8')}
+            else:
+                current_item = {'picture': ''}
+
+            current_item['id'] = each.id
+            current_item['name'] = each.name
+            current_item['teacher_id'] = each.teacher.id
+            current_item['teacher_name'] = each.teacher.name
+            current_item['info'] = each.info
+            current_item['start_date'] = each.start_date
+            current_item['end_date'] = each.end_date
+            current_item['price'] = each.price
+            current_item['quota'] = each.quota
+            current_item['sold'] = each.sold
+            course_set.append(current_item)
+        context['course_set'] = course_set
+
+        page_start = page_obj.number
+        page_bar_num = 5
+        for i in range(int(page_bar_num/2)):
+            if page_start-1 > 0:
+                page_start = page_start - 1
+        page_end = page_start
+        for i in range(int(page_bar_num/2)*2):
+            if page_end+1 <= page_obj.paginator.num_pages:
+                page_end = page_end + 1
+        if page_end-page_start < int(page_bar_num/2)*2:
+            for i in range(int(page_bar_num/2)*2):
+                if page_start-1 >= 1 and page_end-page_start < int(page_bar_num/2)*2:
+                    page_start = page_start - 1
+        page_bar = []
+        for i in range(page_start, page_end+1):
+            page_bar.append(i)
+        context['page_bar'] = page_bar
+
         return HttpResponse(template.render(context, request))
 
 
@@ -838,7 +889,7 @@ class CourseSearchView(View):
             context['is_superuser'] = False
 
         context['page_obj'] = page_obj
-        
+
         course_set = []
         for each in page_obj:
             if each.picture is not None:
@@ -860,7 +911,7 @@ class CourseSearchView(View):
             current_item['sold'] = each.sold
             course_set.append(current_item)
         context['course_set'] = course_set
-        
+
         context['query'] = str(query)
 
         page_start = page_obj.number
