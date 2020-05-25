@@ -521,8 +521,8 @@ class UserOverviewView(View):
         context['hide_welcome'] = True
         context['user_balance'] = request.user.balance
         context['bill_count'] = Bill.objects.filter(user=request.user).count()
-        context['booking_count'] = Booking.objects.filter(
-            student=request.user, end_date__gt=now()).count()
+        context['booking_count'] = Booking.objects.filter(student=request.user, end_date__gt=now()).count(
+        ) + Booking.objects.filter(teacher=request.user, student__isnull=False, end_date__gt=now()).count()
         context['course_count'] = CourseInstance.objects.filter(
             student=request.user).count() + Course.objects.filter(teacher=request.user).count()
         if Booking.objects.filter(student=request.user, end_date__gt=now()).exists():
