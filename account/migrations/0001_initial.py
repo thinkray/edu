@@ -34,4 +34,15 @@ class Migration(migrations.Migration):
                 'abstract': False,
             },
         ),
+        migrations.RunSQL("""
+            CREATE TRIGGER after_account_user_insert AFTER INSERT ON account_user FOR EACH ROW
+            BEGIN
+                IF
+                    NEW.is_superuser = 0 THEN
+                        INSERT INTO site_message_message ( title, send_date, content, is_unread, is_deleted_by_sender, is_deleted_by_recipient, recipient_id, sender_id )
+                    VALUES
+                        ( "Welcome", CURRENT_DATE, "Welcome to the One-on-One Tutoring Platform -- by Group 10", 1, 1, 0, NEW.id, NEW.id );
+                END IF;
+            END
+        """),
     ]
