@@ -20,6 +20,7 @@ from django.views import View
 
 from account.models import User
 from finance.models import Bill
+from site_log.models import Log
 from storage.models import BlobStorage
 
 from .models import User, UserManager
@@ -123,7 +124,28 @@ class UserListAPI(View):
             if cleaned_data['profile'] != '':
                 user.profile = cleaned_data['profile']
 
-            user.save()
+            if request.user is None:
+                try:
+                    with transaction.atomic():
+                        user.save()
+                        log = Log(user=user, date=now(), operation='Sign up')
+                        log.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
+            else:
+                try:
+                    with transaction.atomic():
+                        user.save()
+                        log = Log(user=user, date=now(), operation='Add by an administrator ' + request.user.username)
+                        log.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
 
             if request.user.is_superuser and cleaned_data['balance'] is not None:
                 try:
@@ -268,7 +290,28 @@ class UserAPI(View):
             if cleaned_data['profile'] != '':
                 user.profile = cleaned_data['profile']
 
-            user.save()
+            if request.user.id == user.id:
+                try:
+                    with transaction.atomic():
+                        user.save()
+                        log = Log(user=user, date=now(), operation='Update profile')
+                        log.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
+            else:
+                try:
+                    with transaction.atomic():
+                        user.save()
+                        log = Log(user=user, date=now(), operation='Update profile by an administrator ' + request.user.username)
+                        log.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
 
             if request.user.is_superuser and cleaned_data['balance'] is not None:
                 balance_diff = cleaned_data['balance'] - user.balance
@@ -385,7 +428,28 @@ class UserAPI(View):
                             'message': 'DatabaseError',
                         }, status=500)
 
-            user.save()
+            if request.user.id == user.id:
+                try:
+                    with transaction.atomic():
+                        user.save()
+                        log = Log(user=user, date=now(), operation='Update profile')
+                        log.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
+            else:
+                try:
+                    with transaction.atomic():
+                        user.save()
+                        log = Log(user=user, date=now(), operation='Update profile by an administrator ' + request.user.username)
+                        log.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
 
             if request.user.is_superuser and cleaned_data['balance'] is not None:
                 balance_diff = cleaned_data['balance'] - user.balance
@@ -432,6 +496,8 @@ class UserAPI(View):
             with transaction.atomic():
                 if user.picture is not None:
                     user.picture.delete()
+                log = Log(user=request.user, date=now(), operation='Delete a user ' + user.username + '(id:' + user.id + ')')
+                log.save()
                 user.delete()
         except Exception as e:
             return JsonResponse({
@@ -496,6 +562,15 @@ class UserLoginAPI(View):
                 login(request, user)
                 request.session['is_teacher'] = request.user.groups.filter(
                     name='teacher').exists()
+                try:
+                    with transaction.atomic():
+                        log = Log(user=request.user, date=now(), operation='Login')
+                        log.save()
+                except Exception as e:
+                    return JsonResponse({
+                        'status': 500,
+                        'message': 'DatabaseError',
+                    }, status=500)
                 return JsonResponse({
                     'status': 200,
                     'message': 'Success',
