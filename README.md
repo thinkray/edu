@@ -4,25 +4,11 @@
 
 ## Introduction
 
-This is a version of the project "One-to-one Online Tutoring Platform", which is under development.
-
-In this version, we implemented following features:
-
-1. Database structure
-2. Registration
-3. Login
-4. Logout
-5. Almost all of the APIs (except image upload) with permission check
-
-In this version, we completed the design of following pages:
-
-1. Home
-2. Log in
-3. Sign up
+This is the final version of the project "One-to-one Online Tutoring Platform".
 
 ## Disclaimer of Warranty
 
-THIS IS A PROGRAM WHICH IS UNDER DEVELOPMENT AND THERE IS NO WARRANTY FOR THE PROGRAM. 
+THERE IS NO WARRANTY FOR THE PROGRAM. 
 
 THE DEBUG MODE OF THE PROGRAM IS ON BY DEFAULT.
 
