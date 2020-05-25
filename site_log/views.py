@@ -1,5 +1,6 @@
 import json
 
+from django.db import transaction
 from django.forms import CharField, Form, IntegerField, MultipleChoiceField
 from django.http import JsonResponse
 from django.shortcuts import render
@@ -96,10 +97,22 @@ class LogListAPI(View):
                     'message': 'UserNotFound',
                 }, status=400)
 
-            log = Log(user=cleaned_data['username'], date=now(
-            ), operation=cleaned_data['operation'])
+            try:
+                with transaction.atomic():
+                    log = Log(user=cleaned_data['username'], date=now(
+                    ), operation=cleaned_data['operation'])
 
-            log.save()
+                    log.save()
+
+                    log_creater = Log(user=request.user, date=now(
+                    ), operation='Create a log (id:' + str(log.id) + ')')
+                    
+                    log_creater.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
