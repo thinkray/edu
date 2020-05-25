@@ -58,6 +58,15 @@
                                 <div class="form-group input-group">
                                     <div class="input-group-prepend">
                                         <span class="input-group-text">
+                                            <i class="fas fa-unlock-alt icon_fixer"></i>
+                                        </span>
+                                    </div>
+                                    <input id="edit_panel_old_password" name="old_password" class="form-control"
+                                        placeholder="Old Password" type="password" disabled="">
+                                </div>
+                                <div class="form-group input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text">
                                             <i class="fa fa-lock icon_fixer"></i>
                                         </span>
                                     </div>
@@ -96,9 +105,11 @@
 <script>
     $('#edit_panel_change_password').change(function () {
         if (this.checked) {
+            $('#edit_panel_old_password').prop('disabled', false);
             $('#edit_panel_password').prop('disabled', false);
             $('#edit_panel_password2').prop('disabled', false);
         } else {
+            $('#edit_panel_old_password').prop('disabled', true);
             $('#edit_panel_password').prop('disabled', true);
             $('#edit_panel_password2').prop('disabled', true);
         }
@@ -142,6 +153,7 @@
             data.append("name", $("#edit_panel_name")[0].value);
             data.append("profile", $("#edit_panel_profile")[0].value);
             if (($("#edit_panel_change_password").is(':checked')) && ($("#edit_panel_password")[0].value == $("#edit_panel_password2")[0].value)) {
+                data.append("old_password", $("#edit_panel_old_password")[0].value);
                 data.append("password", $("#edit_panel_password")[0].value);
             }
             data.append("picture", $("#edit_panel_picture")[0].files[0]);

@@ -71,6 +71,7 @@
                                     </td>
                                     <td>{{ each.last_login }}</td>
                                     <td>
+                                        {% if each.username != username %}
                                         <button class="btn btn-success btn-sm rounded-0 edit-item" type="button"
                                             data-toggle="modal" data-target="#edit_panel" title="Edit"
                                             data-id="{{ each.id }}" data-username="{{ each.username }}"
@@ -80,6 +81,7 @@
                                         <a href="#" class="btn btn-danger btn-sm rounded-0 delete-item"
                                             data-toggle="modal" title="Delete" data-target="#delete" role="button"
                                             data-id="{{ each.id }}"><i class="fa fa-trash"></i></a>
+                                        {% endif %}
                                     </td>
                                 </tr>
                                 {% endfor %}

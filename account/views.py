@@ -348,6 +348,7 @@ class UserAPI(View):
 
         class UserAPIPostForm(Form):
             username = CharField(required=False)
+            old_password = CharField(widget=PasswordInput, required=False)
             password = CharField(widget=PasswordInput, required=False)
             name = CharField(required=False)
             role = CharField(required=False)
@@ -374,7 +375,21 @@ class UserAPI(View):
                     user.username = cleaned_data['username']
 
             if cleaned_data['password'] != '':
-                user.set_password(cleaned_data['password'])
+                if cleaned_data['old_password'] != '':
+                    if authenticate(username=user.username, password=cleaned_data['old_password']) is not None:
+                        user.set_password(cleaned_data['password'])
+                    else:
+                        return JsonResponse({
+                            'status': 403,
+                            'message': 'OldPasswordIncorrect'
+                        }, status=403)
+                elif request.user.is_superuser and user.id != request.user.id:
+                    user.set_password(cleaned_data['password'])
+                else:
+                    return JsonResponse({
+                        'status': 403,
+                        'message': 'NeedOldPassword'
+                    }, status=403)
 
             if cleaned_data['name'] != '':
                 user.name = cleaned_data['name']
