@@ -4,74 +4,6 @@
 <script type="text/javascript" src="/static/js/moment-with-locales.min.js"></script>
 <script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
 <link rel="stylesheet" href="/static/css/tempusdominus-bootstrap-4.min.css" />
-<style>
-    .clearfix::after,
-    .calendar ol::after {
-        content: ".";
-        display: block;
-        height: 0;
-        clear: both;
-        visibility: hidden;
-    }
-
-    /* ================
-Calendar Styling */
-    .calendar {
-        border-radius: 10px;
-    }
-
-    .calendar ol li {
-        float: left;
-        width: 14.28571%;
-    }
-
-    .calendar .day-names {
-        border-bottom: 2px solid #eee;
-    }
-
-    .calendar .day-names li {
-        text-transform: uppercase;
-        margin-bottom: 0.5rem;
-    }
-
-    .calendar .days li {
-        border-bottom: 1px solid #eee;
-        min-height: 8rem;
-    }
-
-    .calendar .days li .date {
-        margin: 0.5rem 0;
-    }
-
-    .calendar .days li .event {
-        font-size: 0.75rem;
-        padding: 0.4rem;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        border-radius: 4rem;
-        margin-bottom: 1px;
-    }
-
-    .calendar .days li .event.clear {
-        background: none;
-    }
-
-    /*
-*
-* ==========================================
-* FOR non this month days(the gray number)
-* ==========================================
-*
-*/
-    .calendar .days li:nth-child(n+29) {
-        border-bottom: none;
-    }
-
-    .calendar .days li.outside .date {
-        color: #ddd;
-    }
-</style>
 {% endblock head %}
 
 {% block content %}
@@ -279,14 +211,14 @@ Calendar Styling */
             icons: {
                 time: "far fa-clock",
             },
-            date: moment('{{ course.start_date|date:"Y-m-d\TH:i:sO" }}'),
+            date: moment(),
         }
         );
         $('#create_panel_end_date').datetimepicker({
             icons: {
                 time: "far fa-clock",
             },
-            date: moment('{{ course.end_date|date:"Y-m-d\TH:i:sO" }}'),
+            date: moment(),
         }
         );
     });

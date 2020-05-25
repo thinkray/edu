@@ -358,7 +358,7 @@ Calendar Styling */
                 },
                 success: function (result) {
                     $("nav").first().after('<div class="alert alert-success alert-dismissible fade show text-center m-0" role="alert">The redemptio code was successfully deleted. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');
-                    window.location.reload();
+                    document.location = "{% url 'course_list_view'%}";
                 },
                 error: function (e) {
                     $("nav").first().after('<div class="alert alert-danger alert-dismissible fade show text-center m-0" role="alert">Something goes wrong. We are reloading the page for you.<button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button></div>');

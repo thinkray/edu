@@ -1,6 +1,9 @@
 {% extends 'dashboard\admin\base.html' %}
 
 {% block head %}
+<script type="text/javascript" src="/static/js/moment-with-locales.min.js"></script>
+<script type="text/javascript" src="/static/js/tempusdominus-bootstrap-4.min.js"></script>
+<link rel="stylesheet" href="/static/css/tempusdominus-bootstrap-4.min.css" />
 <style>
     .search-result .col-md-2 {
         border-right: 1px dotted #ccc;
@@ -76,6 +79,123 @@
     </div>
 </div>
 <div class="container">
+<ul class="nav justify-content-end">
+        <li class="nav-item">
+            <button class="btn btn-sm btn-primary rounded-0 edit-item" type="button" data-toggle="modal"
+                data-target="#create_panel" title="Create New Class"><i class="fas fa-chalkboard-teacher"></i>
+                <i class="fas fa-plus"></i></button>
+        </li>
+    </ul>
+    <div class="modal fade" id="create_panel" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="create_panel_label">Create a New Course</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+                <div class="modal-body" id="create_panel_modal_body">
+                    <div class="container-fluid">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="create_panel_name" class="col-form-label">Course Name:</label>
+                                    <input type="text" class="form-control" id="create_panel_name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="create_panel_teacher" class="col-form-label">Teacher:</label>
+                                    <input type="text" class="form-control" id="create_panel_teacher"
+                                        value="{{ username }}" {% if not is_superuser %}disabled{% endif %}>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="create_panel_start_date" class="col-form-label">Start Date:</label>
+                                    <div class="input-group date" id="create_panel_start_date"
+                                        data-target-input="nearest">
+                                        <input id="create_panel_start_date_input" type="text"
+                                            class="form-control datetimepicker-input"
+                                            data-target="#create_panel_start_date" />
+                                        <div class="input-group-append" data-target="#create_panel_start_date"
+                                            data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="create_panel_end_date" class="col-form-label">End Date:</label>
+                                    <div class="input-group date" id="create_panel_end_date"
+                                        data-target-input="nearest">
+                                        <input id="create_panel_end_date_input" type="text"
+                                            class="form-control datetimepicker-input"
+                                            data-target="#create_panel_end_date" />
+                                        <div class="input-group-append" data-target="#create_panel_end_date"
+                                            data-toggle="datetimepicker">
+                                            <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="create_panel_price" class="col-form-label">Price:</label>
+                                    <input type="text" class="form-control" id="create_panel_price">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="create_panel_quota" class="col-form-label">Session Quota:</label>
+                                    <input type="text" class="form-control" id="create_panel_quota">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="create_panel_sold" class="col-form-label">Sold:</label>
+                                    <input type="text" class="form-control" id="create_panel_sold" value="0">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group mb-3">
+                                    <label for="create_panel_picture" class="col-form-label">Picture:</label>
+                                    <div class="custom-file">
+                                        <input type="file" class="custom-file-input" id="create_panel_picture">
+                                        <label id='create_panel_picture_label' class="custom-file-label"
+                                            for="create_panel_picture" aria-describedby="create_panel_picture">Choose
+                                            file</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-12">
+                                <div class="form-group">
+                                    <label for="create_panel_info" class="col-form-label">Info:</label>
+                                    <textarea type="text" class="form-control" id="create_panel_info"></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Back
+                    </button>
+                    <button id="create_panel_save" type="button" class="btn btn-primary">Create
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
     {% if page_obj %}
         <label>We have <span class="font-weight-bolder text-danger">{{ course_enroll_num }}</span>
             course{{ course_enroll_num|pluralize }} in total</label>
@@ -133,6 +253,127 @@
             <!--Pagination-->
         </section>
     <br>
+    {% else %}
+    <label>We have <span class="font-weight-bolder text-danger">no</span> course. <a href="#" data-toggle="modal"
+        data-target="#create_panel" title="Create New Class">Create one!</a></label>
     {% endif %}
 </div>
 {% endblock inner_content %}
+
+{% block script %}
+<script>
+    $(function () {
+        $('#create_panel_start_date').datetimepicker({
+            icons: {
+                time: "far fa-clock",
+            },
+            date: moment(),
+        }
+        );
+        $('#create_panel_end_date').datetimepicker({
+            icons: {
+                time: "far fa-clock",
+            },
+            date: moment(),
+        }
+        );
+    });
+    $('#create_panel_save').click(function () {
+        $(function () {
+            $('#create_panel_save').prop('disabled', true);
+            let list = {};
+            let csrftoken = $("[name=csrfmiddlewaretoken]").val();
+            let data = new FormData();
+            data.append("name", $("#create_panel_name")[0].value);
+            data.append("teacher", $("#create_panel_teacher")[0].value);
+            data.append("start_date", $('#create_panel_start_date').datetimepicker('viewDate').format('YYYY-MM-DD HH:mm'));
+            data.append("end_date", $('#create_panel_end_date').datetimepicker('viewDate').format('YYYY-MM-DD HH:mm'));
+            data.append("price", $("#create_panel_price")[0].value);
+            data.append("quota", $("#create_panel_quota")[0].value);
+            data.append("sold", $("#create_panel_sold")[0].value);
+            data.append("info", $("#create_panel_info")[0].value);
+            data.append("picture", $("#create_panel_picture")[0].files[0]);
+            $.ajax({
+                type: "POST",
+                contentType: false,
+                processData: false,
+                cache: false,
+                url: "{%url 'course_list_api'%}",
+                data: data,
+                beforeSend: function (xhr, settings) {
+                    if (!csrfSafeMethod(settings.type) && !this.crossDomain) {
+                        xhr.setRequestHeader("X-CSRFToken", csrftoken);
+                    }
+                },
+                success: function (result) {
+                    $("[id^=ajax_result]").remove();
+                    $("#create_panel_modal_body").append(
+                        '<div id="ajax_result" class="alert alert-success" role="alert">' +
+                        result["message"] +
+                        '</div>'
+                    );
+                    $('#create_panel').modal('hide');
+                    $("#create_panel_name")[0].value = '';
+                    $("#create_panel_teacher")[0].value = '';
+                    $("#create_panel_start_date")[0].value = '';
+                    $("#create_panel_end_date")[0].value = '';
+                    $("#create_panel_price")[0].value = '';
+                    $("#create_panel_quota")[0].value = '';
+                    $("#create_panel_sold")[0].value = '';
+                    $("#create_panel_info")[0].value = '';
+                    $('#create_panel_save').prop('disabled', false);
+                    window.location.reload();
+                },
+                error: function (e) {
+                    $('#create_panel_save').prop('disabled', false);
+                    let result = e.responseJSON;
+                    switch (result["status"]) {
+                        case 400:
+                            $("[id^=ajax_result]").remove();
+                            if (typeof result['message'] == 'string') {
+                                $("#create_panel_modal_body").append(
+                                    '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>' + result['message'] + '</div>'
+                                );
+                            }
+                            else {
+                                for (var index in result["message"]) {
+                                    $("#create_panel_" + index)
+                                        .parent()
+                                        .append(
+                                            '<div id="ajax_result_' +
+                                            index +
+                                            '" class="alert alert-danger" role="alert">' +
+                                            result["message"][index][0] +
+                                            '</div>'
+                                        );
+                                }
+                            }
+                            break;
+                        case 403:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">' +
+                                result["message"] +
+                                '</div>'
+                            );
+                            break;
+                        default:
+                            $("[id^=ajax_result]").remove();
+                            $("#create_panel_modal_body").append(
+                                '<div id="ajax_result" class="alert alert-danger" role="alert">Something goes wrong.<br/>Please try again.</div>'
+                            );
+                            break;
+                    }
+                },
+            });
+        });
+    });
+    if (typeof ($('#create_panel_picture')[0].files[0]) != "undefined") {
+        $('#create_panel_picture_label').html($('#create_panel_picture')[0].files[0].name);
+    }
+    $('#create_panel_picture').change(function (e) {
+        var fileName = e.target.files[0].name;
+        $('#create_panel_picture_label').html(fileName);
+    });
+</script>
+{% endblock script %}
