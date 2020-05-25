@@ -525,6 +525,42 @@ class UserOverviewView(View):
             student=request.user, end_date__gt=now()).count()
         context['course_count'] = CourseInstance.objects.filter(
             student=request.user).count() + Course.objects.filter(teacher=request.user).count()
+        if Booking.objects.filter(student=request.user, end_date__gt=now()).exists():
+            next_study_booking = Booking.objects.filter(
+                student=request.user, end_date__gt=now())[0]
+            if next_study_booking.course.picture is not None:
+                current_item = {'picture': 'data:' + next_study_booking.course.picture.content_type +
+                                ';base64,' +
+                                str(base64.b64encode(next_study_booking.course.picture.data), encoding='utf-8')}
+            else:
+                current_item = {'picture': ''}
+
+            current_item['id'] = next_study_booking.course.id
+            current_item['name'] = next_study_booking.course.name
+            current_item['teacher_id'] = next_study_booking.course.teacher.id
+            current_item['teacher_name'] = next_study_booking.course.teacher.name
+            current_item['info'] = next_study_booking.info
+            current_item['start_date'] = next_study_booking.start_date
+            current_item['end_date'] = next_study_booking.end_date
+            context['next_study_booking'] = current_item
+        if Booking.objects.filter(teacher=request.user, student__isnull=False, end_date__gt=now()).exists():
+            next_teaching_booking = Booking.objects.filter(
+                teacher=request.user, student__isnull=False, end_date__gt=now())[0]
+            if next_teaching_booking.course.picture is not None:
+                current_item = {'picture': 'data:' + next_teaching_booking.course.picture.content_type +
+                                ';base64,' +
+                                str(base64.b64encode(next_teaching_booking.course.picture.data), encoding='utf-8')}
+            else:
+                current_item = {'picture': ''}
+
+            current_item['id'] = next_teaching_booking.course.id
+            current_item['name'] = next_teaching_booking.course.name
+            current_item['student_id'] = next_teaching_booking.student.id
+            current_item['student_name'] = next_teaching_booking.student.name
+            current_item['info'] = next_teaching_booking.info
+            current_item['start_date'] = next_teaching_booking.start_date
+            current_item['end_date'] = next_teaching_booking.end_date
+            context['next_teaching_booking'] = current_item
 
         return HttpResponse(template.render(context, request))
 

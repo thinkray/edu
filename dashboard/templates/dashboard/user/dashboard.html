@@ -1,5 +1,66 @@
 {% extends 'dashboard\user\base.html' %}
 
+{% block head %}
+<style>
+    .search-result .col-md-3 {
+        border-right: 1px dotted #ccc;
+        min-height: 140px;
+    }
+
+    .search-result ul {
+        padding-left: 0 !important;
+        list-style: none;
+    }
+
+    .search-result ul li {
+        font: 400 normal .85em "Roboto", Arial, Verdana, sans-serif;
+        line-height: 30px;
+    }
+
+    .search-result ul li i {
+        padding-right: 3px;
+    }
+
+    .search-result .col-md-7 {
+        position: relative;
+    }
+
+    .search-result h3 {
+        font: 500 normal 1.375em "Roboto", Arial, Verdana, sans-serif;
+        margin-top: 0 !important;
+        margin-bottom: 10px !important;
+    }
+
+    .search-result h3>a,
+    .search-result i {
+        color: #248dc1 !important;
+    }
+
+    .search-result p {
+        font: normal normal 1.125em "Roboto", Arial, Verdana, sans-serif;
+    }
+
+    .search-result span.plus {
+        position: absolute;
+        right: 0;
+        top: 126px;
+    }
+
+    .search-result span.plus a {
+        background-color: #248dc1;
+        padding: 5px 4px 3px 5px;
+    }
+
+    .search-result span.plus a:hover {
+        background-color: #414141;
+    }
+
+    .search-result span.plus a i {
+        color: #fff !important;
+    }
+</style>
+{% endblock head %}
+
 {% block inner_content %}
 <div class="row">
     <div class="col-xs-12 col-md-12 px-0">
@@ -109,6 +170,76 @@
             </div>
         </div>
     </div>
+    {% if next_study_booking %}
+    <div class="card">
+        <div class="alert alert-warning">
+            <span><strong><i class="fas fa-bell"></i> Studying Booking Notice: </strong>Your <span
+                    class="font-weight-bolder"> latest booking</span> will start at <span
+                    class="font-weight-bolder text-danger"> {{next_study_booking.start_date }} </span>
+        </div>
+        <article class="search-result row card-body">
+            <div class="col-xs-12 col-sm-12 col-md-3">
+                <a href="{% url 'course_detail_view_page' course_id=next_study_booking.id %}" title="Details"
+                    class="thumbnail"> <img
+                        src="{% if next_study_booking.picture == '' %}/static/img/logo.svg{% else %}{{next_study_booking.picture}}{% endif %}"
+                        class="card-img-top" alt="" /></a>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-3">
+                <ul class="meta-search">
+                    <li><i class="icon_fixer far fa-calendar-alt"></i> <span>From
+                            {{next_study_booking.start_date }}</span></li>
+                    <li><i class="icon_fixer far fa-calendar-alt"></i> <span>To
+                            {{next_study_booking.end_date }}</span></li>
+                    <!-- <li><i class="far fa-clock"></i> <span>midnight</span></li> -->
+                    <li><i class="icon_fixer fas fa-chalkboard-teacher"></i> <a
+                            href="{% url 'user_profile_view' user_id=next_study_booking.teacher_id %}"><span>{{ next_study_booking.teacher_name}}</span></a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-6 excerpet">
+                <h3><a
+                        href="{% url 'course_detail_view_page' course_id=next_study_booking.id %}">{{next_study_booking.name}}</a>
+                </h3>
+                <p>{{next_study_booking.info}}</p>
+            </div>
+        </article>
+    </div>
+    {% endif %}
+    {% if next_teaching_booking %}
+    <div class="card">
+        <div class="alert alert-warning">
+            <span><strong><i class="fas fa-bell"></i> Teaching Booking Notice: </strong>Your <span
+                    class="font-weight-bolder"> latest booking</span> will start at <span
+                    class="font-weight-bolder text-danger"> {{next_teaching_booking.start_date }} </span>
+        </div>
+        <article class="search-result row card-body">
+            <div class="col-xs-12 col-sm-12 col-md-3">
+                <a href="{% url 'course_detail_view_page' course_id=next_teaching_booking.id %}" title="Details"
+                    class="thumbnail"> <img
+                        src="{% if next_teaching_booking.picture == '' %}/static/img/logo.svg{% else %}{{next_teaching_booking.picture}}{% endif %}"
+                        class="card-img-top" alt="" /></a>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-3">
+                <ul class="meta-search">
+                    <li><i class="icon_fixer far fa-calendar-alt"></i> <span>From
+                            {{next_teaching_booking.start_date }}</span></li>
+                    <li><i class="icon_fixer far fa-calendar-alt"></i> <span>To
+                            {{next_teaching_booking.end_date }}</span></li>
+                    <!-- <li><i class="far fa-clock"></i> <span>midnight</span></li> -->
+                    <li><i class="icon_fixer fas fa-user-graduate"></i> <a
+                            href="{% url 'user_profile_view' user_id=next_teaching_booking.student_id %}"><span>{{ next_teaching_booking.student_name}}</span></a>
+                    </li>
+                </ul>
+            </div>
+            <div class="col-xs-12 col-sm-12 col-md-6 excerpet">
+                <h3><a
+                        href="{% url 'course_detail_view_page' course_id=next_teaching_booking.id %}">{{next_teaching_booking.name}}</a>
+                </h3>
+                <p>{{next_teaching_booking.info}}</p>
+            </div>
+        </article>
+    </div>
+    {% endif %}
     <div class="row my-2">
         <div class="col-xs-4 col-md-4">
             <div class="card h-100">
@@ -150,7 +281,8 @@
                     <a href="{%url 'user_course_view_panel' panel_name='study' %}" class="btn btn-primary">Study <i
                             class="fas fa-arrow-right"></i></a>
                     {% if is_superuser or is_teacher %}
-                    <a href="{%url 'user_course_view_panel' panel_name='teaching' %}" class="btn btn-primary">Teaching <i class="fas fa-arrow-right"></i></a>
+                    <a href="{%url 'user_course_view_panel' panel_name='teaching' %}" class="btn btn-primary">Teaching
+                        <i class="fas fa-arrow-right"></i></a>
                     {% endif %}
                 </div>
             </div>
