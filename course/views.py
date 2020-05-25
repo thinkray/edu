@@ -18,6 +18,7 @@ from django.views import View
 
 from account.models import User
 from finance.models import Bill, CouponCode
+from site_log.models import Log
 from storage.models import BlobStorage
 
 from .models import Course, CourseInstance
@@ -84,7 +85,8 @@ class CourseListAPI(View):
             start_date = DateTimeField()
             end_date = DateTimeField()
             teacher = CharField(required=False)
-            price = DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+            price = DecimalField(max_digits=10, decimal_places=2, validators=[
+                                 MinValueValidator(0)])
             quota = IntegerField(validators=[MinValueValidator(0)])
             sold = IntegerField(
                 validators=[MinValueValidator(0)], required=False)
@@ -136,9 +138,17 @@ class CourseListAPI(View):
                         'status': 500,
                         'message': 'DatabaseError',
                     }, status=500)
-
-            course.save()
-
+            try:
+                with transaction.atomic():
+                    course.save()
+                    log = Log(user=request.user, date=now(
+                    ), operation='Create a course ' + course.name + ' (id:' + str(course.id) + ')')
+                    log.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success'
@@ -210,7 +220,8 @@ class CourseAPI(View):
             info = CharField(required=False)
             start_date = DateTimeField()
             end_date = DateTimeField()
-            price = DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
+            price = DecimalField(max_digits=10, decimal_places=2, validators=[
+                                 MinValueValidator(0)])
             quota = IntegerField(validators=[MinValueValidator(0)])
             sold = IntegerField(
                 validators=[MinValueValidator(0)], required=False)
@@ -294,7 +305,17 @@ class CourseAPI(View):
                             'message': 'DatabaseError',
                         }, status=500)
 
-            course.save()
+            try:
+                with transaction.atomic():
+                    course.save()
+                    log = Log(user=request.user, date=now(
+                    ), operation='Update infomation about the course ' + course.name + ' (id:' + str(course.id) + ')')
+                    log.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
             return JsonResponse({
                 'status': 200,
                 'message': 'Success',
@@ -322,6 +343,9 @@ class CourseAPI(View):
 
         try:
             with transaction.atomic():
+                log = Log(user=request.user, date=now(
+                ), operation='Delete a course (course name:' + course.name + ' course id:' + str(course.id) + ')')
+                log.save()
                 if course.picture is not None:
                     course.picture.delete()
                 course.delete()
@@ -475,7 +499,10 @@ class CourseInstanceListAPI(View):
                     course_instance = CourseInstance(
                         course=cleaned_data['course'], student=request.user, teacher=cleaned_data['course'].teacher, quota=cleaned_data['course'].quota)
                     cleaned_data['course'].sold += 1
+                    log = Log(user=request.user, date=now(
+                    ), operation='Buy the course ' + cleaned_data['course'].name + ' (id:' + str(cleaned_data['course'].id) + ')')
 
+                    log.save()
                     bill.save()
                     request.user.save()
                     course_instance.save()
@@ -609,11 +636,17 @@ class CourseInstanceAPI(View):
             if cleaned_data['quota'] != '':
                 course_instance.quota = cleaned_data['quota']
 
-            course_instance.save()
-            return JsonResponse({
-                'status': 200,
-                'message': 'Success',
-            })
+            try:
+                with transaction.atomic():
+                    log = Log(user=request.user, date=now(
+                    ), operation='Update quota for the course instance (id:' + str(course_instance.id) + ')')
+                    log.save()
+                    course_instance.save()
+            except Exception as e:
+                return JsonResponse({
+                    'status': 500,
+                    'message': 'DatabaseError',
+                }, status=500)
         else:
             return JsonResponse({
                 'status': 400,
@@ -635,7 +668,17 @@ class CourseInstanceAPI(View):
                 'message': 'Not Found',
             }, status=404)
 
-        course_instance.delete()
+        try:
+            with transaction.atomic():
+                log = Log(user=request.user, date=now(), operation='Delete a course instance (course name:' +
+                          course_instance.course.name + ' student name:' + course_instance.student.name + ' id:' + str(course_instance.id) + ')')
+                log.save()
+                course_instance.delete()
+        except Exception as e:
+            return JsonResponse({
+                'status': 500,
+                'message': 'DatabaseError',
+            }, status=500)
 
         return JsonResponse({
             'status': 200,
