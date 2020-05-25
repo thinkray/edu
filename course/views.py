@@ -84,7 +84,7 @@ class CourseListAPI(View):
             start_date = DateTimeField()
             end_date = DateTimeField()
             teacher = CharField(required=False)
-            price = DecimalField(max_digits=10, decimal_places=2)
+            price = DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
             quota = IntegerField(validators=[MinValueValidator(0)])
             sold = IntegerField(
                 validators=[MinValueValidator(0)], required=False)
@@ -105,6 +105,12 @@ class CourseListAPI(View):
                     }, status=400)
             else:
                 cleaned_data['teacher'] = request.user
+
+            if cleaned_data['start_date'] > cleaned_data['end_date']:
+                return JsonResponse({
+                    'status': 400,
+                    'message': 'InvalidDate',
+                }, status=400)
 
             if cleaned_data['sold'] is None:
                 cleaned_data['sold'] = 0
@@ -204,7 +210,7 @@ class CourseAPI(View):
             info = CharField(required=False)
             start_date = DateTimeField()
             end_date = DateTimeField()
-            price = DecimalField(max_digits=10, decimal_places=2)
+            price = DecimalField(max_digits=10, decimal_places=2, validators=[MinValueValidator(0)])
             quota = IntegerField(validators=[MinValueValidator(0)])
             sold = IntegerField(
                 validators=[MinValueValidator(0)], required=False)
