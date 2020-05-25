@@ -45,4 +45,9 @@ class Migration(migrations.Migration):
                 END IF;
             END
         """),
+        migrations.RunSQL("""
+            INSERT INTO auth_group ( name )
+        VALUES
+            ( "Teacher" );
+        """),
     ]
