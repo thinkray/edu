@@ -286,6 +286,7 @@ Calendar Styling */
                                     class="col-form-label">Teacher{% if is_superuser %}(optional){% endif %}:</label>
                                 <input type="text" class="form-control" id="create_panel_teacher">
                             </div>
+                            <label class="col-form-label font-italic">Please select a date range within the course date range. <br/>For a multi-day schedule, it will be shown on the first day.</label>
                             <div class="form-group">
                                 <label for="create_panel_start_date" class="col-form-label">From:</label>
                                 <div class="input-group date" id="create_panel_start_date" data-target-input="nearest">
@@ -534,20 +535,20 @@ Calendar Styling */
                         $("#days_list_day_" + moment(event_date).format('YYYY-MM-DD')).append('<div id="days_list_event_' + event_set[i].id + '" class="event btn" data-toggle="modal" data-target="#edit_panel" title="Edit">' + event_set[i].course + '</div>');
                         if (event_set[i].student) {
                             if (event_set[i].student.username == '{{username}}') {
-                                $("#days_list_event_" + event_set[i].id).addClass("btn-success");
+                                $("#days_list_event_" + event_set[i].id).addClass("btn-success w-100");
                             }
                             else {
-                                $("#days_list_event_" + event_set[i].id).addClass("btn-warning");
+                                $("#days_list_event_" + event_set[i].id).addClass("btn-warning w-100");
                             }
                             $("#days_list_event_" + event_set[i].id).data('student-id', event_set[i].student.id);
                             $("#days_list_event_" + event_set[i].id).data('student-name', event_set[i].student.name);
                             $("#days_list_event_" + event_set[i].id).data('student-username', event_set[i].student.username);
                         }
                         else if (event_set[i].student != 0) {
-                            $("#days_list_event_" + event_set[i].id).addClass("btn-outline-success");
+                            $("#days_list_event_" + event_set[i].id).addClass("btn-outline-success w-100");
                         }
                         else {
-                            $("#days_list_event_" + event_set[i].id).addClass("btn-warning");
+                            $("#days_list_event_" + event_set[i].id).addClass("btn-warning w-100");
                             $("#days_list_event_" + event_set[i].id).data('student-id', 0);
                         }
                         $("#days_list_event_" + event_set[i].id).data('booking-id', event_set[i].id);

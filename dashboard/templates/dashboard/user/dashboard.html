@@ -171,10 +171,10 @@
         </div>
     </div>
     {% if next_study_booking %}
-    <div class="card">
+    <div class="card my-2">
         <div class="alert alert-warning">
             <span><strong><i class="fas fa-bell"></i> Studying Booking Notice: </strong>Your <span
-                    class="font-weight-bolder"> latest booking</span> will start at <span
+                    class="font-weight-bolder"> latest booking</span> {% if next_study_booking.start_date > now %}will start{% else %}already started{% endif %} at <span
                     class="font-weight-bolder text-danger"> {{next_study_booking.start_date }} </span>
         </div>
         <article class="search-result row card-body">
@@ -206,10 +206,10 @@
     </div>
     {% endif %}
     {% if next_teaching_booking %}
-    <div class="card">
+    <div class="card my-2">
         <div class="alert alert-warning">
             <span><strong><i class="fas fa-bell"></i> Teaching Booking Notice: </strong>Your <span
-                    class="font-weight-bolder"> latest booking</span> will start at <span
+                    class="font-weight-bolder"> latest booking</span> {% if next_teaching_booking.start_date > now %}will start{% else %}already started{% endif %} at <span
                     class="font-weight-bolder text-danger"> {{next_teaching_booking.start_date }} </span>
         </div>
         <article class="search-result row card-body">

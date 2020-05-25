@@ -525,6 +525,7 @@ class UserOverviewView(View):
         ) + Booking.objects.filter(teacher=request.user, student__isnull=False, end_date__gt=now()).count()
         context['course_count'] = CourseInstance.objects.filter(
             student=request.user).count() + Course.objects.filter(teacher=request.user).count()
+        context['now'] = now()
         if Booking.objects.filter(student=request.user, end_date__gt=now()).exists():
             next_study_booking = Booking.objects.filter(
                 student=request.user, end_date__gt=now())[0]
