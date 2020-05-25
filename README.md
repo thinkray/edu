@@ -68,7 +68,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 Any user registered on the website is a student by default.
 
-To add a admin role to a user, you may use following command in `python manage.py shell`
+To add an admin role to a user, you may use following command in `python manage.py shell`
 
     ```
     from django.contrib.auth.models import Group

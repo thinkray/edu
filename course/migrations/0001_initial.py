@@ -57,4 +57,22 @@ class Migration(migrations.Migration):
                 END IF;
             END
         """),
+        migrations.RunSQL("""
+            CREATE TRIGGER before_course_course_teacher_insert BEFORE INSERT ON course_course FOR EACH ROW
+            BEGIN         
+                DECLARE errorMessage VARCHAR(255);        
+                SET errorMessage = CONCAT(NEW.teacher_id, ' is not a teacher. It should be a teacher'); 
+                IF (NOT EXISTS(select *
+                        from account_user_groups
+                        where account_user_groups.user_id = NEW.teacher_id)        
+                AND
+                    NOT EXISTS(select *
+                      from account_user
+                      where account_user.id = NEW.teacher_id AND is_superuser = TRUE)) 
+                THEN         
+                    SIGNAL SQLSTATE '45000'             
+                    SET MYSQL_ERRNO = 0906, MESSAGE_TEXT = errorMessage;        
+                END IF;        
+            END
+        """),
     ]

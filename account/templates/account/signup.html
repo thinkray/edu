@@ -184,21 +184,15 @@
                     },
                 });
             }
+            else {
+                $("#ajax_result_password2").remove();
+                $("#password2")
+                    .parent()
+                    .after(
+                        '<div class="alert alert-danger" role="alert" id="ajax_result_password2">Password doesn\'t match.</div>'
+                    );
+            }
         });
     });
 </script>
 {% endblock script %}
-
-<!--username: varchar(255)
-name: text
-password: varchar(HASH_LENGTH)
-role: varchar(10?) admin/teacher/student
-balance: decimal
-profile: text
-username: varchar(255)
-name: text
-password: varchar(HASH_LENGTH)
-role: varchar(10?) admin/teacher/student
-balance: decimal
-profile: text
--->

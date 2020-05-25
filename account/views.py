@@ -124,11 +124,11 @@ class UserListAPI(View):
             if cleaned_data['profile'] != '':
                 user.profile = cleaned_data['profile']
 
-            if request.user is None:
+            if request.user.is_authenticated:
                 try:
                     with transaction.atomic():
                         user.save()
-                        log = Log(user=user, date=now(), operation='Sign up')
+                        log = Log(user=user, date=now(), operation='Add by an administrator (id:' + str(request.user.id) + ')')
                         log.save()
                 except Exception as e:
                     return JsonResponse({
@@ -139,7 +139,7 @@ class UserListAPI(View):
                 try:
                     with transaction.atomic():
                         user.save()
-                        log = Log(user=user, date=now(), operation='Add by an administrator (id:' + str(request.user.id) + ')')
+                        log = Log(user=user, date=now(), operation='Sign up')
                         log.save()
                 except Exception as e:
                     return JsonResponse({
