@@ -78,16 +78,4 @@ To add a admin role to a user, you may use following command in `python manage.p
     user.save()
     ```
 	
-To add a teacher role to a user, you may use following command in `python manage.py shell`
-
-    ```
-    # For the first time
-    from django.contrib.auth.models import Group
-    from account.models import User
-    group = Group(name="Teacher")
-    group.save()
-
-    group = Group.objects.get(name="teacher")
-    user = User.objects.get(pk=1) # Replace 1 with the user's id
-    user.groups.add(group)
-    ```
+To add a teacher role to a user, you can set it on `http://127.0.0.1:8000/dashboard/admin/user/` with an admin user.
