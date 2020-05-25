@@ -314,7 +314,16 @@ class CourseAPI(View):
                 'message': 'Forbidden'
             }, status=403)
 
-        course.delete()
+        try:
+            with transaction.atomic():
+                if course.picture is not None:
+                    course.picture.delete()
+                course.delete()
+        except Exception as e:
+            return JsonResponse({
+                'status': 500,
+                'message': 'DatabaseError',
+            }, status=500)
 
         return JsonResponse({
             'status': 200,

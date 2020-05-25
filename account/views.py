@@ -428,7 +428,16 @@ class UserAPI(View):
                 'message': 'Not Found',
             }, status=404)
 
-        user.delete()
+        try:
+            with transaction.atomic():
+                if user.picture is not None:
+                    user.picture.delete()
+                user.delete()
+        except Exception as e:
+            return JsonResponse({
+                'status': 500,
+                'message': 'DatabaseError',
+            }, status=500)
 
         return JsonResponse({
             'status': 200,
