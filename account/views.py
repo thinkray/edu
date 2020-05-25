@@ -635,6 +635,7 @@ class UserSignupView(View):
         template = loader.get_template('account/signup.html')
         context = {}
         context['site_name'] = settings.SITE_NAME
+        context['page_name'] = 'Sign Up'
         context['hide_signup'] = True
         return HttpResponse(template.render(context, request))
 
@@ -651,6 +652,7 @@ class UserLoginView(View):
         template = loader.get_template('account/login.html')
         context = {}
         context['site_name'] = settings.SITE_NAME
+        context['page_name'] = 'Log In'
         context['hide_login'] = True
         return HttpResponse(template.render(context, request))
 
@@ -676,11 +678,15 @@ class UserProfileView(View):
             context['status'] = 404
 
         context['site_name'] = settings.SITE_NAME
-        context['is_authenticated'] = True
-        context['is_superuser'] = request.user.is_superuser
-        context['is_teacher'] = request.session.get('is_teacher')
-        context['name'] = request.user.name
-        context['username'] = request.user.username
+        if request.user.is_authenticated:
+            context['is_authenticated'] = True
+            context['is_superuser'] = request.user.is_superuser
+            context['is_teacher'] = request.session.get('is_teacher')
+            context['name'] = request.user.name
+            context['username'] = request.user.username
+        else:
+            context['is_authenticated'] = False
+            context['is_superuser'] = False
         if user.picture is not None:
             context['picture'] = 'data:' + user.picture.content_type + \
                 ';base64,' + \
