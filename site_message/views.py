@@ -395,9 +395,9 @@ class MessageDetailView(View):
 
         # Ger information
         messsage_api = MessageAPI()
-        request._body = json.dumps({
+        request.GET = {
             "column": ["title", "send_date", "sender", "recipient", "content", "is_unread"]
-        })
+        }
         result = json.loads(messsage_api.get(request, message_id).content)
 
         # Prepare view
