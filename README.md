@@ -42,11 +42,11 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 3. Open a shell and change directory to the current directory.
 4. Run the following command in your shell.
 
-    ```
-    python manage.py makemigrations
-    python manage.py migrate
-    python manage.py runserver
-    ```
+```
+python manage.py makemigrations
+python manage.py migrate
+python manage.py runserver
+```
 
 5. Open your browser and go to the URL (e.g. http://127.0.0.1:8000/) which is in the command line output.
 
@@ -56,12 +56,12 @@ Any user registered on the website is a student by default.
 
 To add an admin role to a user, you may use following command in `python manage.py shell`
 
-    ```
-    from django.contrib.auth.models import Group
-    from account.models import User
-    user = User.objects.get(pk=1) # Replace 1 with the user's id
-    user.is_superuser = 1
-    user.save()
-    ```
+```
+from django.contrib.auth.models import Group
+from account.models import User
+user = User.objects.get(pk=1) # Replace 1 with the user's id
+user.is_superuser = 1
+user.save()
+```
 	
 To add a teacher role to a user, you can set it on `http://127.0.0.1:8000/dashboard/admin/user/` with an admin user.
