@@ -1,14 +1,16 @@
-# Readme
+# One-to-one Online Tutoring Platform
 
 ------
 
 ## Introduction
 
-This is the final version of the project "One-to-one Online Tutoring Platform".
+This is the demo version of the project "One-to-one Online Tutoring Platform". The platform aim at providing a basic solution for the business of small training institutions. This system allows students to purchase courses, schedule class time with teachers, and has basic bookkeeping functions.
 
 ## Disclaimer of Warranty
 
 THERE IS NO WARRANTY FOR THE PROGRAM. 
+
+THIS IS A DEMO PROJECT AND HAS NOT UNDERGONE RIGOROUS TESTING.
 
 THE DEBUG MODE OF THE PROGRAM IS ON BY DEFAULT.
 
@@ -38,7 +40,7 @@ along with this program.  If not, see <https://www.gnu.org/licenses/>.
 ## Install & Run
 
 1. Create a MySQL/MariaDB database and make sure you have a database user with full access of it.
-2. Modify the database information in `edu/settings.py`.
+2. Modify settings like the database information in `edu/settings.py`. Don't forget to change the `SECRET_KEY`.
 3. Open a shell and change directory to the current directory.
 4. Run the following command in your shell.
 
